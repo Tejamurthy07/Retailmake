@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Approval Panel</masterLabel>
+    <description>Drop-in approval workflow component for any record page. Shows the approval state, lets the submitter submit or recall, and lets the current approver approve or reject.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <!--
+        No <objects> restriction on purpose. This list used to mirror the old
+        restricted Object_Process__c picklist, so it became the new bottleneck
+        the moment the engine went object-agnostic: an admin could configure an
+        approval matrix for any object but could not put the panel on its page.
+        Omitting the list makes the panel available on every record page, which
+        matches what ApprovalRouter can actually route. The panel reports
+        "no approval rules configured" on objects that have none.
+    -->
+</LightningComponentBundle>

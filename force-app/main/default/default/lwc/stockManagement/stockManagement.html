@@ -1,0 +1,185 @@
+<template>
+    <div class="sm">
+        <div class="sm-head">
+            <h1 class="sm-title">Stock Management</h1>
+            <p class="sm-sub">Warehouse → in transit → distributor, with alerts and the movement ledger.</p>
+        </div>
+
+        <div class="sm-tabs" role="tablist">
+            <template for:each={tabs} for:item="t">
+                <button key={t.id} class={t.css} data-id={t.id} onclick={selectTab} type="button">{t.label}</button>
+            </template>
+        </div>
+
+        <template if:true={error}>
+            <div class="sm-err">{error}</div>
+        </template>
+
+        <!-- Adjustments / Transfers: built long ago, but unreachable until now. -->
+        <template if:true={isAdjustments}>
+            <section class="sm-card"><c-stock-adjustment-form></c-stock-adjustment-form></section>
+        </template>
+        <template if:true={isTransfers}>
+            <section class="sm-card"><c-stock-transfer-form></c-stock-transfer-form></section>
+        </template>
+
+        <template if:true={isOverview}>
+        <template if:true={data}>
+            <!-- The chain, end to end -->
+            <div class="sm-chain">
+                <div class="sm-node">
+                    <span class="sm-node__label">Company Warehouses</span>
+                    <span class="sm-node__value">{data.warehouseUnitsFmt}</span>
+                    <span class="sm-node__meta">units · {data.warehouseSkus} SKUs · {data.warehouseValueFmt}</span>
+                </div>
+                <div class="sm-arrow">→</div>
+                <div class="sm-node sm-node_transit">
+                    <span class="sm-node__label">In Transit</span>
+                    <span class="sm-node__value">{data.inTransitUnitsFmt}</span>
+                    <span class="sm-node__meta">units dispatched, not yet received</span>
+                </div>
+                <div class="sm-arrow">→</div>
+                <div class="sm-node">
+                    <span class="sm-node__label">Distributors</span>
+                    <span class="sm-node__value">{data.distributorUnitsFmt}</span>
+                    <span class="sm-node__meta">units · {data.distributorSkus} SKUs · {data.distributorValueFmt}</span>
+                </div>
+                <div class="sm-arrow">→</div>
+                <div class="sm-node sm-node_alert">
+                    <span class="sm-node__label">Alerts</span>
+                    <span class="sm-node__value">{data.nearExpiryCount}</span>
+                    <span class="sm-node__meta">near-expiry · {data.lowStockCount} low stock</span>
+                </div>
+            </div>
+
+            <div class="sm-grid">
+                <!-- Warehouses -->
+                <section class="sm-card">
+                    <h2 class="sm-card__title">Warehouse Stock</h2>
+                    <template if:true={hasWarehouses}>
+                        <div class="sm-tbl sm-tbl_loc">
+                            <div class="sm-thead">
+                                <span>Warehouse</span><span class="sm-num">SKUs</span>
+                                <span class="sm-num">Units</span><span class="sm-num">Value</span>
+                            </div>
+                            <template for:each={data.warehouses} for:item="w">
+                                <div key={w.key} class="sm-trow">
+                                    <span class="sm-strong">{w.name}</span>
+                                    <span class="sm-num">{w.skus}</span>
+                                    <span class="sm-num">{w.unitsFmt}</span>
+                                    <span class="sm-num sm-strong">{w.valueFmt}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasWarehouses}><p class="sm-empty">No warehouse stock.</p></template>
+                </section>
+
+                <!-- Distributors -->
+                <section class="sm-card">
+                    <h2 class="sm-card__title">Distributor Stock</h2>
+                    <template if:true={hasDistributors}>
+                        <div class="sm-tbl sm-tbl_loc">
+                            <div class="sm-thead">
+                                <span>Distributor</span><span class="sm-num">SKUs</span>
+                                <span class="sm-num">Units</span><span class="sm-num">Value</span>
+                            </div>
+                            <template for:each={data.distributors} for:item="d">
+                                <div key={d.key} class="sm-trow">
+                                    <span class="sm-strong">{d.name}</span>
+                                    <span class="sm-num">{d.skus}</span>
+                                    <span class="sm-num">{d.unitsFmt}</span>
+                                    <span class="sm-num sm-strong">{d.valueFmt}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasDistributors}><p class="sm-empty">No distributor stock.</p></template>
+                </section>
+            </div>
+
+            <!-- In transit -->
+            <section class="sm-card">
+                <h2 class="sm-card__title">In Transit</h2>
+                <template if:true={hasTransit}>
+                    <div class="sm-tbl sm-tbl_transit">
+                        <div class="sm-thead">
+                            <span>Transfer</span><span>From</span><span>To</span>
+                            <span class="sm-num">Units</span><span>Status</span><span>Date</span>
+                        </div>
+                        <template for:each={data.inTransit} for:item="t">
+                            <div key={t.key} class="sm-trow">
+                                <span class="sm-strong">{t.name}</span>
+                                <span>{t.source}</span>
+                                <span>{t.destination}</span>
+                                <span class="sm-num">{t.unitsFmt}</span>
+                                <span><c-dms-status-badge label={t.status}></c-dms-status-badge></span>
+                                <span class="sm-muted">
+                                    <lightning-formatted-date-time value={t.transferDate}></lightning-formatted-date-time>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasTransit}><p class="sm-empty">Nothing in transit.</p></template>
+            </section>
+
+            <!-- Alerts -->
+            <section class="sm-card">
+                <h2 class="sm-card__title">Near-Expiry &amp; Low Stock</h2>
+                <template if:true={hasAlerts}>
+                    <div class="sm-tbl sm-tbl_alert">
+                        <div class="sm-thead">
+                            <span>Alert</span><span>Location</span><span>Product</span>
+                            <span>Batch</span><span class="sm-num">Qty</span><span>Expiry</span>
+                        </div>
+                        <template for:each={data.alerts} for:item="a">
+                            <div key={a.key} class="sm-trow">
+                                <span><span class={a.pillClass}>{a.kind}</span></span>
+                                <span>{a.location}</span>
+                                <span class="sm-strong">{a.product}</span>
+                                <span class="sm-muted">{a.batch}</span>
+                                <span class="sm-num">{a.qtyFmt}</span>
+                                <span class="sm-muted">
+                                    <lightning-formatted-date-time value={a.expiryDate}></lightning-formatted-date-time>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasAlerts}><p class="sm-empty">No near-expiry or low-stock items.</p></template>
+            </section>
+
+            <!-- Movement ledger -->
+            <section class="sm-card">
+                <h2 class="sm-card__title">Recent Stock Movements</h2>
+                <p class="sm-note">Every stock movement writes a ledger row — this is the audit trail.</p>
+                <template if:true={hasMovements}>
+                    <div class="sm-tbl sm-tbl_mov">
+                        <div class="sm-thead">
+                            <span>When</span><span>Type</span><span></span>
+                            <span>Product</span><span>Batch</span>
+                            <span class="sm-num">Qty</span><span>Location</span><span>Source</span>
+                        </div>
+                        <template for:each={data.movements} for:item="m">
+                            <div key={m.key} class="sm-trow">
+                                <span class="sm-muted">
+                                    <lightning-formatted-date-time value={m.txnDate}></lightning-formatted-date-time>
+                                </span>
+                                <span>{m.txnType}</span>
+                                <span><span class={m.dirClass}>{m.dirLabel}</span></span>
+                                <span class="sm-strong">{m.product}</span>
+                                <span class="sm-muted">{m.batch}</span>
+                                <span class="sm-num sm-strong">{m.qtyFmt}</span>
+                                <span>{m.location}</span>
+                                <span class="sm-muted">{m.reference}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasMovements}><p class="sm-empty">No stock movements recorded.</p></template>
+            </section>
+        </template>
+        </template>
+    </div>
+</template>

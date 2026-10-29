@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recipient_Type__c</fullName>
+    <label>Recipient Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Specific User</fullName>
+                <default>false</default>
+                <label>Specific User</label>
+            </value>
+            <value>
+                <fullName>Record Owner</fullName>
+                <default>false</default>
+                <label>Record Owner</label>
+            </value>
+            <value>
+                <fullName>Owners Manager</fullName>
+                <default>false</default>
+                <label>Owners Manager</label>
+            </value>
+            <value>
+                <fullName>Field on Record</fullName>
+                <default>false</default>
+                <label>Field on Record</label>
+            </value>
+            <value>
+                <fullName>Submitter</fullName>
+                <default>false</default>
+                <label>Submitter</label>
+            </value>
+            <value>
+                <fullName>Role</fullName>
+                <default>false</default>
+                <label>Role</label>
+            </value>
+            <value>
+                <fullName>Profile</fullName>
+                <default>false</default>
+                <label>Profile</label>
+            </value>
+            <value>
+                <fullName>Public Group</fullName>
+                <default>false</default>
+                <label>Public Group</label>
+            </value>
+            <value>
+                <fullName>Queue</fullName>
+                <default>false</default>
+                <label>Queue</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

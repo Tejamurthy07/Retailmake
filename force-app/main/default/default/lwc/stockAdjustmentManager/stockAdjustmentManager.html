@@ -1,0 +1,287 @@
+<template>
+    <div class="sa-header">
+        <div class="sa-header-left">
+            <lightning-icon icon-name="standard:inventory_assignment" size="small"></lightning-icon>
+            <div class="sa-header-text">
+                <h1 class="sa-header-title">Stock Adjustments</h1>
+                <span class="sa-header-sub">Reconcile system vs physical stock — Approved adjustments update Warehouse_Stock</span>
+            </div>
+        </div>
+        <div class="sa-header-right">
+            <div class="sa-counter">
+                <span class="sa-counter-num">{draftCount}</span>
+                <span class="sa-counter-lbl">drafts</span>
+            </div>
+            <button class="sa-btn-new" onclick={handleNewClick}>
+                <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                <span>New Adjustment</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="sa-toolbar">
+        <div class="sa-search">
+            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+            <input type="search" class="sa-search-input"
+                placeholder="Search by name, product, warehouse, batch..."
+                value={searchTerm} oninput={handleSearch}/>
+        </div>
+    </div>
+
+    <nav class="sa-filter-bar">
+        <template for:each={statusPills} for:item="p">
+            <button key={p.key} class={p.cssClass} data-key={p.key} onclick={handleFilter}>
+                <span class={p.dotClass}></span>
+                <span>{p.label}</span>
+                <span class="sa-pill-count">{p.count}</span>
+            </button>
+        </template>
+    </nav>
+
+    <div class="sa-content">
+        <template if:true={hasItems}>
+            <div class="sa-list">
+                <template for:each={filteredAdjustments} for:item="a">
+                    <div key={a.Id} class="sa-row">
+                        <div class="sa-row-main">
+                            <div class="sa-row-top">
+                                <a class="sa-row-name" data-id={a.Id} onclick={handleOpenRecord}>{a.Name}</a>
+                                <span class={a.statusClass}>{a.Status__c}</span>
+                                <span class="sa-type-badge">{a.typeLabel}</span>
+                            </div>
+                            <div class="sa-row-meta">
+                                <span class="sa-row-warehouse">
+                                    <lightning-icon icon-name="utility:store" size="xx-small"></lightning-icon>
+                                    {a.warehouseName}
+                                </span>
+                                <span class="sa-row-product">
+                                    <lightning-icon icon-name="utility:product_consumed" size="xx-small"></lightning-icon>
+                                    {a.productName}
+                                </span>
+                                <template if:true={a.Batch_Number__c}>
+                                    <span class="sa-row-batch">Batch: {a.Batch_Number__c}</span>
+                                </template>
+                            </div>
+                            <div class="sa-row-qty-row">
+                                <div class="sa-qty-block">
+                                    <span class="sa-qty-label">System</span>
+                                    <span class="sa-qty-value">{a.System_Qty__c}</span>
+                                </div>
+                                <div class="sa-qty-block">
+                                    <span class="sa-qty-label">Actual</span>
+                                    <span class="sa-qty-value">{a.Actual_Qty__c}</span>
+                                </div>
+                                <div class="sa-qty-block">
+                                    <span class="sa-qty-label">Adjustment</span>
+                                    <span class={a.adjustmentClass}>{a.adjustmentDisplay}</span>
+                                </div>
+                            </div>
+                            <template if:true={a.Reason__c}>
+                                <div class="sa-row-reason">{a.Reason__c}</div>
+                            </template>
+                        </div>
+                        <div class="sa-row-actions">
+                            <template if:true={a.canSubmit}>
+                                <button class="sa-action-btn sa-action-submit" data-id={a.Id} onclick={handleSubmitClick} title="Submit for Approval">
+                                    <lightning-icon icon-name="utility:upload" size="xx-small" variant="inverse"></lightning-icon>
+                                </button>
+                            </template>
+                            <template if:true={a.canEdit}>
+                                <button class="sa-action-btn" data-id={a.Id} onclick={handleEditClick} title="Edit">
+                                    <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                                </button>
+                            </template>
+                            <template if:true={a.canDelete}>
+                                <button class="sa-action-btn sa-action-danger" data-id={a.Id} onclick={handleDelete} title="Delete">
+                                    <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={hasItems}>
+            <div class="sa-empty">
+                <lightning-icon icon-name="standard:inventory_assignment" size="large"></lightning-icon>
+                <p>No adjustments yet.</p>
+                <button class="sa-btn-new" onclick={handleNewClick}>
+                    <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                    <span>Create First Adjustment</span>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- New / Edit Modal -->
+    <template if:true={showModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header sa-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{modalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium sa-modal-body">
+
+                    <!-- Warehouse picker -->
+                    <div class="sa-picker">
+                        <label class="slds-form-element__label sa-required">Warehouse</label>
+                        <div class="sa-picker-input-wrap">
+                            <input type="text" class="sa-picker-input"
+                                placeholder="Search warehouse..."
+                                value={warehouseSearch}
+                                oninput={handleWarehouseSearch}/>
+                            <template if:true={warehouseSelectedName}>
+                                <button class="sa-picker-clear" onclick={handleWarehouseClear} title="Clear">
+                                    <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                </button>
+                            </template>
+                        </div>
+                        <template if:true={warehouseResults.length}>
+                            <div class="sa-picker-dropdown">
+                                <template for:each={warehouseResults} for:item="w">
+                                    <div key={w.value} class="sa-picker-row" data-id={w.value} onclick={handleWarehouseSelect}>
+                                        <span class="sa-picker-label">{w.label}</span>
+                                        <span class="sa-picker-sub">{w.subtitle}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Product picker -->
+                    <div class="sa-picker slds-m-top_small">
+                        <label class="slds-form-element__label sa-required">Product</label>
+                        <div class="sa-picker-input-wrap">
+                            <input type="text" class="sa-picker-input"
+                                placeholder="Search product..."
+                                value={productSearch}
+                                oninput={handleProductSearch}/>
+                            <template if:true={productSelectedName}>
+                                <button class="sa-picker-clear" onclick={handleProductClear} title="Clear">
+                                    <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                </button>
+                            </template>
+                        </div>
+                        <template if:true={productResults.length}>
+                            <div class="sa-picker-dropdown">
+                                <template for:each={productResults} for:item="p">
+                                    <div key={p.value} class="sa-picker-row" data-id={p.value} onclick={handleProductSelect}>
+                                        <span class="sa-picker-label">{p.label}</span>
+                                        <span class="sa-picker-sub">{p.subtitle}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <lightning-input type="text" label="Batch Number (optional)"
+                        value={form.Batch_Number__c} data-field="Batch_Number__c"
+                        onchange={handleFormChange} onblur={handleBatchBlur}
+                        class="slds-m-top_small">
+                    </lightning-input>
+
+                    <template if:true={hasStockInfo}>
+                        <div class="sa-stock-info slds-m-top_small">
+                            <div class="sa-stock-info-item">
+                                <span class="sa-stock-info-label">On Hand</span>
+                                <span class="sa-stock-info-value">{stockInfo.qtyOnHand}</span>
+                            </div>
+                            <div class="sa-stock-info-item">
+                                <span class="sa-stock-info-label">Available</span>
+                                <span class="sa-stock-info-value">{stockInfo.qtyAvailable}</span>
+                            </div>
+                            <div class="sa-stock-info-item">
+                                <span class="sa-stock-info-label">Reserved</span>
+                                <span class="sa-stock-info-value">{stockInfo.qtyReserved}</span>
+                            </div>
+                            <div class="sa-stock-info-item">
+                                <span class="sa-stock-info-label">Damaged</span>
+                                <span class="sa-stock-info-value">{stockInfo.qtyDamaged}</span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="sa-section-divider slds-m-top_medium"><span>Quantities</span></div>
+
+                    <div class="sa-form-grid">
+                        <lightning-input type="number" label="System Qty"
+                            value={form.System_Qty__c} disabled
+                            field-level-help="Auto-filled from Warehouse Stock"></lightning-input>
+                        <lightning-input type="number" label="Actual Qty" required
+                            value={form.Actual_Qty__c} data-field="Actual_Qty__c"
+                            onchange={handleFormChange}
+                            field-level-help="Enter the physically counted quantity"></lightning-input>
+                    </div>
+
+                    <div class={adjustmentRowClass}>
+                        <span class="sa-form-adj-label">Adjustment Qty</span>
+                        <span class="sa-form-adj-value">{adjustmentDisplay}</span>
+                    </div>
+
+                    <div class="sa-section-divider slds-m-top_medium"><span>Classification</span></div>
+
+                    <lightning-combobox label="Adjustment Type" required
+                        value={form.Adjustment_Type__c}
+                        options={adjustmentTypeOptions}
+                        onchange={handleAdjustmentTypeChange}
+                        placeholder="Why is this adjustment needed..."></lightning-combobox>
+
+                    <lightning-textarea label="Reason" required
+                        value={form.Reason__c} data-field="Reason__c"
+                        onchange={handleFormChange}
+                        placeholder="Explain the discrepancy..."
+                        class="slds-m-top_small"></lightning-textarea>
+
+                    <lightning-input type="date" label="Adjustment Date"
+                        value={form.Adjustment_Date__c} data-field="Adjustment_Date__c"
+                        onchange={handleFormChange}
+                        class="slds-m-top_small"></lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSave} disabled={saveDisabled}>
+                        <template if:true={isSaving}>Saving...</template>
+                        <template if:false={isSaving}>Save Draft</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Submit for Approval Modal -->
+    <template if:true={showSubmitModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header sa-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseSubmitModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">Submit {submitTargetName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="sa-submit-info">
+                        This adjustment will route through the configured Stock Adjustment approval chain.
+                        Once Approved, the system stock will be updated and a transaction logged.
+                    </p>
+                    <lightning-textarea label="Comments (optional)"
+                        value={submitComments}
+                        onchange={handleSubmitCommentsChange}
+                        placeholder="Any context for the approver..."
+                        class="slds-m-top_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseSubmitModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleConfirmSubmit} disabled={isSubmitting}>
+                        <template if:true={isSubmitting}>Submitting...</template>
+                        <template if:false={isSubmitting}>Submit for Approval</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

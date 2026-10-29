@@ -1,0 +1,529 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TEAM ATTENDANCE DASHBOARD - Styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── HEADER / TOOLBAR ──────────────────────────────────────────────── */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.date-picker {
+    min-width: 160px;
+}
+
+.refresh-btn {
+    margin-left: 0.25rem;
+}
+
+/* ── LOADING SPINNER ───────────────────────────────────────────────── */
+
+.spinner-container {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── SUMMARY CARDS ─────────────────────────────────────────────────── */
+
+.summary-cards-container {
+    margin-bottom: 0.5rem;
+}
+
+.summary-card {
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+    min-height: 90px;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.summary-card-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-card-icon lightning-icon {
+    --lwc-colorTextIconDefault: #ffffff;
+}
+
+.summary-card-content {
+    flex: 1;
+}
+
+.summary-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.summary-card-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0.125rem 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card color variants */
+.summary-card-present {
+    background: linear-gradient(135deg, #2e844a 0%, #22683a 100%);
+}
+
+.summary-card-leave {
+    background: linear-gradient(135deg, #0176d3 0%, #014486 100%);
+}
+
+.summary-card-absent {
+    background: linear-gradient(135deg, #ea001e 0%, #ba0517 100%);
+}
+
+.summary-card-autoclosed {
+    background: linear-gradient(135deg, #dd7a01 0%, #b86301 100%);
+}
+
+/* ── DATA TABLE OVERRIDES ──────────────────────────────────────────── */
+
+.desktop-table {
+    margin-bottom: 1rem;
+}
+
+/* Status cell color classes (applied via cellAttributes) */
+.status-cell-started {
+    color: #2e844a;
+    font-weight: 600;
+}
+
+.status-cell-ended {
+    color: #0176d3;
+    font-weight: 600;
+}
+
+.status-cell-autoclosed {
+    color: #dd7a01;
+    font-weight: 600;
+}
+
+.status-cell-leave {
+    color: #9050e9;
+    font-weight: 600;
+}
+
+.status-cell-absent {
+    color: #ea001e;
+    font-weight: 600;
+}
+
+/* ── STATUS BADGES (Mobile / Card Layout) ──────────────────────────── */
+
+.status-badge {
+    display: inline-block;
+    padding: 0.1875rem 0.625rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.status-badge-started {
+    background-color: #e3f6e8;
+    color: #2e844a;
+    border: 1px solid #2e844a;
+}
+
+.status-badge-ended {
+    background-color: #e1f0fd;
+    color: #0176d3;
+    border: 1px solid #0176d3;
+}
+
+.status-badge-autoclosed {
+    background-color: #fef3e0;
+    color: #dd7a01;
+    border: 1px solid #dd7a01;
+}
+
+.status-badge-leave {
+    background-color: #f0e5fc;
+    color: #9050e9;
+    border: 1px solid #9050e9;
+}
+
+.status-badge-absent {
+    background-color: #fde5e8;
+    color: #ea001e;
+    border: 1px solid #ea001e;
+}
+
+/* ── MOBILE CARD LAYOUT ────────────────────────────────────────────── */
+
+.mobile-cards {
+    display: none;
+}
+
+.mobile-attendance-card {
+    background-color: #ffffff;
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    transition: box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.mobile-attendance-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.mobile-card-name {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.mobile-card-name-text {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #181818;
+}
+
+.mobile-card-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.625rem;
+}
+
+.mobile-metric {
+    text-align: center;
+}
+
+.mobile-metric-label {
+    display: block;
+    font-size: 0.6875rem;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.125rem;
+}
+
+.mobile-metric-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #181818;
+}
+
+.mobile-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.mobile-card-time {
+    font-size: 0.8125rem;
+    color: #706e6b;
+}
+
+.mobile-card-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0176d3;
+}
+
+/* ── EMPTY STATE ───────────────────────────────────────────────────── */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-state lightning-icon {
+    --lwc-colorTextIconDefault: #b0adab;
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #3e3e3c;
+    margin: 0 0 0.375rem 0;
+}
+
+.empty-state-subtext {
+    font-size: 0.875rem;
+    color: #706e6b;
+    margin: 0;
+}
+
+/* ── WEEKLY SUMMARY VIEW ───────────────────────────────────────────── */
+
+.weekly-summary-container {
+    margin-bottom: 0.5rem;
+}
+
+.weekly-metric-card {
+    background-color: #f3f3f3;
+    border-radius: 8px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    border: 1px solid #e5e5e5;
+    transition: box-shadow 0.2s ease;
+}
+
+.weekly-metric-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.weekly-metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.1;
+}
+
+.weekly-metric-label {
+    font-size: 0.8125rem;
+    color: #706e6b;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Weekly breakdown color variants */
+.weekly-breakdown-card {
+    border-radius: 8px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+.breakdown-present {
+    background: linear-gradient(135deg, #2e844a 0%, #22683a 100%);
+}
+
+.breakdown-leave {
+    background: linear-gradient(135deg, #0176d3 0%, #014486 100%);
+}
+
+.breakdown-absent {
+    background: linear-gradient(135deg, #ea001e 0%, #ba0517 100%);
+}
+
+.breakdown-count {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.breakdown-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0.25rem 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ── FOOTER ────────────────────────────────────────────────────────── */
+
+.footer-bar {
+    border-top: 1px solid #e5e5e5;
+}
+
+.last-refresh-text {
+    font-size: 0.75rem;
+    color: #706e6b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── TABLET (max-width: 1024px) ────────────────────────────────────── */
+
+@media screen and (max-width: 1024px) {
+    .summary-card-value {
+        font-size: 1.5rem;
+    }
+
+    .summary-card-label {
+        font-size: 0.75rem;
+    }
+
+    .weekly-metric-value {
+        font-size: 1.5rem;
+    }
+
+    .breakdown-count {
+        font-size: 1.75rem;
+    }
+}
+
+/* ── MOBILE (max-width: 768px) ─────────────────────────────────────── */
+
+@media screen and (max-width: 768px) {
+    /* Show mobile cards, hide desktop table */
+    .desktop-table {
+        display: none;
+    }
+
+    .mobile-cards {
+        display: block;
+    }
+
+    /* Header actions: stack vertically */
+    .header-actions .slds-grid {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .header-actions .slds-col {
+        width: 100%;
+    }
+
+    .header-actions lightning-button-group {
+        display: flex;
+        width: 100%;
+    }
+
+    .date-picker {
+        width: 100%;
+    }
+
+    /* Summary cards: 2-col */
+    .summary-card {
+        min-height: 76px;
+        padding: 0.75rem 1rem;
+    }
+
+    .summary-card-value {
+        font-size: 1.5rem;
+    }
+
+    .summary-card-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Mobile metric grid: 2x2 on very small */
+    .mobile-card-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    /* Weekly summary adjustments */
+    .weekly-metric-value {
+        font-size: 1.375rem;
+    }
+
+    .breakdown-count {
+        font-size: 1.5rem;
+    }
+}
+
+/* ── SMALL MOBILE (max-width: 480px) ───────────────────────────────── */
+
+@media screen and (max-width: 480px) {
+    .summary-card-inner {
+        gap: 0.625rem;
+    }
+
+    .summary-card-value {
+        font-size: 1.25rem;
+    }
+
+    .summary-card-label {
+        font-size: 0.6875rem;
+    }
+
+    .summary-card-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .mobile-card-name-text {
+        font-size: 0.875rem;
+    }
+
+    .mobile-metric-value {
+        font-size: 0.875rem;
+    }
+
+    .mobile-metric-label {
+        font-size: 0.625rem;
+    }
+
+    .mobile-card-time {
+        font-size: 0.75rem;
+    }
+
+    .mobile-card-value {
+        font-size: 0.8125rem;
+    }
+
+    .weekly-metric-value {
+        font-size: 1.125rem;
+    }
+
+    .weekly-metric-label {
+        font-size: 0.75rem;
+    }
+
+    .breakdown-count {
+        font-size: 1.25rem;
+    }
+
+    .breakdown-label {
+        font-size: 0.75rem;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state-text {
+        font-size: 1rem;
+    }
+}

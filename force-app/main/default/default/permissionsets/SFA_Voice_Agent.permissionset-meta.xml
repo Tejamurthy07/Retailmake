@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>SFAVoiceProxy</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Grants access to the voice order agent: the SFAVoiceProxy Apex transport (callout to the Ai_sf2 backend). Assign to reps who use voice on the Order Entry page.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>SFA Voice Agent</label>
+</PermissionSet>

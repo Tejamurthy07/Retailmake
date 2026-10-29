@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Non_Productive_Visits</fullName>
+    <columns>NAME</columns>
+    <columns>Salesperson__c</columns>
+    <columns>Account__c</columns>
+    <columns>Visit_Date__c</columns>
+    <columns>Beat__c</columns>
+    <columns>Non_Productive_Reason__c</columns>
+    <columns>Check_In_Time__c</columns>
+    <columns>Check_Out_Time__c</columns>
+    <columns>Duration_Minutes__c</columns>
+    <columns>Notes__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Productive__c</field>
+        <operation>equals</operation>
+        <value>0</value>
+    </filters>
+    <label>Non-Productive Visits</label>
+</ListView>

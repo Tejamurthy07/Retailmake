@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>OMS Order Management</label>
+    <protected>false</protected>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Order management and processing</value>
+    </values>
+    <values>
+        <field>Feature_Code__c</field>
+        <value xsi:type="xsd:string">OMS-001</value>
+    </values>
+    <values>
+        <field>Is_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">OMS</value>
+    </values>
+    <values>
+        <field>Package_Tier__c</field>
+        <value xsi:type="xsd:string">Base</value>
+    </values>
+</CustomMetadata>

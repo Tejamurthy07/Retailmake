@@ -1,0 +1,180 @@
+/* ── Step Indicator ─────────────────────────────────────────────── */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.step-item:hover {
+    opacity: 0.8;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e5e5e5;
+    color: #706e6b;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+}
+
+.step-active {
+    background: #0176d3;
+    color: #fff;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: #706e6b;
+}
+
+.step-label-active {
+    color: #0176d3;
+    font-weight: 600;
+}
+
+/* ── Section Titles ────────────────────────────────────────────── */
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #181818;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 2px solid #0176d3;
+    display: inline-block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+}
+
+/* ── Step Content ──────────────────────────────────────────────── */
+.step-content {
+    min-height: 300px;
+    padding: 1rem 0;
+}
+
+/* ── Category Badge Display ────────────────────────────────────── */
+.category-badge-display {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ── Product Search ────────────────────────────────────────────── */
+.product-search-wrapper {
+    position: relative;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #d8dde6;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    z-index: 9001;
+}
+
+.search-result-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f3f3f3;
+}
+
+.search-result-item:hover {
+    background: #f3f2f2;
+}
+
+.result-name {
+    font-weight: 500;
+    color: #181818;
+}
+
+.result-sku {
+    font-size: 0.75rem;
+    color: #706e6b;
+}
+
+/* ── Child Tables ──────────────────────────────────────────────── */
+.child-table {
+    margin-top: 0.5rem;
+}
+
+.child-table th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #706e6b;
+}
+
+.action-col {
+    width: 40px;
+    text-align: center;
+}
+
+.empty-child-state {
+    text-align: center;
+    padding: 2rem;
+    color: #706e6b;
+    background: #fafaf9;
+    border-radius: 4px;
+    border: 1px dashed #d8dde6;
+}
+
+/* ── Slab & Mapping Cards ──────────────────────────────────────── */
+.slab-card,
+.mapping-card {
+    background: #fafaf9;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.slab-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.slab-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #181818;
+}
+
+/* ── Footer Actions ────────────────────────────────────────────── */
+.footer-actions {
+    padding-top: 1rem;
+    border-top: 1px solid #e5e5e5;
+}

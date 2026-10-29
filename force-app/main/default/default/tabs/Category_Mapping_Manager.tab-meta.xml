@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Category Mapping Manager - Manage category assignments for accounts and employees</description>
+    <flexiPage>Category_Mapping_Manager</flexiPage>
+    <label>Category Mapping</label>
+    <motif>Custom70: Handsaw</motif>
+</CustomTab>

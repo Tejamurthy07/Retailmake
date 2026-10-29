@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Criteria_Value__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>Value compared against the Criteria Field. Ignored for &quot;is blank&quot; / &quot;is not blank&quot;.</inlineHelpText>
+    <label>Criteria Value</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

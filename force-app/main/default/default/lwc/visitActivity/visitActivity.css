@@ -1,0 +1,392 @@
+/* Visit Activity Component Styles — Read-only Summary View */
+:host {
+    --va-primary: #0176d3;
+    --va-active: #dd7a01;
+    --va-completed: #2e844a;
+    --va-border: #e5e5e5;
+    --va-bg: #f8f9fa;
+    --va-radius: 8px;
+}
+
+/* Header Section */
+.va-header {
+    padding: 16px;
+}
+
+.va-outlet-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.va-sequence {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--va-primary);
+    flex-shrink: 0;
+}
+
+.va-outlet-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.va-outlet-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #181818;
+    margin: 0 0 6px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.va-outlet-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.va-beat-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #eaf5fe;
+    color: var(--va-primary);
+}
+
+.va-adhoc-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #f3ecfc;
+    color: #9050e9;
+}
+
+.status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #fef4e8;
+    color: var(--va-active);
+    border: 1px solid #f5d5a0;
+}
+
+.status-completed {
+    background: #e6f7e9;
+    color: var(--va-completed);
+    border: 1px solid #a8ddb5;
+}
+
+.status-other {
+    background: var(--va-bg);
+    color: #706e6b;
+    border: 1px solid var(--va-border);
+}
+
+/* KPI Row */
+.va-kpi-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.va-kpi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--va-bg);
+    border-radius: var(--va-radius);
+    border: 1px solid var(--va-border);
+    min-width: 60px;
+    flex: 1;
+}
+
+.va-kpi-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.va-kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #706e6b;
+    margin-top: 2px;
+}
+
+/* Productivity Badge */
+.va-productivity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--va-border);
+}
+
+.va-productive-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+}
+
+.va-productive-yes {
+    background: #e6f7e9;
+    color: #2e844a;
+}
+
+.va-productive-no {
+    background: #fef2f2;
+    color: #ea001e;
+}
+
+.va-productive-reason {
+    font-size: 12px;
+    color: #706e6b;
+}
+
+/* Tabs */
+.va-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--va-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.va-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.va-tab {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #706e6b;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.va-tab:hover {
+    color: #3e3e3c;
+    background: var(--va-bg);
+}
+
+.va-tab:focus {
+    outline: none;
+}
+
+.va-tab-selected {
+    color: var(--va-primary);
+    border-bottom-color: var(--va-primary);
+}
+
+.va-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--va-primary);
+    color: #fff;
+}
+
+/* Tab Content */
+.va-tab-content {
+    padding: 16px;
+}
+
+/* Record Rows */
+.va-record-row {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 6px;
+    border: 1px solid var(--va-border);
+    border-radius: var(--va-radius);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    gap: 12px;
+}
+
+.va-record-row:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--va-primary);
+}
+
+.va-record-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.va-record-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.va-record-detail {
+    display: block;
+    font-size: 12px;
+    color: #706e6b;
+    margin-top: 2px;
+}
+
+.va-record-amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--va-completed);
+    white-space: nowrap;
+}
+
+.va-record-chevron {
+    color: #b0b0b0;
+    flex-shrink: 0;
+}
+
+/* Empty Tab */
+.va-empty-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    text-align: center;
+    color: #706e6b;
+    padding: 24px;
+}
+
+.va-empty-tab p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Must Sell Compliance */
+.must-sell-compliance {
+    background: var(--va-bg);
+    border: 1px solid var(--va-border);
+    border-radius: var(--va-radius);
+    padding: 12px;
+}
+
+.compliance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.compliance-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.compliance-badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+
+.compliance-green {
+    background: #e6f7e9;
+    color: #2e844a;
+}
+
+.compliance-yellow {
+    background: #fef4e8;
+    color: #dd7a01;
+}
+
+.compliance-red {
+    background: #fef2f2;
+    color: #ea001e;
+}
+
+.compliance-detail {
+    font-size: 12px;
+    color: #706e6b;
+    margin-bottom: 8px;
+}
+
+.compliance-bar {
+    height: 6px;
+    background: #e5e5e5;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.compliance-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .va-header {
+        padding: 12px;
+    }
+
+    .va-outlet-name {
+        font-size: 16px;
+    }
+
+    .va-sequence {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+
+    .va-kpi {
+        padding: 6px 8px;
+        min-width: 50px;
+    }
+
+    .va-kpi-value {
+        font-size: 13px;
+    }
+
+    .va-tab {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .va-tab-content {
+        padding: 12px;
+    }
+}

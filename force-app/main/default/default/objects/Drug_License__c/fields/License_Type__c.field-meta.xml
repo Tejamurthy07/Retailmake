@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>License_Type__c</fullName>
+    <label>License Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Retail Drug License</fullName>
+                <default>false</default>
+                <label>Retail Drug License</label>
+            </value>
+            <value>
+                <fullName>Wholesale Drug License</fullName>
+                <default>false</default>
+                <label>Wholesale Drug License</label>
+            </value>
+            <value>
+                <fullName>Manufacturing License</fullName>
+                <default>false</default>
+                <label>Manufacturing License</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

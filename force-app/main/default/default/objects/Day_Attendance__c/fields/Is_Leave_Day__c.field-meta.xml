@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Leave_Day__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indicates whether this day overlaps with an approved leave request</description>
+    <label>Is Leave Day</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

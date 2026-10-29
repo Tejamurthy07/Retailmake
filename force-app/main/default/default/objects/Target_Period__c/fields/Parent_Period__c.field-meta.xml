@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Parent_Period__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Self-referencing hierarchy for period nesting. Monthly → Quarterly → Annual.</description>
+    <inlineHelpText>Links this period to a parent period for cumulative calculations. Example: Monthly periods (Apr, May, Jun) link to their parent Quarterly period (Q1). Quarterly periods link to their parent Annual period. Leave blank for standalone periods.</inlineHelpText>
+    <label>Parent Period</label>
+    <referenceTo>Target_Period__c</referenceTo>
+    <relationshipLabel>Child Periods</relationshipLabel>
+    <relationshipName>Child_Periods</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

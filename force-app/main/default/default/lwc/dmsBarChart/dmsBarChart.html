@@ -1,0 +1,24 @@
+<template>
+    <div class="chart">
+        <template lwc:if={title}>
+            <p class="chart__title">{title}</p>
+        </template>
+        <div class="chart__body">
+            <template for:each={bars} for:item="bar">
+                <div key={bar.key} class="chart__row">
+                    <span class="chart__label">{bar.label}</span>
+                    <div class="chart__track">
+                        <div class="chart__bar" style={bar.style}></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <template lwc:if={ticks.length}>
+            <div class="chart__axis">
+                <template for:each={ticks} for:item="tick">
+                    <span key={tick} class="chart__tick">{tick}</span>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

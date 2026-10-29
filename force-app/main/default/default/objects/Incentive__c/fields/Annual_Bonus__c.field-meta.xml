@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Annual_Bonus__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>Calculated annual bonus = average of best 3 out of 4 quarterly incentives.</description>
+    <inlineHelpText>Annual bonus amount calculated as the average of the top 3 quarterly incentives earned during the financial year. Automatically computed by the annual bonus calculation engine.</inlineHelpText>
+    <label>Annual Bonus</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

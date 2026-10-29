@@ -1,0 +1,395 @@
+<template>
+    <div class="soh-header">
+        <div class="soh-header-left">
+            <lightning-icon icon-name="standard:product" size="small"></lightning-icon>
+            <div class="soh-header-text">
+                <h1 class="soh-header-title">Stock Operations</h1>
+                <span class="soh-header-sub">Check availability, raise requests, confirm receipts</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="soh-tabs">
+        <template for:each={tabPills} for:item="t">
+            <button key={t.key} class={t.cssClass} data-key={t.key} onclick={handleTabClick}>
+                <lightning-icon icon-name={t.icon} size="xx-small"></lightning-icon>
+                <span>{t.label}</span>
+            </button>
+        </template>
+    </nav>
+
+    <!-- ═══════ AVAILABILITY ═══════ -->
+    <template if:true={isAvailability}>
+        <div class="soh-section">
+            <div class="soh-toolbar">
+                <lightning-combobox label="Warehouse" variant="label-hidden"
+                    value={availabilityWarehouseId}
+                    options={warehouseOptions}
+                    onchange={handleAvailabilityWarehouseChange}
+                    placeholder="Select warehouse..."
+                    class="soh-toolbar-warehouse">
+                </lightning-combobox>
+                <div class="soh-search">
+                    <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+                    <input type="search" class="soh-search-input"
+                        placeholder="Search product, code, batch..."
+                        value={availabilitySearch}
+                        oninput={handleAvailabilitySearch}/>
+                </div>
+            </div>
+
+            <div class="soh-filter-bar">
+                <template for:each={availabilityFilterPills} for:item="p">
+                    <button key={p.key} class={p.cssClass} data-key={p.key} onclick={handleAvailabilityFilter}>
+                        {p.label}
+                    </button>
+                </template>
+            </div>
+
+            <template if:true={loadingAvailability}>
+                <div class="soh-loading"><lightning-spinner size="small"></lightning-spinner></div>
+            </template>
+
+            <template if:false={loadingAvailability}>
+                <template if:true={availabilityRows.length}>
+                    <div class="soh-list">
+                        <template for:each={availabilityRows} for:item="r">
+                            <div key={r.id} class="soh-row">
+                                <div class="soh-row-main">
+                                    <div class="soh-row-top">
+                                        <span class="soh-row-name">{r.productName}</span>
+                                        <span class={r.stockBadgeClass}>{r.stockBadge}</span>
+                                        <template if:true={r.batchNumber}>
+                                            <span class="soh-row-batch">Batch: {r.batchNumber}</span>
+                                        </template>
+                                    </div>
+                                    <div class="soh-row-meta">
+                                        <template if:true={r.productCode}>
+                                            <span class="soh-row-code">{r.productCode}</span>
+                                        </template>
+                                    </div>
+                                    <div class="soh-qty-row">
+                                        <div class="soh-qty-block">
+                                            <span class="soh-qty-label">On Hand</span>
+                                            <span class="soh-qty-value">{r.qtyOnHand}</span>
+                                        </div>
+                                        <div class="soh-qty-block">
+                                            <span class="soh-qty-label">Available</span>
+                                            <span class="soh-qty-value soh-qty-available">{r.qtyAvailable}</span>
+                                        </div>
+                                        <div class="soh-qty-block">
+                                            <span class="soh-qty-label">Reserved</span>
+                                            <span class="soh-qty-value">{r.qtyReserved}</span>
+                                        </div>
+                                        <div class="soh-qty-block">
+                                            <span class="soh-qty-label">Damaged</span>
+                                            <span class="soh-qty-value">{r.qtyDamaged}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={availabilityRows.length}>
+                    <div class="soh-empty">
+                        <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+                        <p>No stock found.</p>
+                        <span class="soh-empty-sub">Try changing the warehouse, search term, or filter.</span>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </template>
+
+    <!-- ═══════ REQUESTS ═══════ -->
+    <template if:true={isRequests}>
+        <div class="soh-section">
+            <div class="soh-toolbar">
+                <div class="soh-search">
+                    <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+                    <input type="search" class="soh-search-input"
+                        placeholder="Search requests..."
+                        value={requestSearch}
+                        oninput={handleRequestSearch}/>
+                </div>
+                <button class="soh-btn-primary" onclick={handleNewRequest}>
+                    <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                    <span>New Request</span>
+                </button>
+            </div>
+
+            <div class="soh-filter-bar">
+                <template for:each={requestFilterPills} for:item="p">
+                    <button key={p.key} class={p.cssClass} data-key={p.key} onclick={handleRequestFilter}>
+                        {p.label}
+                        <span class="soh-filter-count">{p.count}</span>
+                    </button>
+                </template>
+            </div>
+
+            <template if:true={loadingRequests}>
+                <div class="soh-loading"><lightning-spinner size="small"></lightning-spinner></div>
+            </template>
+
+            <template if:false={loadingRequests}>
+                <template if:true={hasRequests}>
+                    <div class="soh-list">
+                        <template for:each={filteredRequests} for:item="r">
+                            <div key={r.id} class="soh-row">
+                                <div class="soh-row-main">
+                                    <div class="soh-row-top">
+                                        <span class="soh-row-name">{r.name}</span>
+                                        <span class={r.statusClass}>{r.statusLabel}</span>
+                                    </div>
+                                    <div class="soh-row-meta">
+                                        <span>{r.sourceWarehouse} → {r.destinationWarehouse}</span>
+                                        <span class="soh-row-dot">·</span>
+                                        <span>by {r.requestedBy}</span>
+                                        <span class="soh-row-dot">·</span>
+                                        <span>{r.lineCount} item(s)</span>
+                                    </div>
+                                </div>
+                                <div class="soh-row-actions">
+                                    <template if:true={r.canSubmit}>
+                                        <button class="soh-action-btn soh-action-primary"
+                                            data-id={r.id} onclick={handleSubmitClick}
+                                            title="Submit for Approval">
+                                            <lightning-icon icon-name="utility:upload" size="xx-small" variant="inverse"></lightning-icon>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasRequests}>
+                    <div class="soh-empty">
+                        <lightning-icon icon-name="utility:upload" size="large"></lightning-icon>
+                        <p>No requests yet.</p>
+                        <button class="soh-btn-primary" onclick={handleNewRequest}>
+                            <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                            <span>Create First Request</span>
+                        </button>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </template>
+
+    <!-- ═══════ RECEIPTS ═══════ -->
+    <template if:true={isReceipts}>
+        <div class="soh-section">
+            <div class="soh-toolbar">
+                <span class="soh-hint">Requests approved and ready to receive at the destination warehouse.</span>
+            </div>
+
+            <template if:true={loadingReceipts}>
+                <div class="soh-loading"><lightning-spinner size="small"></lightning-spinner></div>
+            </template>
+
+            <template if:false={loadingReceipts}>
+                <template if:true={hasReceipts}>
+                    <div class="soh-list">
+                        <template for:each={receipts} for:item="r">
+                            <div key={r.id} class="soh-row">
+                                <div class="soh-row-main">
+                                    <div class="soh-row-top">
+                                        <span class="soh-row-name">{r.name}</span>
+                                        <span class={r.statusClass}>{r.statusLabel}</span>
+                                    </div>
+                                    <div class="soh-row-meta">
+                                        <span>{r.sourceWarehouse} → {r.destinationWarehouse}</span>
+                                        <span class="soh-row-dot">·</span>
+                                        <span>requested by {r.requestedBy}</span>
+                                    </div>
+                                </div>
+                                <div class="soh-row-actions">
+                                    <button class="soh-btn-secondary"
+                                        data-id={r.id} onclick={handleConfirmReceiptClick}>
+                                        <lightning-icon icon-name="utility:check" size="xx-small"></lightning-icon>
+                                        <span>Confirm Receipt</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasReceipts}>
+                    <div class="soh-empty">
+                        <lightning-icon icon-name="utility:download" size="large"></lightning-icon>
+                        <p>Nothing waiting to be received.</p>
+                        <span class="soh-empty-sub">Once a request is approved you'll confirm receipt here.</span>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </template>
+
+    <!-- ═══════ NEW REQUEST MODAL ═══════ -->
+    <template if:true={showRequestModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header soh-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseRequestModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">New Stock Request</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium soh-modal-body">
+                    <div class="soh-form-grid">
+                        <lightning-combobox label="Source Warehouse" required
+                            value={requestForm.sourceWarehouseId}
+                            options={warehouseOptions}
+                            onchange={handleRequestSourceChange}
+                            placeholder="Where stock comes from..."></lightning-combobox>
+                        <lightning-combobox label="Destination Warehouse" required
+                            value={requestForm.destinationWarehouseId}
+                            options={warehouseOptions}
+                            onchange={handleRequestDestChange}
+                            placeholder="Where it goes..."></lightning-combobox>
+                    </div>
+
+                    <lightning-input type="date" label="Transfer Date"
+                        value={requestForm.transferDate}
+                        onchange={handleRequestDateChange}
+                        class="slds-m-top_small"></lightning-input>
+
+                    <lightning-textarea label="Notes (optional)"
+                        value={requestForm.notes}
+                        onchange={handleRequestNotesChange}
+                        class="slds-m-top_small"></lightning-textarea>
+
+                    <div class="soh-section-divider slds-m-top_medium">
+                        <span>Products</span>
+                    </div>
+
+                    <div class="soh-product-search">
+                        <input type="text" class="soh-product-input"
+                            placeholder="Search products in source warehouse..."
+                            value={productSearchTerm}
+                            oninput={handleProductSearch}/>
+                        <template if:true={productSearchResults.length}>
+                            <div class="soh-product-dropdown">
+                                <template for:each={productSearchResults} for:item="p">
+                                    <div key={p.value} class="soh-product-row"
+                                        data-id={p.value} onclick={handleAddLine}>
+                                        <span class="soh-product-name">{p.label}</span>
+                                        <span class="soh-product-sub">{p.subtitle}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template if:true={hasRequestLines}>
+                        <div class="soh-lines">
+                            <template for:each={requestForm.lines} for:item="line">
+                                <div key={line._key} class="soh-line-row">
+                                    <div class="soh-line-info">
+                                        <span class="soh-line-name">{line.productName}</span>
+                                        <span class="soh-line-meta">Available: {line.availableQty}</span>
+                                    </div>
+                                    <lightning-input type="number" label="Qty" variant="label-hidden"
+                                        value={line.requestedQty} min="1" step="1"
+                                        data-key={line._key}
+                                        onchange={handleLineQtyChange}
+                                        class="soh-line-qty"></lightning-input>
+                                    <button class="soh-line-remove" data-key={line._key} onclick={handleRemoveLine}>
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseRequestModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSaveRequest} disabled={saveRequestDisabled}>
+                        <template if:true={isCreatingRequest}>Saving...</template>
+                        <template if:false={isCreatingRequest}>Save as Draft</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════ SUBMIT FOR APPROVAL MODAL ═══════ -->
+    <template if:true={showSubmitModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header soh-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseSubmitModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">Submit {submitTargetName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="soh-hint">This request will route to the warehouse manager via the approval engine. Once approved, source stock auto-deducts.</p>
+                    <lightning-textarea label="Comments (optional)"
+                        value={submitComments}
+                        onchange={handleSubmitCommentsChange}
+                        class="slds-m-top_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseSubmitModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleConfirmSubmit} disabled={isSubmitting}>
+                        <template if:true={isSubmitting}>Submitting...</template>
+                        <template if:false={isSubmitting}>Submit for Approval</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════ CONFIRM RECEIPT MODAL ═══════ -->
+    <template if:true={showReceiptModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header soh-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseReceiptModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">Confirm Receipt — {receiptTargetName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="soh-hint">Received qty pre-fills with the requested/approved quantity. Edit any line if you received a different amount.</p>
+                    <div class="soh-receipt-lines">
+                        <div class="soh-receipt-head">
+                            <span>Product</span>
+                            <span>Batch</span>
+                            <span>Requested</span>
+                            <span>Received</span>
+                        </div>
+                        <template for:each={receiptLines} for:item="line">
+                            <div key={line.id} class="soh-receipt-row">
+                                <div class="soh-receipt-name">
+                                    <span class="soh-line-name">{line.productName}</span>
+                                    <template if:true={line.productCode}>
+                                        <span class="soh-line-meta">{line.productCode}</span>
+                                    </template>
+                                </div>
+                                <span class="soh-receipt-batch">{line.batchNumber}</span>
+                                <span class="soh-receipt-req">{line.requestedQty}</span>
+                                <lightning-input type="number" variant="label-hidden"
+                                    value={line.receivedInput} min="0" step="1"
+                                    data-id={line.id}
+                                    onchange={handleReceivedQtyChange}></lightning-input>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseReceiptModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleConfirmReceipt} disabled={confirmReceiptDisabled}>
+                        <template if:true={isConfirmingReceipt}>Confirming...</template>
+                        <template if:false={isConfirmingReceipt}>Confirm Receipt</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

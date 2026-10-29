@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>From_Location__c</fullName>
+    <description>Source plant or depot the goods will be supplied from.</description>
+    <label>From Location</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Virudhunagar Plant</fullName>
+                <default>false</default>
+                <label>Virudhunagar Plant</label>
+            </value>
+            <value>
+                <fullName>Namakkal Plant</fullName>
+                <default>false</default>
+                <label>Namakkal Plant</label>
+            </value>
+            <value>
+                <fullName>Chennai Depot</fullName>
+                <default>false</default>
+                <label>Chennai Depot</label>
+            </value>
+            <value>
+                <fullName>Coimbatore Depot</fullName>
+                <default>false</default>
+                <label>Coimbatore Depot</label>
+            </value>
+            <value>
+                <fullName>Bengaluru Depot</fullName>
+                <default>false</default>
+                <label>Bengaluru Depot</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

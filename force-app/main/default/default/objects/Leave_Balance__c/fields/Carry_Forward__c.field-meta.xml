@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Carry_Forward__c</fullName>
+    <defaultValue>0</defaultValue>
+    <externalId>false</externalId>
+    <inlineHelpText>Days carried forward from the previous year. Capped by the policy&apos;s Max Carry Forward setting.</inlineHelpText>
+    <label>Carry Forward</label>
+    <precision>5</precision>
+    <required>false</required>
+    <scale>1</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

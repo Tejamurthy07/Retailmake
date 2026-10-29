@@ -1,0 +1,632 @@
+<template>
+    <div class="leave-manager-container">
+
+        <!-- ═══ HEADER ═══════════════════════════════════════════ -->
+        <div class="manager-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <h1 class="slds-text-heading_medium header-title">
+                        <lightning-icon icon-name="standard:time_off_request" size="small"
+                            class="slds-m-right_x-small"></lightning-icon>
+                        Leave Management
+                    </h1>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                        Apply for leave, track requests, and manage team approvals
+                    </p>
+                </div>
+                <div class="slds-col slds-no-flex slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
+                    <div>
+                        <lightning-combobox label="Year" value={selectedYear} options={yearOptions}
+                            onchange={handleYearChange} variant="label-hidden"
+                            class="year-picker"></lightning-combobox>
+                    </div>
+                    <div>
+                        <lightning-button variant="brand" label="Apply for Leave" icon-name="utility:add"
+                            onclick={handleOpenApplyModal}></lightning-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Tabs -->
+            <div class="view-tabs slds-m-top_small">
+                <button class={myLeavesTabClass} onclick={handleMyLeavesTab}>
+                    <lightning-icon icon-name="utility:user" size="xx-small"
+                        class="slds-m-right_xx-small"></lightning-icon>
+                    My Leaves
+                </button>
+                <template if:true={isManager}>
+                    <button class={teamTabClass} onclick={handleTeamTab}>
+                        <lightning-icon icon-name="utility:groups" size="xx-small"
+                            class="slds-m-right_xx-small"></lightning-icon>
+                        Team Approvals
+                        <template if:true={pendingTeamCount}>
+                            <span class="tab-badge">{pendingTeamCount}</span>
+                        </template>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- ═══ MY LEAVES VIEW ═══════════════════════════════════ -->
+        <template if:true={isMyLeavesView}>
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+                <!-- Leave Balance Cards -->
+                <div class="balance-cards-row slds-m-top_medium slds-m-bottom_medium">
+                    <div class="slds-grid slds-wrap slds-gutters_x-small">
+                        <template for:each={balanceCards} for:item="card">
+                            <div class="slds-col slds-size_1-of-4 slds-small-size_1-of-2 slds-x-small-size_1-of-1"
+                                key={card.key}>
+                                <div class="balance-card">
+                                    <div class="balance-card-header">
+                                        <span class="balance-type-label">{card.label}</span>
+                                        <span class="balance-short">{card.key}</span>
+                                    </div>
+                                    <div class="balance-card-body">
+                                        <div class="balance-ring-container">
+                                            <svg class="balance-ring" viewBox="0 0 70 70">
+                                                <circle class="balance-ring-bg" cx="35" cy="35" r="30"
+                                                    fill="none" stroke-width="5"></circle>
+                                                <circle class="balance-ring-progress" cx="35" cy="35" r="30"
+                                                    fill="none" stroke-width="5" stroke-linecap="round"
+                                                    stroke-dasharray={card.ringDashArray}
+                                                    stroke-dashoffset={card.ringDashOffset}
+                                                    style={card.ringStyle}></circle>
+                                            </svg>
+                                            <span class="balance-ring-label">{card.available}</span>
+                                        </div>
+                                        <div class="balance-details">
+                                            <div class="balance-detail-row">
+                                                <span class="balance-detail-label">Available</span>
+                                                <span class="balance-detail-value balance-available">{card.available}</span>
+                                            </div>
+                                            <template if:true={card.hasDetails}>
+                                                <div class="balance-detail-row">
+                                                    <span class="balance-detail-label">Accrued</span>
+                                                    <span class="balance-detail-value">{card.accrued}</span>
+                                                </div>
+                                                <template if:true={card.carryForward}>
+                                                    <div class="balance-detail-row">
+                                                        <span class="balance-detail-label">Carry Fwd</span>
+                                                        <span class="balance-detail-value">{card.carryForward}</span>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                            <div class="balance-detail-row">
+                                                <span class="balance-detail-label">Used</span>
+                                                <span class="balance-detail-value">{card.used}</span>
+                                            </div>
+                                            <template if:true={card.pending}>
+                                                <div class="balance-detail-row">
+                                                    <span class="balance-detail-label">Pending</span>
+                                                    <span class="balance-detail-value balance-pending">{card.pending}</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="status-filters slds-m-bottom_small">
+                    <template for:each={statusFilters} for:item="filter">
+                        <button class={filter.pillClass} key={filter.value}
+                            data-status={filter.value} onclick={handleStatusFilter}>
+                            {filter.label}
+                            <span class="pill-count">{filter.count}</span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Leave Request Cards -->
+                <div class="leave-list">
+                    <template if:true={hasLeaveRequests}>
+                        <template for:each={filteredLeaveRequests} for:item="leave">
+                            <div class={leave.cardClass} key={leave.Id}>
+                                <!-- Card Main Row -->
+                                <div class="leave-card-main" data-id={leave.Id}
+                                    onclick={handleToggleExpand}>
+                                    <div class="leave-card-left">
+                                        <span class={leave.typeBadgeClass}
+                                            style={leave.typeBadgeStyle}>{leave.typeShort}</span>
+                                    </div>
+                                    <div class="leave-card-center">
+                                        <div class="leave-card-title">
+                                            <span class="leave-type-name">{leave.Leave_Type__c}</span>
+                                            <span class={leave.statusBadgeClass}>{leave.Status__c}</span>
+                                        </div>
+                                        <div class="leave-card-meta">
+                                            <span class="leave-meta-item">
+                                                <lightning-icon icon-name="utility:event" size="xx-small"
+                                                    class="slds-m-right_xx-small"></lightning-icon>
+                                                {leave.dateRange}
+                                            </span>
+                                            <span class="leave-meta-item">
+                                                <lightning-icon icon-name="utility:clock" size="xx-small"
+                                                    class="slds-m-right_xx-small"></lightning-icon>
+                                                {leave.daysDisplay}
+                                            </span>
+                                        </div>
+                                        <div class="leave-reason-preview">{leave.reasonPreview}</div>
+                                    </div>
+                                    <div class="leave-card-right">
+                                        <lightning-button-icon icon-name="utility:preview" variant="bare"
+                                            alternative-text="View details" data-id={leave.Id}
+                                            onclick={handleViewDetail}
+                                            class="slds-m-right_xx-small"></lightning-button-icon>
+                                        <template if:true={leave.canCancel}>
+                                            <lightning-button-icon icon-name="utility:ban" variant="bare"
+                                                alternative-text="Cancel leave" data-id={leave.Id}
+                                                onclick={handleCancelLeave}
+                                                class="cancel-icon-btn"></lightning-button-icon>
+                                        </template>
+                                        <lightning-icon
+                                            icon-name={leave.expandIcon}
+                                            size="xx-small" class="expand-chevron"></lightning-icon>
+                                    </div>
+                                </div>
+
+                                <!-- Expanded Detail -->
+                                <template if:true={leave.isExpanded}>
+                                    <div class="leave-card-detail">
+                                        <div class="slds-grid slds-wrap slds-gutters_small">
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Leave Type</span>
+                                                    <span class="detail-field-value">{leave.Leave_Type__c}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Status</span>
+                                                    <span class={leave.statusBadgeClass}>{leave.Status__c}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">From Date</span>
+                                                    <span class="detail-field-value">{leave.startDateFormatted} ({leave.startSessionDisplay})</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">To Date</span>
+                                                    <span class="detail-field-value">{leave.endDateFormatted} ({leave.endSessionDisplay})</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Number of Days</span>
+                                                    <span class="detail-field-value">{leave.daysDisplay}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Approved By</span>
+                                                    <span class="detail-field-value">{leave.approverName}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Reason</span>
+                                                    <span class="detail-field-value">{leave.Reason__c}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Comments</span>
+                                                    <span class="detail-field-value">{leave.commentsDisplay}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Empty State -->
+                    <template if:false={hasLeaveRequests}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:date_time" size="large"
+                                class="empty-icon slds-m-bottom_small"></lightning-icon>
+                            <p class="slds-text-heading_small slds-m-bottom_xx-small">No leave requests found</p>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                Click "Apply for Leave" to submit a new request
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- ═══ TEAM APPROVALS VIEW ══════════════════════════════ -->
+        <template if:true={isTeamView}>
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium slds-m-top_medium">
+
+                <!-- Pending Approvals Section -->
+                <div class="team-section slds-m-bottom_medium">
+                    <div class="team-section-header">
+                        <h2 class="team-section-title">
+                            <lightning-icon icon-name="utility:clock" size="x-small"
+                                class="slds-m-right_x-small"></lightning-icon>
+                            Pending Approvals
+                        </h2>
+                        <span class="pending-count-badge">{pendingTeamCount}</span>
+                    </div>
+
+                    <template if:true={hasPendingTeamRequests}>
+                        <!-- Table Header -->
+                        <div class="team-table-header">
+                            <span class="team-col-employee">Employee</span>
+                            <span class="team-col-type">Type</span>
+                            <span class="team-col-dates">Date Range</span>
+                            <span class="team-col-days">Days</span>
+                            <span class="team-col-reason">Reason</span>
+                            <span class="team-col-actions">Actions</span>
+                        </div>
+
+                        <!-- Table Rows -->
+                        <template for:each={pendingTeamRequests} for:item="req">
+                            <div class={req.rowClass} key={req.Id}>
+                                <div class="team-row-main" data-id={req.Id}
+                                    onclick={handleToggleTeamRow}>
+                                    <span class="team-col-employee">
+                                        <lightning-icon icon-name="standard:user" size="xx-small"
+                                            class="slds-m-right_xx-small"></lightning-icon>
+                                        {req.employeeName}
+                                    </span>
+                                    <span class="team-col-type">
+                                        <span class={req.typeBadgeClass}
+                                            style={req.typeBadgeStyle}>{req.typeShort}</span>
+                                    </span>
+                                    <span class="team-col-dates">{req.dateRange}</span>
+                                    <span class="team-col-days">{req.daysDisplay}</span>
+                                    <span class="team-col-reason">{req.reasonPreview}</span>
+                                    <span class="team-col-actions">
+                                        <lightning-button-icon icon-name="utility:check" variant="bare"
+                                            alternative-text="Approve" data-id={req.Id}
+                                            onclick={handleApproveLeave}
+                                            class="approve-icon-btn slds-m-right_xx-small"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:close" variant="bare"
+                                            alternative-text="Reject" data-id={req.Id}
+                                            onclick={handleRejectLeave}
+                                            class="reject-icon-btn"></lightning-button-icon>
+                                    </span>
+                                </div>
+
+                                <!-- Expanded comment row -->
+                                <template if:true={req.isExpanded}>
+                                    <div class="team-row-detail">
+                                        <div class="slds-grid slds-gutters_x-small slds-grid_vertical-align-end">
+                                            <div class="slds-col slds-size_1-of-1 slds-m-bottom_x-small">
+                                                <p class="team-detail-reason">
+                                                    <strong>Full Reason:</strong> {req.Reason__c}
+                                                </p>
+                                            </div>
+                                            <div class="slds-col slds-grow">
+                                                <lightning-textarea label="Comments" data-id={req.Id}
+                                                    value={req.commentValue}
+                                                    onchange={handleTeamCommentChange}
+                                                    placeholder="Add comments (required for rejection)..."
+                                                    variant="label-hidden"
+                                                    class="team-comment-input"></lightning-textarea>
+                                            </div>
+                                            <div class="slds-col slds-no-flex">
+                                                <div class="slds-button-group">
+                                                    <lightning-button variant="success" label="Approve"
+                                                        icon-name="utility:check" data-id={req.Id}
+                                                        onclick={handleApproveLeave}
+                                                        class="slds-m-right_xx-small"></lightning-button>
+                                                    <lightning-button variant="destructive" label="Reject"
+                                                        icon-name="utility:close" data-id={req.Id}
+                                                        onclick={handleRejectLeave}></lightning-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Empty Pending -->
+                    <template if:false={hasPendingTeamRequests}>
+                        <div class="empty-state-small">
+                            <lightning-icon icon-name="utility:check" size="medium"
+                                class="empty-icon slds-m-bottom_x-small"></lightning-icon>
+                            <p class="slds-text-body_regular slds-text-color_weak">
+                                No pending approvals. You are all caught up!
+                            </p>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Recent Decisions Section -->
+                <div class="team-section">
+                    <div class="team-section-header">
+                        <h2 class="team-section-title">
+                            <lightning-icon icon-name="utility:activity" size="x-small"
+                                class="slds-m-right_x-small"></lightning-icon>
+                            Recent Decisions
+                        </h2>
+                    </div>
+
+                    <template if:true={hasRecentDecisions}>
+                        <div class="team-table-header">
+                            <span class="team-col-employee">Employee</span>
+                            <span class="team-col-type">Type</span>
+                            <span class="team-col-dates">Date Range</span>
+                            <span class="team-col-days">Days</span>
+                            <span class="team-col-reason">Status</span>
+                            <span class="team-col-actions">Decision Date</span>
+                        </div>
+
+                        <template for:each={processedRecentDecisions} for:item="dec">
+                            <div class="team-row team-row-decision" key={dec.Id}>
+                                <div class="team-row-main">
+                                    <span class="team-col-employee">
+                                        <lightning-icon icon-name="standard:user" size="xx-small"
+                                            class="slds-m-right_xx-small"></lightning-icon>
+                                        {dec.employeeName}
+                                    </span>
+                                    <span class="team-col-type">
+                                        <span class={dec.typeBadgeClass}
+                                            style={dec.typeBadgeStyle}>{dec.typeShort}</span>
+                                    </span>
+                                    <span class="team-col-dates">{dec.dateRange}</span>
+                                    <span class="team-col-days">{dec.daysDisplay}</span>
+                                    <span class="team-col-reason">
+                                        <span class={dec.statusBadgeClass}>{dec.Status__c}</span>
+                                    </span>
+                                    <span class="team-col-actions">{dec.approvalDateFormatted}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <template if:false={hasRecentDecisions}>
+                        <div class="empty-state-small">
+                            <p class="slds-text-body_regular slds-text-color_weak">
+                                No recent decisions to display.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- ═══ APPLY FOR LEAVE MODAL ════════════════════════════ -->
+    <template if:true={showApplyModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        alternative-text="Close" onclick={handleCloseApplyModal}
+                        class="slds-modal__close"></lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">Apply for Leave</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="apply-form-content">
+                        <!-- Leave Type -->
+                        <div class="slds-m-bottom_small">
+                            <lightning-combobox label="Leave Type" value={leaveForm.Leave_Type__c}
+                                options={leaveTypeOptions} data-field="Leave_Type__c"
+                                onchange={handleLeaveFormChange} required
+                                placeholder="Select leave type"></lightning-combobox>
+                        </div>
+
+                        <!-- Available Balance Indicator -->
+                        <template if:true={selectedTypeBalance}>
+                            <div class={selectedTypeBalance.balanceClass}>
+                                <lightning-icon icon-name="utility:info" size="xx-small"
+                                    class="slds-m-right_xx-small"></lightning-icon>
+                                Available Balance for {selectedTypeBalance.type}:
+                                <strong class="slds-m-left_xx-small">
+                                    {selectedTypeBalance.available} days
+                                </strong>
+                            </div>
+                        </template>
+
+                        <!-- From Date and Session -->
+                        <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input type="date" label="From Date"
+                                    value={leaveForm.Start_Date__c} data-field="Start_Date__c"
+                                    onchange={handleLeaveFormChange} required></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-combobox label="From Session"
+                                    value={leaveForm.Start_Session__c}
+                                    options={sessionOptions} data-field="Start_Session__c"
+                                    onchange={handleLeaveFormChange}></lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- To Date and Session -->
+                        <div class="slds-grid slds-gutters_small slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input type="date" label="To Date"
+                                    value={leaveForm.End_Date__c} data-field="End_Date__c"
+                                    onchange={handleLeaveFormChange} required></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-combobox label="To Session"
+                                    value={leaveForm.End_Session__c}
+                                    options={sessionOptions} data-field="End_Session__c"
+                                    onchange={handleLeaveFormChange}></lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- Invalid Session Warning -->
+                        <template if:true={isInvalidSessionCombo}>
+                            <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small" role="alert" style="padding: 0.5rem 1rem; border-radius: 0.25rem; background: #fff8e1; color: #8c6900; font-size: 0.8125rem;">
+                                <lightning-icon icon-name="utility:warning" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Invalid session combination: To Session cannot be Session 1 when From Session is Session 2 on the same date.
+                            </div>
+                        </template>
+
+                        <!-- Calculated Days -->
+                        <div class="calculated-days-box slds-m-bottom_small">
+                            <span class="calculated-days-label">Calculated Days</span>
+                            <span class="calculated-days-value">{calculatedDaysDisplay}</span>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="slds-m-bottom_small">
+                            <lightning-textarea label="Reason" value={leaveForm.Reason__c}
+                                data-field="Reason__c" onchange={handleLeaveFormChange}
+                                required placeholder="Provide a reason for your leave..."
+                                max-length="500"></lightning-textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel"
+                        onclick={handleCloseApplyModal}
+                        class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button variant="brand" label="Submit Request"
+                        onclick={handleSubmitLeave} disabled={isApplyDisabled}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══ LEAVE DETAIL MODAL ═══════════════════════════════ -->
+    <template if:true={showDetailModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        alternative-text="Close" onclick={handleCloseDetailModal}
+                        class="slds-modal__close"></lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">
+                        Leave Request Details
+                        <template if:true={detailLeave}>
+                            <span class="detail-modal-ref"> &mdash; {detailLeave.Name}</span>
+                        </template>
+                    </h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={detailLeave}>
+                        <!-- Status Timeline -->
+                        <div class="status-timeline slds-m-bottom_medium">
+                            <div class="timeline-track">
+                                <template for:each={detailTimelineSteps} for:item="step">
+                                    <div class={step.stepClass} key={step.label}>
+                                        <div class="timeline-dot"></div>
+                                        <span class="timeline-label">{step.label}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Detail Grid -->
+                        <div class="detail-section slds-m-bottom_medium">
+                            <h3 class="detail-section-title">Leave Information</h3>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Leave Type</span>
+                                        <span class="detail-field-value">
+                                            <span class={detailLeave.typeBadgeClass}
+                                                style={detailLeave.typeBadgeStyle}>{detailLeave.typeShort}</span>
+                                            {detailLeave.Leave_Type__c}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Status</span>
+                                        <span class={detailLeave.statusBadgeClass}>{detailLeave.Status__c}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">From Date</span>
+                                        <span class="detail-field-value">{detailLeave.startDateFormatted} ({detailLeave.startSessionDisplay})</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">To Date</span>
+                                        <span class="detail-field-value">{detailLeave.endDateFormatted} ({detailLeave.endSessionDisplay})</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Number of Days</span>
+                                        <span class="detail-field-value">{detailLeave.daysDisplay}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Request Number</span>
+                                        <span class="detail-field-value">{detailLeave.Name}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Reason</span>
+                                        <span class="detail-field-value detail-reason">{detailLeave.Reason__c}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approval Info -->
+                        <template if:true={hasApprovalInfo}>
+                            <div class="detail-section">
+                                <h3 class="detail-section-title">{approvalInfoLabel}</h3>
+                                <div class="slds-grid slds-wrap slds-gutters_small">
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                        <div class="detail-field">
+                                            <span class="detail-field-label">{approverFieldLabel}</span>
+                                            <span class="detail-field-value">{approverName}</span>
+                                        </div>
+                                    </div>
+                                    <template if:true={showDecisionDate}>
+                                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                            <div class="detail-field">
+                                                <span class="detail-field-label">Decision Date</span>
+                                                <span class="detail-field-value">{approvalDateFormatted}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_x-small">
+                                        <div class="detail-field">
+                                            <span class="detail-field-label">Comments</span>
+                                            <span class="detail-field-value detail-reason">{detailComments}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <template if:true={canCancelSelected}>
+                        <lightning-button variant="destructive-text" label="Cancel Leave"
+                            icon-name="utility:ban" onclick={handleCancelFromDetail}
+                            class="slds-m-right_x-small"></lightning-button>
+                    </template>
+                    <lightning-button variant="neutral" label="Close"
+                        onclick={handleCloseDetailModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

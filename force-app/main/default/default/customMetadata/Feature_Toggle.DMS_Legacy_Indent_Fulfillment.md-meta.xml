@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>DMS Legacy Indent Fulfillment</label>
+    <protected>false</protected>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">DEPRECATED. Legacy Indent__c primary fulfillment, OFF by default (Primary_Order__c is now the primary order). Enable only for an org still transacting on the old Indent__c object; off prevents an approved Indent creating a duplicate primary invoice.</value>
+    </values>
+    <values>
+        <field>Feature_Code__c</field>
+        <value xsi:type="xsd:string">DMS-014</value>
+    </values>
+    <values>
+        <field>Is_Enabled__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">DMS</value>
+    </values>
+    <values>
+        <field>Package_Tier__c</field>
+        <value xsi:type="xsd:string">Base</value>
+    </values>
+</CustomMetadata>

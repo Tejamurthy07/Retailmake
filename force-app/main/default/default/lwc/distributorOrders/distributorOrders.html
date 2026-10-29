@@ -1,0 +1,196 @@
+<template>
+    <div class="dms-orders">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button key={tab.id} class={tab.class} data-tab={tab.id} onclick={handleTab} type="button">{tab.label}</button>
+            </template>
+        </div>
+
+        <div class="dms-body">
+            <template lwc:if={error}>
+                <div class="dms-err">{error}</div>
+            </template>
+
+            <!-- ===================== Primary ===================== -->
+            <template lwc:if={isPrimary}>
+                <!-- New-order entry view -->
+                <template lwc:if={showEntry}>
+                    <button class="dms-back" type="button" onclick={backToList}>‹ Back to Primary Orders</button>
+                    <c-distributor-order-entry mode="P1" onorderplaced={handlePlaced}></c-distributor-order-entry>
+                </template>
+
+                <!-- List view -->
+                <template lwc:else>
+                    <div class="dms-toolbar">
+                        <span class="dms-h">My Primary Orders (PO)</span>
+                        <button class="dms-btn" type="button" onclick={newOrder}>
+                            <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Order
+                        </button>
+                    </div>
+
+                    <template lwc:if={hasPrimary}>
+                        <div class="dms-tbl dms-tbl_primary">
+                            <div class="dms-thead">
+                                <span>Order #</span><span>Date</span><span>Source</span>
+                                <span class="dms-num">Amount</span><span>Status</span><span>Action</span>
+                            </div>
+                            <template for:each={primaryRows} for:item="o">
+                                <div key={o.id} class="dms-trow">
+                                    <span class="dms-link dms-clickable" data-label="Order #"
+                                        data-id={o.id} onclick={viewPrimary} role="button" tabindex="0">{o.orderNumber}</span>
+                                    <span data-label="Date">{o.dateLabel}</span>
+                                    <span class="dms-muted" data-label="Source">{o.party}</span>
+                                    <span class="dms-num dms-strong" data-label="Amount">{o.amountLabel}</span>
+                                    <span data-label="Status"><c-dms-status-badge label={o.status} theme={o.theme}></c-dms-status-badge></span>
+                                    <span data-label="Action">
+                                        <template lwc:if={o.isDraft}>
+                                            <button class="dms-linkbtn" type="button" data-id={o.id}
+                                                onclick={handleSubmitOrder} disabled={submitting}>Submit</button>
+                                        </template>
+                                        <template lwc:else>
+                                            <span class="dms-muted">—</span>
+                                        </template>
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="dms-empty">
+                            <p>No primary orders yet.</p>
+                            <button class="dms-btn" type="button" onclick={newOrder}>Create your first order</button>
+                        </div>
+                    </template>
+                </template>
+            </template>
+
+            <!-- ===================== Secondary ===================== -->
+            <template lwc:if={isSecondary}>
+                <div class="dms-toolbar">
+                    <span class="dms-h">Secondary Orders (Retailer SOs)</span>
+                    <span class="dms-readonly">
+                        <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Booked in Visit Manager
+                    </span>
+                </div>
+
+                <template lwc:if={hasSecondary}>
+                    <div class="dms-tbl dms-tbl_secondary">
+                        <div class="dms-thead">
+                            <span>SO #</span><span>Date</span><span>Retailer</span>
+                            <span class="dms-num">Items</span><span class="dms-num">Total</span>
+                            <span>Status</span><span>Action</span>
+                        </div>
+                        <template for:each={secondaryRows} for:item="o">
+                            <div key={o.id} class="dms-trow">
+                                <span class="dms-link" data-label="SO #">{o.name}</span>
+                                <span data-label="Date">{o.dateLabel}</span>
+                                <span class="dms-strong" data-label="Retailer">{o.retailer}</span>
+                                <span class="dms-num" data-label="Items">{o.itemsLabel}</span>
+                                <span class="dms-num dms-strong" data-label="Total">{o.totalLabel}</span>
+                                <span data-label="Status"><c-dms-status-badge label={o.status} theme={o.theme}></c-dms-status-badge></span>
+                                <span class="dms-action" data-label="Action" data-id={o.id} onclick={viewOrder}>
+                                    <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    View
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="dms-empty"><p>No secondary orders yet. Field reps book these in Visit Manager.</p></div>
+                </template>
+            </template>
+        </div>
+
+        <!-- Primary (Indent) detail flyout -->
+        <template lwc:if={primaryDetail}>
+            <div class="dms-modal__overlay" onclick={closePrimary}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{primaryDetail.orderNumber}</h2>
+                        <p class="dms-flyout__sub">Primary Order · {primaryDetail.status}</p>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closePrimary} title="Close">✕</button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Order Date</span><span class="dms-flyout__val">{primaryDetail.dateLabel}</span></div>
+                    <div><span class="dms-flyout__lbl">Source</span><span class="dms-flyout__val">{primaryDetail.party}</span></div>
+                    <div><span class="dms-flyout__lbl">Amount</span><span class="dms-flyout__val">{primaryDetail.amountLabel}</span></div>
+                    <div><span class="dms-flyout__lbl">Status</span><span class="dms-flyout__val">{primaryDetail.status}</span></div>
+                </div>
+                <p class="dms-flyout__section">Order Lines</p>
+                <template lwc:if={hasPrimaryLines}>
+                    <div class="dms-tbl dms-tbl_lines">
+                        <div class="dms-thead">
+                            <span>Product</span><span class="dms-num">Qty</span>
+                            <span class="dms-num">Rate</span><span class="dms-num">Line Total</span>
+                        </div>
+                        <template for:each={primaryLines} for:item="l">
+                            <div key={l.Id} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">
+                                    {l.productName}
+                                    <template lwc:if={l.scheme}><small class="dms-line-scheme">🎁 {l.scheme}</small></template>
+                                    <template lwc:if={l.discLabel}><small class="dms-line-disc">{l.discLabel}</small></template>
+                                </span>
+                                <span class="dms-num" data-label="Qty">{l.qtyLabel}</span>
+                                <span class="dms-num" data-label="Rate">{l.rate}</span>
+                                <span class="dms-num dms-strong" data-label="Line Total">{l.amount}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <p class="dms-empty">No order lines.</p>
+                </template>
+            </aside>
+        </template>
+
+        <!-- SO detail flyout -->
+        <template lwc:if={detail}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{detail.name}</h2>
+                        <p class="dms-flyout__sub">{detail.retailer} · {detail.status}</p>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closeDetail} title="Close">✕</button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Order Date</span><span class="dms-flyout__val">{detail.dateLabel}</span></div>
+                    <div><span class="dms-flyout__lbl">Total</span><span class="dms-flyout__val">{detail.totalLabel}</span></div>
+                </div>
+                <p class="dms-flyout__section">Order Lines</p>
+                <template lwc:if={hasDetailLines}>
+                    <div class="dms-tbl dms-tbl_lines">
+                        <div class="dms-thead">
+                            <span>Product</span><span class="dms-num">Qty</span>
+                            <span class="dms-num">Rate</span><span class="dms-num">Amount</span>
+                        </div>
+                        <template for:each={detailLines} for:item="l">
+                            <div key={l.Id} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">{l.productName}</span>
+                                <span class="dms-num" data-label="Qty">{l.Quantity__c}</span>
+                                <span class="dms-num" data-label="Rate">{l.rate}</span>
+                                <span class="dms-num dms-strong" data-label="Amount">{l.amount}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <p class="dms-empty">No order lines.</p>
+                </template>
+            </aside>
+        </template>
+    </div>
+</template>

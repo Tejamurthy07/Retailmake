@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category_Level_No_Parent</fullName>
+    <active>true</active>
+    <description>Top-level Category entries cannot have a parent category.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Level__c, &quot;Category&quot;),
+    NOT(ISBLANK(Parent_Category__c))
+)</errorConditionFormula>
+    <errorDisplayField>Parent_Category__c</errorDisplayField>
+    <errorMessage>Top-level Category entries cannot have a parent category.</errorMessage>
+</ValidationRule>

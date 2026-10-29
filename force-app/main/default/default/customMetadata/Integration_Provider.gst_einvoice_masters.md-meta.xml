@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>GST e-Invoice — Masters India</label>
+    <protected>false</protected>
+    <values>
+        <field>Docs_URL__c</field>
+        <value xsi:type="xsd:string">https://docs.mastersindia.co</value>
+    </values>
+    <values>
+        <field>Integration_Key__c</field>
+        <value xsi:type="xsd:string">gst_einvoice</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Live_Base_URL__c</field>
+        <value xsi:type="xsd:string">https://commonapi.mastersindia.co</value>
+    </values>
+    <values>
+        <field>Provider_Name__c</field>
+        <value xsi:type="xsd:string">Masters India</value>
+    </values>
+    <values>
+        <field>Sandbox_Base_URL__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Sort_Order__c</field>
+        <value xsi:type="xsd:double">30.0</value>
+    </values>
+</CustomMetadata>

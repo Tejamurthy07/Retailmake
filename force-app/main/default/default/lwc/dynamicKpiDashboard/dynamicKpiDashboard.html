@@ -1,0 +1,507 @@
+<template>
+    <div class="dkd-container">
+
+        <!-- ═════════ HEADER ═════════ -->
+        <div class="dkd-header">
+            <div class="dkd-header-left">
+                <lightning-icon icon-name="standard:dashboard" size="small" class="dkd-header-icon"></lightning-icon>
+                <div class="dkd-header-titles">
+                    <h1 class="dkd-title">Dynamic KPI Dashboard</h1>
+                    <p class="dkd-subtitle">
+                        Pick any metric, filter by any dimension, analyse trends.
+                        <template if:true={lastUpdatedLabel}>
+                            <span class="dkd-last-updated"> &bull; {lastUpdatedLabel}</span>
+                        </template>
+                    </p>
+                </div>
+            </div>
+            <div class="dkd-header-actions">
+                <div class="dkd-auto-refresh">
+                    <lightning-combobox
+                        variant="label-hidden"
+                        value={autoRefreshInterval}
+                        options={autoRefreshOptions}
+                        onchange={handleAutoRefreshChange}
+                        class="dkd-auto-refresh-picker">
+                    </lightning-combobox>
+                </div>
+                <span class="dkd-action-btn" onclick={handleExportKpis} role="button" tabindex="0">&#x2913; CSV</span>
+                <span class="dkd-action-btn" onclick={handlePrintDashboard} role="button" tabindex="0">&#x1F5B6; Print</span>
+                <span class="dkd-action-btn" onclick={handleToggleFilterPanel} role="button" tabindex="0">&#x2630; Filters</span>
+                <span class="dkd-action-btn dkd-action-btn-primary" onclick={handleRefresh} role="button" tabindex="0">&#x21BB; Refresh</span>
+            </div>
+        </div>
+
+        <!-- Saved Views Toolbar -->
+        <div class="dkd-views-toolbar">
+            <div class="dkd-views-left">
+                <lightning-icon icon-name="utility:preview" size="x-small" class="dkd-views-icon"></lightning-icon>
+                <span class="dkd-views-label">View:</span>
+                <lightning-combobox
+                    variant="label-hidden"
+                    value={activeViewId}
+                    options={viewPickerOptions}
+                    onchange={handleViewSelect}
+                    placeholder="Select a saved view..."
+                    class="dkd-views-picker">
+                </lightning-combobox>
+            </div>
+            <div class="dkd-views-right">
+                <button class="dkd-btn-mini" onclick={handleOpenSaveModal} title="Save current layout as a new view">
+                    <lightning-icon icon-name="utility:save" size="xx-small"></lightning-icon>
+                    Save As New
+                </button>
+                <template if:true={canEditActiveView}>
+                    <button class="dkd-btn-mini" onclick={handleOpenEditModal} title="Update the active view">
+                        <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                        Update
+                    </button>
+                    <button class="dkd-btn-mini" onclick={handleToggleDefault} title="Mark as default view">
+                        <lightning-icon icon-name="utility:pinned" size="xx-small"></lightning-icon>
+                        {setDefaultButtonLabel}
+                    </button>
+                    <button class="dkd-btn-mini dkd-btn-mini-danger" onclick={handleDeleteView} title="Delete this view">
+                        <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                        Delete
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Active filter chips -->
+        <div class="dkd-chips-row">
+            <template for:each={activeFilterChips} for:item="chip">
+                <span class="dkd-chip" key={chip.key}>{chip.label}</span>
+            </template>
+        </div>
+
+        <!-- Initialization error -->
+        <template if:true={initError}>
+            <div class="dkd-error">
+                <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                <span>{initError}</span>
+            </div>
+        </template>
+
+        <!-- ═════════ BODY (filter panel + canvas) ═════════ -->
+        <div class={bodyClass}>
+
+            <!-- ────── FILTER PANEL ────── -->
+            <template if:true={showFilterPanel}>
+                <aside class={filterPanelClass}>
+                    <div class="dkd-panel-header">
+                        <h3 class="dkd-panel-title">Filters</h3>
+                    </div>
+
+                    <div class="dkd-filter-group">
+                        <label class="dkd-filter-label">User Scope</label>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={userScope}
+                            options={userScopeOptions}
+                            onchange={handleScopeChange}>
+                        </lightning-combobox>
+                    </div>
+
+                    <div class="dkd-filter-group">
+                        <label class="dkd-filter-label">Period</label>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={datePreset}
+                            options={datePresetOptions}
+                            onchange={handleDatePresetChange}>
+                        </lightning-combobox>
+                    </div>
+
+                    <template if:true={isCustomRange}>
+                        <div class="dkd-filter-group">
+                            <label class="dkd-filter-label">From</label>
+                            <lightning-input
+                                type="date"
+                                variant="label-hidden"
+                                value={dateFrom}
+                                onchange={handleDateFromChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="dkd-filter-group">
+                            <label class="dkd-filter-label">To</label>
+                            <lightning-input
+                                type="date"
+                                variant="label-hidden"
+                                value={dateTo}
+                                onchange={handleDateToChange}>
+                            </lightning-input>
+                        </div>
+                    </template>
+
+                    <div class="dkd-filter-group">
+                        <label class="dkd-filter-label">Category</label>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={selectedCategory}
+                            options={categoryOptions}
+                            onchange={handleCategoryChange}>
+                        </lightning-combobox>
+                    </div>
+
+                    <div class="dkd-filter-group">
+                        <label class="dkd-filter-label">Territory</label>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            value={selectedTerritory}
+                            options={territoryOptions}
+                            onchange={handleTerritoryChange}>
+                        </lightning-combobox>
+                    </div>
+
+                    <div class="dkd-filter-group">
+                        <label class="dkd-filter-label">
+                            Metrics
+                            <span class="dkd-filter-hint">({selectedMetricKeys.length} selected)</span>
+                        </label>
+                        <div class="dkd-metric-actions">
+                            <a class="dkd-link" onclick={handleSelectAllMetrics}>Select All</a>
+                            <span class="dkd-link-sep">|</span>
+                            <a class="dkd-link" onclick={handleClearMetrics}>Clear</a>
+                        </div>
+                        <div class="dkd-metric-list">
+                            <template for:each={filteredMetricOptions} for:item="opt">
+                                <div class={opt.rowClass}
+                                     key={opt.value}
+                                     data-metric-key={opt.value}
+                                     onclick={handleMetricToggle}>
+                                    <lightning-icon
+                                        icon-name="utility:check"
+                                        size="xx-small"
+                                        class={opt.checkClass}></lightning-icon>
+                                    <span class="dkd-metric-row-label">{opt.label}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="dkd-filter-actions">
+                        <button class="dkd-btn dkd-btn-primary dkd-btn-full" onclick={handleApplyFilters}>
+                            Apply Filters
+                        </button>
+                        <button class="dkd-btn dkd-btn-ghost dkd-btn-full" onclick={handleResetFilters}>
+                            Reset
+                        </button>
+                    </div>
+                </aside>
+            </template>
+
+            <!-- ────── MAIN CANVAS ────── -->
+            <main class="dkd-canvas">
+
+                <!-- Loading spinner -->
+                <template if:true={isLoading}>
+                    <div class="dkd-loading">
+                        <lightning-spinner alternative-text="Loading dashboard..." size="medium"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <!-- Smart Insights (Sprint 8) -->
+                    <template if:true={hasInsights}>
+                        <section class="dkd-section dkd-insights-section">
+                            <div class="dkd-section-head">
+                                <h2 class="dkd-section-title">
+                                    <lightning-icon icon-name="utility:einstein" size="x-small" class="dkd-insight-head-icon"></lightning-icon>
+                                    Smart Insights
+                                </h2>
+                                <button class="dkd-btn-mini" onclick={handleToggleInsights}>
+                                    <template if:true={showInsights}>Hide</template>
+                                    <template if:false={showInsights}>Show</template>
+                                </button>
+                            </div>
+                            <template if:true={showInsights}>
+                                <div class="dkd-insight-grid">
+                                    <template for:each={insightCards} for:item="ins">
+                                        <div class="dkd-insight-card" key={ins.id} style={ins.cardStyle}>
+                                            <div class="dkd-insight-icon" style={ins.iconStyle}>
+                                                <lightning-icon icon-name={ins.icon} size="x-small"></lightning-icon>
+                                            </div>
+                                            <div class="dkd-insight-body">
+                                                <p class="dkd-insight-title">{ins.title}</p>
+                                                <p class="dkd-insight-message">{ins.message}</p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </section>
+                    </template>
+
+                    <!-- KPI Card Grid -->
+                    <section class="dkd-section">
+                        <h2 class="dkd-section-title">Key Metrics</h2>
+                        <template if:true={hasKpiCards}>
+                            <div class="dkd-kpi-grid">
+                                <template for:each={kpiCards} for:item="card">
+                                    <article class="dkd-kpi-card dkd-kpi-card-clickable" key={card.key} style={card.cardStyle}
+                                             data-metric-key={card.key} onclick={handleKpiCardClick}
+                                             title="Click for drill-down">
+                                        <div class="dkd-kpi-head">
+                                            <div class="dkd-kpi-icon" style={card.iconStyle}>
+                                                <lightning-icon icon-name={card.icon} size="small"></lightning-icon>
+                                            </div>
+                                            <span class="dkd-kpi-category">{card.category}</span>
+                                        </div>
+                                        <div class="dkd-kpi-body">
+                                            <p class="dkd-kpi-label">{card.label}</p>
+                                            <p class="dkd-kpi-value">{card.formattedValue}</p>
+                                            <template if:true={card.hasComparison}>
+                                                <div class={card.trendClass}>
+                                                    <lightning-icon
+                                                        icon-name={card.trendIcon}
+                                                        size="xx-small"></lightning-icon>
+                                                    <span>{card.deltaPct}</span>
+                                                    <span class="dkd-kpi-prev">vs {card.formattedPrevValue}</span>
+                                                </div>
+                                            </template>
+                                            <template if:false={card.hasComparison}>
+                                                <div class="dkd-trend dkd-trend-flat">
+                                                    <span class="dkd-kpi-prev">No previous data</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasKpiCards}>
+                            <div class="dkd-empty">
+                                <lightning-icon icon-name="utility:chart" size="medium"></lightning-icon>
+                                <p>No metrics selected. Pick one or more metrics from the filter panel.</p>
+                            </div>
+                        </template>
+                    </section>
+
+                    <!-- Breakdown chart widget -->
+                    <section class="dkd-section">
+                        <div class="dkd-section-head">
+                            <h2 class="dkd-section-title">Breakdown</h2>
+                            <div class="dkd-chart-controls">
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedChartMetric}
+                                    options={chartMetricOptions}
+                                    onchange={handleChartMetricChange}
+                                    placeholder="Metric..."
+                                    class="dkd-ctrl-metric">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedGroupBy}
+                                    options={groupByOptions}
+                                    onchange={handleGroupByChange}
+                                    placeholder="Group by..."
+                                    class="dkd-ctrl-groupby">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={breakdownChartType}
+                                    options={chartTypeOptions}
+                                    onchange={handleChartTypeChange}
+                                    placeholder="Chart type..."
+                                    class="dkd-ctrl-type">
+                                </lightning-combobox>
+                            </div>
+                        </div>
+                        <c-dkd-chart-widget
+                            chart-type={breakdownChartType}
+                            labels={breakdownLabels}
+                            chart-datasets={breakdownDatasets}
+                            title={breakdownChartTitle}
+                            format={breakdownChartFormat}
+                            height="320"
+                            show-legend>
+                        </c-dkd-chart-widget>
+                    </section>
+
+                    <!-- Trend chart widget -->
+                    <section class="dkd-section">
+                        <div class="dkd-section-head">
+                            <h2 class="dkd-section-title">Trend Analysis</h2>
+                            <div class="dkd-chart-controls">
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedTrendMetric}
+                                    options={chartMetricOptions}
+                                    onchange={handleTrendMetricChange}
+                                    placeholder="Metric..."
+                                    class="dkd-ctrl-metric">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedTrendInterval}
+                                    options={trendIntervalOptions}
+                                    onchange={handleTrendIntervalChange}
+                                    placeholder="Interval..."
+                                    class="dkd-ctrl-type">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={trendChartType}
+                                    options={chartTypeOptions}
+                                    onchange={handleTrendChartTypeChange}
+                                    placeholder="Chart type..."
+                                    class="dkd-ctrl-type">
+                                </lightning-combobox>
+                            </div>
+                        </div>
+                        <c-dkd-chart-widget
+                            chart-type={trendChartType}
+                            labels={trendLabels}
+                            chart-datasets={trendDatasets}
+                            title={trendChartTitle}
+                            format={trendChartFormat}
+                            height="300">
+                        </c-dkd-chart-widget>
+                    </section>
+
+                    <!-- Forecast widget -->
+                    <section class="dkd-section dkd-section-forecast">
+                        <div class="dkd-section-head">
+                            <h2 class="dkd-section-title">
+                                <lightning-icon icon-name="utility:trending" size="xx-small" class="dkd-title-icon"></lightning-icon>
+                                Future Growth Forecast
+                            </h2>
+                            <div class="dkd-chart-controls">
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedForecastMetric}
+                                    options={forecastMetricOptions}
+                                    onchange={handleForecastMetricChange}
+                                    placeholder="Metric..."
+                                    class="dkd-ctrl-metric">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedForecastInterval}
+                                    options={trendIntervalOptions}
+                                    onchange={handleForecastIntervalChange}
+                                    placeholder="Interval..."
+                                    class="dkd-ctrl-type">
+                                </lightning-combobox>
+                                <lightning-combobox
+                                    variant="label-hidden"
+                                    value={selectedForecastHorizon}
+                                    options={forecastHorizonOptions}
+                                    onchange={handleForecastHorizonChange}
+                                    placeholder="Horizon..."
+                                    class="dkd-ctrl-type">
+                                </lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- Forecast stats strip -->
+                        <template if:true={forecastStats}>
+                            <div class="dkd-forecast-stats">
+                                <template for:each={forecastStatsItems} for:item="stat">
+                                    <div class="dkd-forecast-stat" key={stat.key}>
+                                        <span class="dkd-forecast-stat-label">{stat.label}</span>
+                                        <span class="dkd-forecast-stat-value">{stat.value}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <c-dkd-chart-widget
+                            chart-type="line"
+                            labels={forecastLabels}
+                            chart-datasets={forecastDatasets}
+                            title={forecastChartTitle}
+                            format={forecastChartFormat}
+                            height="320">
+                        </c-dkd-chart-widget>
+
+                        <template if:true={forecastInsight}>
+                            <div class="dkd-forecast-insight">
+                                <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                <span>{forecastInsight}</span>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </main>
+        </div>
+
+        <!-- Save View Modal -->
+        <template if:true={showSaveModal}>
+            <c-dkd-save-view-modal
+                view-name={activeViewName}
+                is-edit={isEditSaveMode}
+                is-saving={isSaving}
+                onsave={handleSaveView}
+                oncancel={handleCancelSave}>
+            </c-dkd-save-view-modal>
+        </template>
+
+        <!-- Drill-Down Modal (Sprint 7) -->
+        <template if:true={showDrillDown}>
+            <section class="slds-modal slds-fade-in-open dkd-drilldown-modal">
+                <div class="slds-modal__container dkd-drilldown-container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="bare-inverse"
+                            class="slds-modal__close"
+                            onclick={handleCloseDrillDown}></lightning-button-icon>
+                        <h2 class="slds-modal__title">{drillDownTitle}</h2>
+                        <p class="slds-text-body_small dkd-drilldown-count">{drillDownRecordCount} records</p>
+                    </header>
+                    <div class="slds-modal__content dkd-drilldown-content">
+                        <template if:true={drillDownLoading}>
+                            <div class="dkd-loading">
+                                <lightning-spinner alternative-text="Loading records..." size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:false={drillDownLoading}>
+                            <template if:true={drillDownRecordCount}>
+                                <div class="dkd-drilldown-table-wrap">
+                                    <table class="dkd-drilldown-table">
+                                        <thead>
+                                            <tr>
+                                                <template for:each={drillDownColumns} for:item="col">
+                                                    <th key={col.field}>{col.label}</th>
+                                                </template>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={drillDownRows} for:item="row">
+                                                <tr key={row.id}>
+                                                    <template for:each={row.cells} for:item="cell">
+                                                        <td key={cell.field}>{cell.value}</td>
+                                                    </template>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={drillDownRecordCount}>
+                                <div class="dkd-empty">
+                                    <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+                                    <p>No records found for this selection.</p>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={handleCloseDrillDown}>
+                            Close
+                        </button>
+                        <button class="slds-button slds-button_brand" onclick={handleExportDrillDown}>
+                            <lightning-icon icon-name="utility:download" size="xx-small" variant="inverse"></lightning-icon>
+                            Export CSV
+                        </button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+        <a class="dkd-download-anchor" aria-hidden="true"></a>
+    </div>
+</template>

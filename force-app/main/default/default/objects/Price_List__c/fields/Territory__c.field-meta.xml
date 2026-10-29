@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Territory__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Territory for territory-based pricing. Used in combination with Category and Channel for multi-dimensional price resolution.</description>
+    <label>Territory</label>
+    <referenceTo>Territory_Master__c</referenceTo>
+    <relationshipLabel>Territory Price Lists</relationshipLabel>
+    <relationshipName>Territory_Price_Lists</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Journey_Plan_Day__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Links attendance to the planned journey for adherence tracking</description>
+    <label>Journey Plan Day</label>
+    <referenceTo>Journey_Plan_Day__c</referenceTo>
+    <relationshipLabel>Day Attendance Records</relationshipLabel>
+    <relationshipName>Day_Attendance_Records</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

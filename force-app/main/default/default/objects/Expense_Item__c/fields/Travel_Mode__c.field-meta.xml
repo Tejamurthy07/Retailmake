@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Travel_Mode__c</fullName>
+    <description>Mode of travel for TA expense items (Bike, Car, Bus, Train, Auto, Public Transport)</description>
+    <label>Travel Mode</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Bike</fullName>
+                <default>false</default>
+                <label>Bike</label>
+            </value>
+            <value>
+                <fullName>Car</fullName>
+                <default>false</default>
+                <label>Car</label>
+            </value>
+            <value>
+                <fullName>Bus</fullName>
+                <default>false</default>
+                <label>Bus</label>
+            </value>
+            <value>
+                <fullName>Train</fullName>
+                <default>false</default>
+                <label>Train</label>
+            </value>
+            <value>
+                <fullName>Auto</fullName>
+                <default>false</default>
+                <label>Auto</label>
+            </value>
+            <value>
+                <fullName>Public Transport</fullName>
+                <default>false</default>
+                <label>Public Transport</label>
+            </value>
+            <value>
+                <fullName>Flight</fullName>
+                <default>false</default>
+                <label>Flight</label>
+            </value>
+            <value>
+                <fullName>Own Bike</fullName>
+                <default>false</default>
+                <label>Own Bike</label>
+            </value>
+            <value>
+                <fullName>Own Car</fullName>
+                <default>false</default>
+                <label>Own Car</label>
+            </value>
+            <value>
+                <fullName>Bus: AC</fullName>
+                <default>false</default>
+                <label>Bus: AC</label>
+            </value>
+            <value>
+                <fullName>Bus: Non-AC</fullName>
+                <default>false</default>
+                <label>Bus: Non-AC</label>
+            </value>
+            <value>
+                <fullName>Train: 1AC</fullName>
+                <default>false</default>
+                <label>Train: 1AC</label>
+            </value>
+            <value>
+                <fullName>Train: 2AC</fullName>
+                <default>false</default>
+                <label>Train: 2AC</label>
+            </value>
+            <value>
+                <fullName>Train: 3AC</fullName>
+                <default>false</default>
+                <label>Train: 3AC</label>
+            </value>
+            <value>
+                <fullName>Train: Sleeper</fullName>
+                <default>false</default>
+                <label>Train: Sleeper</label>
+            </value>
+            <value>
+                <fullName>Train: General</fullName>
+                <default>false</default>
+                <label>Train: General</label>
+            </value>
+            <value>
+                <fullName>Flight: Business</fullName>
+                <default>false</default>
+                <label>Flight: Business</label>
+            </value>
+            <value>
+                <fullName>Flight: Economy</fullName>
+                <default>false</default>
+                <label>Flight: Economy</label>
+            </value>
+            <value>
+                <fullName>Flight: Premium Economy</fullName>
+                <default>false</default>
+                <label>Flight: Premium Economy</label>
+            </value>
+            <value>
+                <fullName>Own Vehicle</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Own Vehicle</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

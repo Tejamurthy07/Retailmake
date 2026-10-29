@@ -1,0 +1,552 @@
+/* ================================================================
+   expenseApproval.css — Polished Approval UI
+   ================================================================ */
+
+:host {
+    --brand-primary: #0176d3;
+    --brand-dark: #014486;
+    --success-color: #2e844a;
+    --success-light: #e6f9e6;
+    --warning-color: #dd7a01;
+    --warning-light: #fef3e0;
+    --error-color: #ea001e;
+    --error-light: #fde4e4;
+    --info-color: #1b96ff;
+    --purple-color: #9b59b6;
+    --purple-light: #f3e8f9;
+    --teal-color: #06a59a;
+    --teal-light: #e0f5f5;
+    --border-color: #e5e5e5;
+    --bg-light: #f4f6f9;
+    --text-primary: #181818;
+    --text-secondary: #706e6b;
+    --text-weak: #939393;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+    --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-pill: 20px;
+}
+
+.approval-container {
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ================================================================
+   MESSAGES
+   ================================================================ */
+.msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    animation: slideDown 0.3s ease;
+}
+
+.msg-error {
+    background: var(--error-color);
+    color: white;
+}
+
+.msg-success {
+    background: var(--success-color);
+    color: white;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+.approval-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-dark));
+    color: white;
+    border-radius: var(--radius) var(--radius) 0 0;
+    margin-bottom: 0;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin: 0;
+    color: white;
+}
+
+.header-ref {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    backdrop-filter: blur(4px);
+}
+
+.exp-status-badge {
+    padding: 5px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.exp-status-submitted { background: rgba(255, 255, 255, 0.2); color: white; }
+.exp-status-approved { background: var(--purple-light); color: var(--purple-color); }
+.exp-status-finance { background: var(--teal-light); color: var(--teal-color); }
+.exp-status-rejected { background: var(--error-light); color: var(--error-color); }
+
+/* ================================================================
+   EMPLOYEE INFO
+   ================================================================ */
+.employee-info {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.emp-field {
+    padding: 14px 16px;
+    border-right: 1px solid var(--border-color);
+    transition: background 0.15s ease;
+}
+
+.emp-field:last-child {
+    border-right: none;
+}
+
+.emp-field:hover {
+    background: var(--bg-light);
+}
+
+.emp-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.emp-value {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.emp-amount {
+    font-family: var(--font-mono);
+    color: var(--brand-primary);
+}
+
+/* ================================================================
+   BULK ACTIONS
+   ================================================================ */
+.bulk-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+}
+
+.bulk-left,
+.bulk-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ================================================================
+   TABLE WRAPPER
+   ================================================================ */
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 16px;
+}
+
+.approval-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+/* ── Table Header ───────────────────────────────────────────── */
+.approval-table th {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8ecf1 100%);
+    padding: 12px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--brand-primary);
+    white-space: nowrap;
+}
+
+/* Fix: numeric column headers must right-align to match data */
+.approval-table th.num-col {
+    text-align: right;
+}
+
+/* ── Table Body ─────────────────────────────────────────────── */
+.approval-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eaeef2;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.approval-table tr:last-child td {
+    border-bottom: none;
+}
+
+.approval-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.approval-table tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.approval-table tbody tr:hover td {
+    background: #eef5ff;
+}
+
+/* ── Numeric Columns ────────────────────────────────────────── */
+.num-col {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.approval-table td.num-col {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ── Checkbox Column ────────────────────────────────────────── */
+.check-col {
+    width: 40px;
+    text-align: center;
+}
+
+.check-col input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--brand-primary);
+}
+
+/* ── Type Column ────────────────────────────────────────────── */
+.type-col {
+    min-width: 130px;
+}
+
+.vehicle-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--bg-light);
+    color: var(--text-secondary);
+    margin-left: 4px;
+    vertical-align: middle;
+    border: 1px solid var(--border-color);
+}
+
+.travel-mode-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #dbeafe;
+    color: var(--brand-primary);
+    margin-left: 4px;
+    vertical-align: middle;
+    border: 1px solid #bfdbfe;
+}
+
+/* ── Notes Column ───────────────────────────────────────────── */
+.notes-col {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Files Column ───────────────────────────────────────────── */
+.files-col {
+    min-width: 80px;
+}
+
+.file-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.file-link {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--brand-primary);
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 4px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+}
+
+.file-link:hover {
+    color: var(--brand-dark);
+    text-decoration: underline;
+}
+
+.no-file {
+    color: var(--text-weak);
+    font-size: 12px;
+}
+
+/* ── Amount Input ───────────────────────────────────────────── */
+.amt-input {
+    width: 100px;
+}
+
+.exceeds-warn {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--warning-color);
+    display: block;
+    margin-top: 2px;
+}
+
+/* ================================================================
+   STATUS BADGES (per-item)
+   ================================================================ */
+.status-badge-sm {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.status-pending { background: #e8f4fd; color: var(--brand-primary); }
+.status-l1 { background: var(--purple-light); color: var(--purple-color); }
+.status-l2 { background: var(--teal-light); color: var(--teal-color); }
+.status-finance { background: var(--success-light); color: var(--success-color); }
+.status-rejected { background: var(--error-light); color: var(--error-color); }
+
+/* ================================================================
+   ROW HIGHLIGHTING (editable/actionable items)
+   ================================================================ */
+.highlight-row td {
+    background-color: #f0faf0 !important;
+    border-left: 3px solid var(--success-color);
+}
+
+.highlight-row td:first-child {
+    border-left: 3px solid var(--success-color);
+}
+
+.highlight-row td:not(:first-child) {
+    border-left: none;
+}
+
+.highlight-row:hover td {
+    background-color: #e5f5e5 !important;
+}
+
+/* ================================================================
+   SYSTEM CALCULATED COLUMN
+   ================================================================ */
+.system-calc-value {
+    color: var(--teal-color);
+    font-weight: 700;
+}
+
+.exceeds-system-warn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--warning-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* ================================================================
+   INLINE COMMENTS
+   ================================================================ */
+.comment-col {
+    min-width: 110px;
+}
+
+.inline-comment-wrap {
+    margin-top: 6px;
+}
+
+.inline-comment-input {
+    font-size: 12px;
+}
+
+.prev-comments {
+    display: block;
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: help;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: var(--bg-light);
+    border-radius: 4px;
+    border-left: 3px solid var(--brand-primary);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+/* ================================================================
+   RESPONSIVE — TABLET (768px)
+   ================================================================ */
+@media (max-width: 768px) {
+    .employee-info {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .emp-field {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .emp-field:nth-child(3) {
+        border-right: none;
+    }
+
+    .bulk-actions {
+        flex-direction: column;
+    }
+
+    .bulk-left,
+    .bulk-right {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .approval-table {
+        font-size: 12px;
+    }
+
+    .approval-table th,
+    .approval-table td {
+        padding: 8px;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE — MOBILE (480px)
+   ================================================================ */
+@media (max-width: 480px) {
+    .approval-container {
+        padding: 8px;
+    }
+
+    .approval-header {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 16px;
+        text-align: center;
+    }
+
+    .header-title {
+        font-size: 16px;
+    }
+
+    .employee-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .emp-field:nth-child(even) {
+        border-right: none;
+    }
+
+    .bulk-left,
+    .bulk-right {
+        flex-direction: column;
+    }
+
+    .approval-table {
+        font-size: 11px;
+    }
+
+    .approval-table th,
+    .approval-table td {
+        padding: 6px;
+    }
+}

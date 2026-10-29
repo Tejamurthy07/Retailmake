@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Batch_Master__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <label>Batch</label>
+    <referenceTo>Batch_Master__c</referenceTo>
+    <relationshipLabel>Primary Orders</relationshipLabel>
+    <relationshipName>POL_Batch_Master</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

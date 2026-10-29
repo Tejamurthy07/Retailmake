@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Score_Weight__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>Weightage multiplier for this question&apos;s contribution to the total survey score. Leave blank or 0 for questions that should not contribute to scoring.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Set the weight for scoring. e.g., 1 = normal, 2 = double weight, 0 = not scored.</inlineHelpText>
+    <label>Score Weight</label>
+    <precision>4</precision>
+    <required>false</required>
+    <scale>1</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Monthly_Accrual__c</fullName>
+    <description>Null/0 = full entitlement credited at start of year. &gt;0 = accrues monthly via batch.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Days accrued per month. Example: 1.25 days/month for EL (15 days/year). Leave blank or 0 for full lump-sum credit at year start (e.g., CL, SL).</inlineHelpText>
+    <label>Monthly Accrual (Days)</label>
+    <precision>4</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

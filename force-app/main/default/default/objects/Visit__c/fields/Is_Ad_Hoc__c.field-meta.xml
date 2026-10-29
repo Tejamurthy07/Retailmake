@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Ad_Hoc__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indicates this is an ad-hoc/unplanned visit not part of the original journey plan. Auto-set by the BPM_Visit_AdHoc_Detection flow when Is_Planned__c is false.</description>
+    <label>Is Ad-Hoc Visit</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

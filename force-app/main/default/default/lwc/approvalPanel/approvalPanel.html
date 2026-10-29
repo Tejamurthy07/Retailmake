@@ -1,0 +1,158 @@
+<template>
+    <article class="ap-card slds-card">
+        <header class="ap-header">
+            <div class="ap-header-left">
+                <lightning-icon icon-name="standard:approval" size="small" variant="inverse"></lightning-icon>
+                <h2 class="ap-title">Approval</h2>
+            </div>
+            <template if:true={hasRequest}>
+                <span class={statusClass}>{request.Status__c}</span>
+            </template>
+        </header>
+
+        <template if:true={loading}>
+            <div class="ap-loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <!-- No request yet -->
+            <template if:true={noRequest}>
+                <div class="ap-empty">
+                    <template if:true={canSubmit}>
+                        <p class="ap-empty-text">This record has not been submitted for approval.</p>
+                        <button class="ap-btn ap-btn-primary" onclick={handleSubmitClick}>
+                            <lightning-icon icon-name="utility:upload" size="xx-small" variant="inverse"></lightning-icon>
+                            <span>Submit for Approval</span>
+                        </button>
+                    </template>
+                    <template if:false={canSubmit}>
+                        <p class="ap-empty-text ap-muted">
+                            No approval rules configured for this object.
+                            Add rules in the Approval Rules tab.
+                        </p>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Has a request -->
+            <template if:true={hasRequest}>
+                <div class="ap-summary">
+                    <div class="ap-summary-item">
+                        <span class="ap-summary-label">Progress</span>
+                        <span class="ap-summary-value">{progressText}</span>
+                    </div>
+                    <div class="ap-summary-item">
+                        <span class="ap-summary-label">Submitted By</span>
+                        <span class="ap-summary-value">{submittedByName}</span>
+                    </div>
+                    <template if:true={showCurrentApprover}>
+                        <div class="ap-summary-item">
+                            <span class="ap-summary-label">With</span>
+                            <span class="ap-summary-value ap-current">{currentApproverName}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Action bar -->
+                <template if:true={canAct}>
+                    <div class="ap-actions">
+                        <button class="ap-btn ap-btn-approve" onclick={handleApproveClick}>
+                            <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                            <span>Approve</span>
+                        </button>
+                        <button class="ap-btn ap-btn-reject" onclick={handleRejectClick}>
+                            <lightning-icon icon-name="utility:close" size="xx-small" variant="inverse"></lightning-icon>
+                            <span>Reject</span>
+                        </button>
+                    </div>
+                </template>
+                <template if:true={canRecall}>
+                    <div class="ap-actions">
+                        <button class="ap-btn ap-btn-recall" onclick={handleRecallClick}>
+                            <lightning-icon icon-name="utility:undo" size="xx-small"></lightning-icon>
+                            <span>Recall</span>
+                        </button>
+                    </div>
+                </template>
+                <template if:true={canSubmitAgain}>
+                    <div class="ap-actions">
+                        <button class="ap-btn ap-btn-primary" onclick={handleSubmitClick}>
+                            <lightning-icon icon-name="utility:upload" size="xx-small" variant="inverse"></lightning-icon>
+                            <span>Submit Again</span>
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Timeline -->
+                <div class="ap-timeline-title">History</div>
+                <div class="ap-timeline">
+                    <template for:each={steps} for:item="s">
+                        <div key={s.key} class="ap-step">
+                            <div class="ap-step-left">
+                                <span class={s.dotClass}>{s.levelLabel}</span>
+                                <template if:false={s.isLast}>
+                                    <span class="ap-step-line"></span>
+                                </template>
+                            </div>
+                            <div class="ap-step-body">
+                                <div class="ap-step-row">
+                                    <span class="ap-step-approver">{s.approverName}</span>
+                                    <span class={s.badgeClass}>{s.statusLabel}</span>
+                                </div>
+                                <div class="ap-step-meta">{s.approverMeta}</div>
+                                <template if:true={s.decisionDate}>
+                                    <div class="ap-step-date">
+                                        <lightning-formatted-date-time value={s.decisionDate}
+                                            year="numeric" month="short" day="2-digit"
+                                            hour="2-digit" minute="2-digit">
+                                        </lightning-formatted-date-time>
+                                    </div>
+                                </template>
+                                <template if:true={s.comments}>
+                                    <div class="ap-step-comments">{s.comments}</div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+
+        <!-- Comments modal -->
+        <template if:true={showCommentsModal}>
+            <section class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header ap-modal-header">
+                        <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseModal}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">{modalTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-textarea
+                            label="Comments"
+                            placeholder="Optional comments..."
+                            value={modalComments}
+                            onchange={handleCommentsChange}
+                            required={isRejectMode}>
+                        </lightning-textarea>
+                        <template if:true={isRejectMode}>
+                            <p class="ap-modal-hint">Comments are required when rejecting.</p>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={handleCloseModal}>Cancel</button>
+                        <button class="slds-button slds-button_brand"
+                            onclick={handleModalConfirm} disabled={confirmDisabled}>
+                            <template if:true={isProcessing}>Processing...</template>
+                            <template if:false={isProcessing}>{modalConfirmLabel}</template>
+                        </button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </article>
+</template>

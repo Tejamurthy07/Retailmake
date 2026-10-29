@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Distance_Non_Negative</fullName>
+    <active>true</active>
+    <description>Distance From and Distance To must be non-negative.</description>
+    <errorConditionFormula>OR(
+    AND(NOT(ISBLANK(Distance_From__c)), Distance_From__c &lt; 0),
+    AND(NOT(ISBLANK(Distance_To__c)), Distance_To__c &lt; 0)
+)</errorConditionFormula>
+    <errorDisplayField>Distance_From__c</errorDisplayField>
+    <errorMessage>Distance values must be non-negative.</errorMessage>
+</ValidationRule>

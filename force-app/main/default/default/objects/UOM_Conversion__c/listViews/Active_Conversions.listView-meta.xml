@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active_Conversions</fullName>
+    <columns>NAME</columns>
+    <columns>From_UOM__c</columns>
+    <columns>To_UOM__c</columns>
+    <columns>Conversion_Factor__c</columns>
+    <columns>Product__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Active Conversions</label>
+</ListView>

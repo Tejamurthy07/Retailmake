@@ -1,0 +1,218 @@
+<template>
+    <div class="dms-inv">
+        <div class="dms-body">
+            <!-- Sub-tabs -->
+            <div class="dms-tabs">
+                <button class={onhandTabCls} type="button" onclick={showOnhand}>Stock on Hand</button>
+                <button class={adjustTabCls} type="button" onclick={showAdjust}>Adjust Stock</button>
+                <button class={movementsTabCls} type="button" onclick={showMovements}>Movements</button>
+            </div>
+
+            <!-- ══ STOCK ON HAND ══ -->
+            <template if:true={isOnhand}>
+                <div class="dms-toolbar">
+                    <span class="dms-toolbar__title">Stock on Hand</span>
+                    <button class="dms-btn" type="button" disabled={canReplenishDisabled} onclick={replenish}
+                        title="Creates a draft primary order to top every below-reorder product back up to its max level.">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Reorder Low Stock
+                    </button>
+                </div>
+                <p class="dms-help">
+                    <strong>Reorder Low Stock</strong> raises a draft order to the company for any product at or below its
+                    reorder level, topping it up to the suggested quantity. It stays disabled while nothing is below reorder.
+                    Click a product row to see its batches and expiry dates.
+                </p>
+
+                <div class="dms-cards">
+                    <template for:each={cards} for:item="c">
+                        <div key={c.id} class="dms-card">
+                            <span class="dms-card__label">{c.label}</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <template if:true={error}>
+                    <div class="dms-empty" style="color:var(--dms-danger)">{error}</div>
+                </template>
+                <template if:true={hasRows}>
+                    <div class="dms-tbl dms-tbl_inv">
+                        <div class="dms-thead">
+                            <span>Product</span><span>Brand</span><span class="dms-num">On Hand</span>
+                            <span class="dms-num" title="Units already promised to approved orders you have not billed yet">Committed</span>
+                            <span class="dms-num" title="On Hand minus Committed - what you can still promise">Available</span>
+                            <span class="dms-num">Batches</span><span class="dms-num">Near-Expiry</span>
+                            <span class="dms-num">Reorder</span><span class="dms-num">Value</span>
+                            <span>Status</span><span class="dms-num">Suggested</span>
+                        </div>
+                        <template for:each={rows} for:item="r">
+                            <div key={r.key} class="dms-invgroup">
+                                <div class="dms-trow">
+                                    <span class="dms-strong" data-label="Product">
+                                        <button class="dms-exp" type="button" data-id={r.productId}
+                                            onclick={toggleExpand} title={r.expandTitle}>{r.caret}</button>
+                                        {r.name}
+                                    </span>
+                                    <span data-label="Brand">{r.brand}</span>
+                                    <span class="dms-num" data-label="On Hand">{r.onHand}</span>
+                                    <span class="dms-num" data-label="Committed">{r.committed}</span>
+                                    <span class={r.availableClass} data-label="Available">{r.available}</span>
+                                    <span class="dms-num" data-label="Batches">{r.batches}</span>
+                                    <span class="dms-num" data-label="Near-Expiry">{r.nearExpiryQty}</span>
+                                    <span class="dms-num" data-label="Reorder">{r.reorderLevel}</span>
+                                    <span class="dms-num" data-label="Value"><lightning-formatted-number value={r.stockValue} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                                    <span data-label="Status"><c-dms-status-badge label={r.status} theme={r.statusTheme}></c-dms-status-badge></span>
+                                    <span class="dms-num" data-label="Suggested">{r.suggestedQty}</span>
+                                </div>
+                                <template if:true={r.expanded}>
+                                    <div class="dms-batchpanel">
+                                        <template if:true={r.hasBatches}>
+                                            <div class="dms-bt">
+                                                <div class="dms-bthead">
+                                                    <span>Batch</span><span class="dms-num">Quantity</span>
+                                                    <span>Expiry</span><span>Status</span>
+                                                </div>
+                                                <template for:each={r.batchRows} for:item="b">
+                                                    <div key={b.key} class={b.cls}>
+                                                        <span data-label="Batch">{b.batchLabel}</span>
+                                                        <span class="dms-num" data-label="Quantity">{b.qty}</span>
+                                                        <span data-label="Expiry">{b.expiryLabel}</span>
+                                                        <span data-label="Status">
+                                                            <template if:true={b.nearExpiry}>
+                                                                <span class="dms-flag">Near expiry</span>
+                                                            </template>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <template if:false={r.hasBatches}>
+                                            <p class="dms-empty">No batch detail for this product.</p>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasRows}>
+                    <p class="dms-empty">No stock on hand.</p>
+                </template>
+            </template>
+
+            <!-- ══ ADJUST STOCK ══ -->
+            <template if:true={isAdjust}>
+                <span class="dms-toolbar__title">Adjust Stock</span>
+                <p class="dms-help">
+                    Record what actually happened in your godown — <strong>damage</strong>, an <strong>expiry write-off</strong>,
+                    a <strong>physical count</strong> correction, or a manual <strong>add/deduct</strong>. The change is applied
+                    immediately to your on-hand stock and logged in Movements.
+                </p>
+
+                <template if:true={noProducts}>
+                    <div class="dms-panel">
+                        <p class="dms-empty">You have no stock on hand to adjust yet.</p>
+                    </div>
+                </template>
+                <template if:false={noProducts}>
+                    <div class="dms-panel dms-form">
+                        <template if:true={adjError}>
+                            <div class="dms-banner dms-banner_error" role="alert">{adjError}</div>
+                        </template>
+                        <div class="dms-fgrid">
+                            <!-- Search the whole catalogue, not just what is already
+                                 in stock — otherwise opening stock for a new SKU
+                                 can never be entered. -->
+                            <div class="dms-f dms-prodpick">
+                                <label class="slds-form-element__label" for="prodsearch">Product</label>
+                                <template if:true={adjProductName}>
+                                    <div class="dms-prodchosen">
+                                        <span>{adjProductName}</span>
+                                        <button type="button" class="dms-prodclear" onclick={handleClearProduct}
+                                            title="Choose a different product">&times;</button>
+                                    </div>
+                                </template>
+                                <template if:false={adjProductName}>
+                                    <input id="prodsearch" type="search" class="dms-prodinput"
+                                        placeholder="Type to search all products by name or SKU..."
+                                        value={productSearch} oninput={handleProductSearch} />
+                                    <template if:true={showProductResults}>
+                                        <div class="dms-proddrop">
+                                            <template if:true={productLoading}>
+                                                <div class="dms-prodrow dms-prodrow_muted">Searching...</div>
+                                            </template>
+                                            <template for:each={productResults} for:item="p">
+                                                <div key={p.productId} class="dms-prodrow" data-id={p.productId}
+                                                    onclick={handlePickProduct}>
+                                                    <span class="dms-prodname">{p.name}</span>
+                                                    <span class="dms-prodmeta">{p.onHandLabel}</span>
+                                                </div>
+                                            </template>
+                                            <template if:true={noProductMatches}>
+                                                <div class="dms-prodrow dms-prodrow_muted">No products match.</div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                            <template if:true={hasBatchChoice}>
+                                <lightning-combobox class="dms-f" label="Batch" placeholder="Select a batch"
+                                    value={adjBatch} options={batchOptions} onchange={handleAdjBatch}></lightning-combobox>
+                            </template>
+                            <lightning-combobox class="dms-f" label="Adjustment Type" placeholder="Select a type"
+                                value={adjType} options={adjTypeOptions} onchange={handleAdjType}></lightning-combobox>
+                            <div class="dms-f">
+                                <lightning-input type="number" min="0" label={qtyLabel} value={adjQty}
+                                    onchange={handleAdjQty}></lightning-input>
+                                <template if:true={qtyHint}><p class="dms-fhint">{qtyHint}</p></template>
+                            </div>
+                        </div>
+                        <lightning-textarea class="dms-f dms-f_full" label="Reason" value={adjReason}
+                            placeholder="e.g. Breakage during unloading / stock count on 15-Jul" onchange={handleAdjReason}></lightning-textarea>
+                        <div class="dms-form__actions">
+                            <lightning-button label="Apply Adjustment" variant="brand"
+                                disabled={submitDisabled} onclick={submitAdjustment}></lightning-button>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ══ MOVEMENTS ══ -->
+            <template if:true={isMovements}>
+                <span class="dms-toolbar__title">Stock Movements</span>
+                <p class="dms-help">Every movement into or out of your stock — receipts, secondary sales, returns and adjustments — newest first.</p>
+
+                <template if:true={movementsError}>
+                    <div class="dms-empty" style="color:var(--dms-danger)">{movementsError}</div>
+                </template>
+                <template if:true={hasMovements}>
+                    <div class="dms-tbl dms-tbl_mov">
+                        <div class="dms-thead">
+                            <span>Date</span><span>Type</span><span>Direction</span><span>Product</span>
+                            <span>Batch</span><span class="dms-num">Quantity</span><span>Reference</span>
+                        </div>
+                        <template for:each={movements} for:item="m">
+                            <div key={m.key} class="dms-trow">
+                                <span class="dms-muted" data-label="Date">{m.dateLabel}</span>
+                                <span data-label="Type">{m.type}</span>
+                                <span data-label="Direction"><span class={m.dirCls}>{m.dirSign} {m.dir}</span></span>
+                                <span class="dms-strong" data-label="Product">{m.product}</span>
+                                <span class="dms-muted" data-label="Batch">{m.batch}</span>
+                                <span class="dms-num" data-label="Quantity">{m.qty}</span>
+                                <span class="dms-muted" data-label="Reference">{m.reference}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasMovements}>
+                    <p class="dms-empty">No stock movements yet.</p>
+                </template>
+            </template>
+        </div>
+    </div>
+</template>

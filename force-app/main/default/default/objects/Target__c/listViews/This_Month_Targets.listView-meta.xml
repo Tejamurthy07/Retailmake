@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>This_Month_Targets</fullName>
+    <columns>NAME</columns>
+    <columns>Target_Type__c</columns>
+    <columns>Salesperson__c</columns>
+    <columns>Territory__c</columns>
+    <columns>Target_Value__c</columns>
+    <columns>Achievement_Value__c</columns>
+    <columns>Achievement_Percent__c</columns>
+    <columns>Status__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Period_Start__c</field>
+        <operation>equals</operation>
+        <value>THIS_MONTH</value>
+    </filters>
+    <label>This Month</label>
+</ListView>

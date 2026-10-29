@@ -1,0 +1,53 @@
+<template>
+    <lightning-card title="New Secondary Sale" icon-name="standard:orders">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <lightning-combobox
+                label="Retailer"
+                placeholder="Select a retailer"
+                options={retailerOptions}
+                value={retailerId}
+                onchange={handleRetailer}>
+            </lightning-combobox>
+
+            <div class="slds-grid slds-gutters slds-grid_vertical-align-end slds-m-top_small">
+                <div class="slds-col slds-size_3-of-5">
+                    <lightning-combobox
+                        label="Product"
+                        placeholder="Select a product"
+                        options={productOptions}
+                        value={productId}
+                        onchange={handleProduct}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <lightning-input type="number" label="Qty" min="1" value={quantity} onchange={handleQty}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-5">
+                    <lightning-button label="Add" onclick={addLine} variant="neutral"></lightning-button>
+                </div>
+            </div>
+
+            <template if:true={lines.length}>
+                <div class="slds-m-top_medium">
+                    <lightning-datatable
+                        key-field="productId"
+                        data={lines}
+                        columns={columns}
+                        hide-checkbox-column="true"
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </div>
+            </template>
+
+            <div class="slds-m-top_medium slds-text-align_right">
+                <lightning-button
+                    label="Place Sale"
+                    variant="brand"
+                    disabled={isSubmitDisabled}
+                    onclick={submit}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

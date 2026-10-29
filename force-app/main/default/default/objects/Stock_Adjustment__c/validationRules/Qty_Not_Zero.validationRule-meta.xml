@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Qty_Not_Zero</fullName>
+    <active>true</active>
+    <errorConditionFormula>Adjustment_Qty__c = 0</errorConditionFormula>
+    <errorMessage>Adjustment quantity cannot be zero.</errorMessage>
+</ValidationRule>

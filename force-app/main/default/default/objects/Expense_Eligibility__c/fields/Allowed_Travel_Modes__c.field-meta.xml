@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Allowed_Travel_Modes__c</fullName>
+    <description>Travel modes and classes eligible for this band/type</description>
+    <label>Allowed Travel Modes</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>All</fullName>
+                <default>true</default>
+                <label>All</label>
+            </value>
+            <value>
+                <fullName>Bike</fullName>
+                <default>false</default>
+                <label>Bike</label>
+            </value>
+            <value>
+                <fullName>Car</fullName>
+                <default>false</default>
+                <label>Car</label>
+            </value>
+            <value>
+                <fullName>Auto</fullName>
+                <default>false</default>
+                <label>Auto</label>
+            </value>
+            <value>
+                <fullName>Own Bike</fullName>
+                <default>false</default>
+                <label>Own Bike</label>
+            </value>
+            <value>
+                <fullName>Own Car</fullName>
+                <default>false</default>
+                <label>Own Car</label>
+            </value>
+            <value>
+                <fullName>Public Transport</fullName>
+                <default>false</default>
+                <label>Public Transport</label>
+            </value>
+            <value>
+                <fullName>Bus: AC</fullName>
+                <default>false</default>
+                <label>Bus: AC</label>
+            </value>
+            <value>
+                <fullName>Bus: Non-AC</fullName>
+                <default>false</default>
+                <label>Bus: Non-AC</label>
+            </value>
+            <value>
+                <fullName>Train: 1AC</fullName>
+                <default>false</default>
+                <label>Train: 1AC</label>
+            </value>
+            <value>
+                <fullName>Train: 2AC</fullName>
+                <default>false</default>
+                <label>Train: 2AC</label>
+            </value>
+            <value>
+                <fullName>Train: 3AC</fullName>
+                <default>false</default>
+                <label>Train: 3AC</label>
+            </value>
+            <value>
+                <fullName>Train: Sleeper</fullName>
+                <default>false</default>
+                <label>Train: Sleeper</label>
+            </value>
+            <value>
+                <fullName>Train: General</fullName>
+                <default>false</default>
+                <label>Train: General</label>
+            </value>
+            <value>
+                <fullName>Flight: Business</fullName>
+                <default>false</default>
+                <label>Flight: Business</label>
+            </value>
+            <value>
+                <fullName>Flight: Economy</fullName>
+                <default>false</default>
+                <label>Flight: Economy</label>
+            </value>
+            <value>
+                <fullName>Flight: Premium Economy</fullName>
+                <default>false</default>
+                <label>Flight: Premium Economy</label>
+            </value>
+            <value>
+                <fullName>Own Vehicle</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Own Vehicle</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>6</visibleLines>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Scheme__c</fullName>
+    <label>Scheme</label>
+    <referenceTo>Scheme__c</referenceTo>
+    <relationshipLabel>Scheme Slabs</relationshipLabel>
+    <relationshipName>Scheme_Slabs</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Survey_Type__c</fullName>
+    <label>Survey Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Visit Survey</fullName>
+                <default>false</default>
+                <label>Visit Survey</label>
+            </value>
+            <value>
+                <fullName>Outlet Audit</fullName>
+                <default>false</default>
+                <label>Outlet Audit</label>
+            </value>
+            <value>
+                <fullName>Customer Feedback</fullName>
+                <default>false</default>
+                <label>Customer Feedback</label>
+            </value>
+            <value>
+                <fullName>Market Intelligence</fullName>
+                <default>false</default>
+                <label>Market Intelligence</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

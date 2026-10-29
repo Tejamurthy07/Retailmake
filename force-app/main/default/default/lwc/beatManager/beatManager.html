@@ -1,0 +1,513 @@
+<template>
+    <div class="beat-manager-container">
+        <!-- Header -->
+        <div class="manager-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <h1 class="slds-text-heading_medium header-title">
+                        <lightning-icon icon-name="standard:location" size="small" class="slds-m-right_x-small"></lightning-icon>
+                        Beat &amp; Outlet Manager
+                        <template if:true={hasBeatSelected}>
+                            <span class="header-beat-separator">/</span>
+                            <span class="header-beat-name">{selectedBeatName}</span>
+                        </template>
+                    </h1>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                        Create beats, map outlets (accounts) to beats, and manage assignments
+                    </p>
+                </div>
+                <div class="slds-col slds-no-flex">
+                    <lightning-button-group>
+                        <lightning-button variant="brand" label="New Beat" icon-name="utility:add"
+                            onclick={handleNewBeat}></lightning-button>
+                        <lightning-button variant="neutral" label="Edit" icon-name="utility:edit"
+                            onclick={handleEditBeat} disabled={isEditDisabled}></lightning-button>
+                        <lightning-button variant="neutral" label="Clone" icon-name="utility:copy"
+                            onclick={handleCloneBeat} disabled={isEditDisabled}></lightning-button>
+                        <lightning-button variant="neutral" label="Reassign" icon-name="utility:reassign"
+                            onclick={handleReassignBeat} disabled={isEditDisabled}></lightning-button>
+                        <lightning-button variant="destructive-text" label="Delete" icon-name="utility:delete"
+                            onclick={handleDeleteBeat} disabled={isEditDisabled}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+            <!-- Executive Picker Row -->
+            <div class="executive-picker-row slds-m-top_small">
+                <lightning-record-edit-form object-api-name="Beat__c">
+                    <div class="slds-grid slds-grid_vertical-align-end slds-gutters_x-small">
+                        <div class="executive-picker-field">
+                            <lightning-input-field field-name="Assigned_User__c"
+                                label="View Beats for Executive"
+                                value={selectedExecutiveId}
+                                data-field="ExecutivePicker"
+                                onchange={handleExecutiveChange}
+                                variant="label-stacked"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-no-flex slds-p-bottom_xx-small">
+                            <lightning-button variant="neutral" label="Reset to Me"
+                                icon-name="utility:refresh" onclick={handleResetExecutive}
+                                class="slds-m-left_x-small"></lightning-button>
+                        </div>
+                    </div>
+                </lightning-record-edit-form>
+            </div>
+        </div>
+
+        <div class="slds-grid slds-gutters_small slds-p-horizontal_medium slds-p-bottom_medium">
+            <!-- Left Panel: Beat List -->
+            <div class="slds-col slds-size_5-of-12">
+                <div class="panel beat-list-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Beats</h2>
+                        <span class="panel-count">{filteredBeatsCount}</span>
+                    </div>
+                    <div class="beat-search-bar">
+                        <lightning-input type="search" label="Search Beats"
+                            placeholder="Search by name, code, or territory..."
+                            value={beatSearchTerm}
+                            onchange={handleBeatSearchChange}
+                            variant="label-hidden"></lightning-input>
+                    </div>
+                    <div class="panel-body beat-list-body">
+                        <template if:true={hasFilteredBeats}>
+                            <template for:each={filteredBeats} for:item="beat">
+                                <div class={beat.rowClass} key={beat.Id} data-id={beat.Id}
+                                    onclick={handleSelectBeat}>
+                                    <div class="beat-row-main">
+                                        <span class="beat-row-name">{beat.Name}</span>
+                                        <span class="beat-row-code">{beat.Beat_Code__c}</span>
+                                    </div>
+                                    <div class="beat-row-meta">
+                                        <span class="meta-item">
+                                            <lightning-icon icon-name="utility:date_input" size="xx-small"></lightning-icon>
+                                            {beat.daysDisplay}
+                                        </span>
+                                        <span class="meta-item">
+                                            <lightning-icon icon-name="utility:retail_execution" size="xx-small"></lightning-icon>
+                                            {beat.outletCount} outlets
+                                        </span>
+                                    </div>
+                                    <div class="beat-row-meta">
+                                        <span class="meta-item meta-freq">{beat.Frequency__c}</span>
+                                        <span class="meta-item meta-territory">{beat.territoryName}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasFilteredBeats}>
+                            <div class="empty-state">
+                                <lightning-icon icon-name="utility:location" size="large" class="empty-icon"></lightning-icon>
+                                <template if:true={beatSearchTerm}>
+                                    <p class="slds-m-top_small">No beats match your search.</p>
+                                </template>
+                                <template if:false={beatSearchTerm}>
+                                    <p class="slds-m-top_small">No beats found. Create your first beat.</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Outlet Management -->
+            <div class="slds-col slds-size_7-of-12">
+                <template if:true={hasBeatSelected}>
+                    <!-- Outlet List -->
+                    <div class="panel outlet-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                Outlets for: <strong>{selectedBeatName}</strong>
+                            </h2>
+                            <div class="panel-header-actions">
+                                <template if:true={showSaveOrderButton}>
+                                    <lightning-button variant="brand" label="Save Order"
+                                        icon-name="utility:save" onclick={handleSaveOutletOrder}
+                                        class="save-order-btn"></lightning-button>
+                                </template>
+                                <span class="panel-count">{outletCountLabel}</span>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <template if:true={hasOutlets}>
+                                <div class="outlet-table">
+                                    <div class="outlet-table-header">
+                                        <span class="outlet-col-seq">#</span>
+                                        <span class="outlet-col-name">Account Name</span>
+                                        <span class="outlet-col-status">Status</span>
+                                        <span class="outlet-col-reorder">Order</span>
+                                        <span class="outlet-col-action"></span>
+                                    </div>
+                                    <template for:each={beatOutlets} for:item="outlet">
+                                        <div class="outlet-table-row" key={outlet.Id}>
+                                            <span class="outlet-col-seq">{outlet.Visit_Sequence__c}</span>
+                                            <span class="outlet-col-name">{outlet.accountName}</span>
+                                            <span class="outlet-col-status">
+                                                <span class="status-badge status-active">{outlet.statusLabel}</span>
+                                            </span>
+                                            <span class="outlet-col-reorder">
+                                                <lightning-button-icon icon-name="utility:arrowup"
+                                                    alternative-text="Move Up" size="small" variant="bare"
+                                                    data-id={outlet.Id} onclick={handleMoveOutletUp}
+                                                    disabled={outlet.isFirst}
+                                                    class="reorder-btn"></lightning-button-icon>
+                                                <lightning-button-icon icon-name="utility:arrowdown"
+                                                    alternative-text="Move Down" size="small" variant="bare"
+                                                    data-id={outlet.Id} onclick={handleMoveOutletDown}
+                                                    disabled={outlet.isLast}
+                                                    class="reorder-btn"></lightning-button-icon>
+                                            </span>
+                                            <span class="outlet-col-action">
+                                                <lightning-button-icon icon-name="utility:close"
+                                                    alternative-text="Remove" size="small" variant="bare"
+                                                    data-id={outlet.Id} onclick={handleRemoveOutlet}
+                                                    class="remove-btn"></lightning-button-icon>
+                                            </span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasOutlets}>
+                                <div class="empty-state-small">
+                                    <p class="slds-text-color_weak">No outlets mapped. Search and add below.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Territory Accounts -->
+                    <div class="panel account-panel slds-m-top_small">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                Accounts in: <strong>{selectedTerritoryName}</strong>
+                            </h2>
+                            <span class="panel-count">{accountListLabel}</span>
+                        </div>
+                        <div class="panel-body account-panel-body">
+                            <!-- Search + Add Bar -->
+                            <div class="account-toolbar">
+                                <div class="account-toolbar-search">
+                                    <lightning-input type="search" label="Search Accounts"
+                                        placeholder="Search by account name..."
+                                        value={accountSearchTerm}
+                                        onchange={handleAccountSearchChange}
+                                        variant="label-hidden"></lightning-input>
+                                </div>
+                                <div class="account-toolbar-action">
+                                    <template if:true={hasSelectedAccounts}>
+                                        <span class="selected-count-badge">{selectedCountLabel}</span>
+                                    </template>
+                                    <lightning-button variant="brand" label="Add Selected"
+                                        icon-name="utility:add" onclick={handleAddOutlets}
+                                        disabled={isAddDisabled}></lightning-button>
+                                </div>
+                            </div>
+
+                            <!-- Account List -->
+                            <template if:true={hasTerritoryAccounts}>
+                                <div class="account-table">
+                                    <div class="account-table-header">
+                                        <span class="account-col-check"></span>
+                                        <span class="account-col-name">Account Name</span>
+                                        <span class="account-col-city">City</span>
+                                        <span class="account-col-status"></span>
+                                    </div>
+                                    <template for:each={territoryAccounts} for:item="acc">
+                                        <div class={acc.rowClass} key={acc.Id}
+                                            data-id={acc.Id} onclick={handleToggleAccount}>
+                                            <span class="account-col-check">
+                                                <template if:true={acc.isSelected}>
+                                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                                        variant="success"></lightning-icon>
+                                                </template>
+                                                <template if:true={acc.alreadyAdded}>
+                                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                                        class="check-muted"></lightning-icon>
+                                                </template>
+                                            </span>
+                                            <span class="account-col-name">{acc.Name}</span>
+                                            <span class="account-col-city">{acc.cityState}</span>
+                                            <span class="account-col-status">
+                                                <template if:true={acc.alreadyAdded}>
+                                                    <span class="already-badge">Added</span>
+                                                </template>
+                                            </span>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Pagination -->
+                                <template if:true={showPagination}>
+                                    <div class="pagination-bar">
+                                        <lightning-button-icon icon-name="utility:chevronleft"
+                                            alternative-text="Previous" variant="bare"
+                                            disabled={isPrevDisabled}
+                                            onclick={handlePrevPage}
+                                            class="pagination-btn"></lightning-button-icon>
+                                        <span class="pagination-label">{paginationLabel}</span>
+                                        <lightning-button-icon icon-name="utility:chevronright"
+                                            alternative-text="Next" variant="bare"
+                                            disabled={isNextDisabled}
+                                            onclick={handleNextPage}
+                                            class="pagination-btn"></lightning-button-icon>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <template if:false={hasTerritoryAccounts}>
+                                <div class="empty-state-small">
+                                    <p class="slds-text-color_weak">No accounts found in this territory.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:false={hasBeatSelected}>
+                    <div class="panel select-prompt-panel">
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:picklist_type" size="large" class="empty-icon"></lightning-icon>
+                            <p class="slds-m-top_small slds-text-heading_small">Select a beat to manage outlets</p>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                Click on a beat from the list, or create a new one
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Beat Form Modal -->
+        <template if:true={showBeatForm}>
+            <section class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleCancelBeatForm}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">{formTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium beat-form-content">
+                        <lightning-record-edit-form object-api-name="Beat__c" record-id={beatForm.Id}>
+                            <!-- Section: Basic Info -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Basic Information</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Beat Name" value={beatForm.Name}
+                                            data-field="Name" onchange={handleBeatFormChange} required></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Beat Code" value={beatForm.Beat_Code__c}
+                                            data-field="Beat_Code__c" onchange={handleBeatFormChange} required></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Pincode Cluster" value={beatForm.Pincode_Cluster__c}
+                                            data-field="Pincode_Cluster__c" onchange={handleBeatFormChange}></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Schedule -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Schedule</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-combobox label="Frequency" value={beatForm.Frequency__c}
+                                            options={frequencyOptions} data-field="Frequency__c"
+                                            onchange={handleBeatFormChange}></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Sequence" type="number"
+                                            value={beatForm.Sequence__c} data-field="Sequence__c"
+                                            onchange={handleBeatFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small beat-active-toggle">
+                                        <lightning-input type="toggle" label="Is Active"
+                                            checked={beatForm.Is_Active__c}
+                                            data-field="Is_Active__c"
+                                            onchange={handleBeatFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                        <lightning-dual-listbox label="Days of Week"
+                                            source-label="Available" selected-label="Selected"
+                                            options={dayOptions} value={beatForm.Day_of_Week__c}
+                                            data-field="Day_of_Week__c" onchange={handleBeatFormChange}
+                                            size="4"
+                                            required></lightning-dual-listbox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Assignment -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Assignment</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <c-searchable-combobox
+                                            label="Territory"
+                                            value={beatForm.Territory__c}
+                                            options={territoryComboboxOptions}
+                                            placeholder="Search territories..."
+                                            required
+                                            onchange={handleTerritoryChange}></c-searchable-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <lightning-input-field field-name="Assigned_User__c"
+                                            value={beatForm.Assigned_User__c}
+                                            data-field="Assigned_User__c"
+                                            onchange={handleBeatFormChange}
+                                            required
+                                            variant="label-stacked"></lightning-input-field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Description -->
+                            <div class="form-section form-section-last">
+                                <lightning-textarea label="Description" value={beatForm.Description__c}
+                                    data-field="Description__c" onchange={handleBeatFormChange}
+                                    max-length="500"></lightning-textarea>
+                            </div>
+                        </lightning-record-edit-form>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel"
+                            onclick={handleCancelBeatForm}></lightning-button>
+                        <lightning-button variant="brand" label="Save Beat"
+                            onclick={handleSaveBeat} class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Clone Beat Modal -->
+        <template if:true={showCloneModal}>
+            <section class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleCancelClone}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">Clone Beat</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <p class="slds-text-body_regular slds-m-bottom_medium">
+                            Cloning <strong>{selectedBeatName}</strong>. The new beat will copy all outlet mappings.
+                        </p>
+                        <lightning-record-edit-form object-api-name="Beat__c">
+                            <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                    <lightning-input label="New Beat Name" value={cloneForm.Name}
+                                        data-field="CloneName" onchange={handleCloneFormChange}
+                                        required></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                    <lightning-input label="New Beat Code" value={cloneForm.Beat_Code__c}
+                                        data-field="CloneCode" onchange={handleCloneFormChange}
+                                        required></lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                    <lightning-input-field field-name="Assigned_User__c"
+                                        label="Assign To"
+                                        value={cloneForm.Assigned_User__c}
+                                        data-field="CloneUser"
+                                        onchange={handleCloneFormChange}
+                                        required
+                                        variant="label-stacked"></lightning-input-field>
+                                </div>
+                            </div>
+                        </lightning-record-edit-form>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel"
+                            onclick={handleCancelClone}></lightning-button>
+                        <lightning-button variant="brand" label="Clone Beat"
+                            onclick={handleSaveClone} class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Reassign Beat Modal -->
+        <template if:true={showReassignModal}>
+            <section class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleCancelReassign}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">Reassign Beat</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <p class="slds-text-body_regular slds-m-bottom_medium">
+                            Reassigning <strong>{selectedBeatName}</strong> to a different executive.
+                        </p>
+                        <div class="slds-box slds-box_x-small slds-theme_warning slds-m-bottom_medium">
+                            <p class="slds-text-body_small">
+                                <lightning-icon icon-name="utility:warning" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                <strong>Journey Plan Impact:</strong> Reassigning this beat will affect any
+                                Draft or Active Journey Plans that reference it. The beat will remain on those
+                                plans but will now belong to the new executive. Approved/Submitted plans are not affected.
+                            </p>
+                        </div>
+                        <lightning-record-edit-form object-api-name="Beat__c">
+                            <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                <lightning-input-field field-name="Assigned_User__c"
+                                    label="Reassign To"
+                                    value={reassignUserId}
+                                    data-field="ReassignUser"
+                                    onchange={handleReassignUserChange}
+                                    required
+                                    variant="label-stacked"></lightning-input-field>
+                            </div>
+                        </lightning-record-edit-form>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel"
+                            onclick={handleCancelReassign}></lightning-button>
+                        <lightning-button variant="brand" label="Reassign"
+                            onclick={handleSaveReassign} class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+    </div>
+
+    <!-- Deactivation Warning Modal -->
+    <template if:true={showDeactivateWarning}>
+        <section class="slds-modal slds-fade-in-open slds-modal_small" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-theme_warning">
+                    <h2 class="slds-modal__title">Deactivate Beat?</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                        <lightning-icon icon-name="utility:warning" variant="warning" size="medium" class="slds-m-right_small"></lightning-icon>
+                        <p class="slds-text-body_regular">
+                            This beat has <strong>{deactivateImpactCount}</strong> future journey plan day(s).
+                            Deactivating will <strong>remove all future planned visits</strong> for this beat.
+                        </p>
+                    </div>
+                    <p class="slds-text-color_weak">This action cannot be undone. Do you want to proceed?</p>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleDeactivateCancel}></lightning-button>
+                    <lightning-button label="Deactivate &amp; Remove Plans" variant="destructive"
+                        onclick={handleDeactivateConfirm} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

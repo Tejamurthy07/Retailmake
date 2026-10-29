@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rate_Amount_Required_For_Per_KM</fullName>
+    <active>true</active>
+    <description>Rate Amount is required when Rate Type is Per KM.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Rate_Type__c, &quot;Per KM&quot;),
+    OR(ISBLANK(Rate_Amount__c), Rate_Amount__c = 0)
+)</errorConditionFormula>
+    <errorDisplayField>Rate_Amount__c</errorDisplayField>
+    <errorMessage>Rate Amount is required when Rate Type is Per KM.</errorMessage>
+</ValidationRule>

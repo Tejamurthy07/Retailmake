@@ -1,0 +1,84 @@
+/* Generic DMS design tokens — inherit the site/theme brand, neutral fallback. */
+:host {
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, #0b5cab));
+    --dms-navy: #1b2a4a;
+    --dms-bg: #f4f6f9;
+    --dms-surface: #ffffff;
+    --dms-text: #16202c;
+    --dms-text-muted: #5c6b7a;
+    --dms-border: #e1e5eb;
+    --dms-success: #2e844a;
+    --dms-warning: #c47d00;
+    --dms-danger: #ba0517;
+    --dms-radius: 0.75rem;
+    --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
+    --dms-font: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: block;
+}
+
+.dms-card {
+    background: var(--dms-surface); border: 1px solid var(--dms-border);
+    border-radius: var(--dms-radius); box-shadow: var(--dms-shadow);
+    font-family: var(--dms-font); color: var(--dms-text);
+    /* No overflow:hidden — it clips combobox / record-picker dropdown panels. */
+}
+.dms-card__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--dms-border);
+}
+.dms-card__title { font-size: 1.15rem; font-weight: 700; color: var(--dms-navy); margin: 0; }
+.dms-card__body { padding: 1.25rem; }
+
+.dms-step {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--dms-brand); margin: 1.1rem 0 0.6rem;
+}
+.dms-row { margin-bottom: 0.5rem; }
+.dms-actions { margin-top: 1rem; }
+.dms-empty { color: var(--dms-text-muted); font-size: 0.88rem; padding: 1rem 0; margin: 0; text-align: center; }
+
+.dms-banner { border-radius: 0.5rem; padding: 0.65rem 0.85rem; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
+.dms-banner_error { background: #fdecea; border: 1px solid #f5c2bd; color: var(--dms-danger); }
+
+.dms-linebox {
+    background: #f7f9fb; border: 1px solid var(--dms-border); border-radius: 0.6rem;
+    padding: 0.5rem 0.7rem; margin-bottom: 0.5rem;
+}
+
+/* Detail KPI grid */
+.dms-kpis {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem 1rem; margin-bottom: 1.25rem;
+}
+.dms-kpi__label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--dms-text-muted); }
+.dms-kpi__val { display: block; font-size: 1rem; font-weight: 700; color: var(--dms-navy); margin-top: 0.1rem; }
+
+/* Grid tables */
+.dms-tbl { border: 1px solid var(--dms-border); border-radius: 0.6rem; overflow: hidden; margin-bottom: 0.5rem; }
+.dms-thead, .dms-trow { display: grid; gap: 0.5rem; align-items: center; padding: 0.7rem 0.9rem; }
+.dms-thead {
+    background: #f7f9fb; color: var(--dms-text-muted); font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.03em;
+}
+.dms-trow { border-top: 1px solid var(--dms-border); font-size: 0.85rem; }
+.dms-tbl_list .dms-thead, .dms-tbl_list .dms-trow { grid-template-columns: 1.1fr 1.3fr 1.3fr 1fr 1fr 1.2fr 0.7fr; }
+.dms-tbl_detail .dms-thead, .dms-tbl_detail .dms-trow { grid-template-columns: 0.7fr 1.6fr 1fr 0.9fr 0.9fr 0.9fr 0.7fr 0.9fr; }
+.dms-num { text-align: right; }
+.dms-strong { font-weight: 700; color: var(--dms-navy); }
+.dms-muted { color: var(--dms-text-muted); }
+
+@media (max-width: 767px) {
+    .dms-thead { display: none; }
+    .dms-tbl { border: none; }
+    .dms-trow {
+        grid-template-columns: 1fr !important; gap: 0.35rem; background: var(--dms-surface);
+        border: 1px solid var(--dms-border); border-radius: 0.6rem; margin-bottom: 0.6rem; padding: 0.85rem;
+    }
+    .dms-trow > span { display: flex; justify-content: space-between; gap: 1rem; }
+    .dms-trow > span::before {
+        content: attr(data-label); font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.03em; color: var(--dms-text-muted);
+    }
+}
+
+.dms-hint { font-size: 0.82rem; color: var(--dms-text-muted); background: #f7f9fb; border: 1px solid var(--dms-border); border-radius: 0.5rem; padding: 0.5rem 0.7rem; margin: 0 0 0.75rem; }

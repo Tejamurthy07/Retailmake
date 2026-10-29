@@ -1,0 +1,66 @@
+/* Generic DMS portal design tokens — inherit the site/theme brand, neutral fallback. */
+:host {
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, #0b5cab));
+    --dms-brand-dark: #08477f;
+    --dms-navy: #1b2a4a;
+    --dms-accent: #f5a623;
+    --dms-bg: #f4f6f9;
+    --dms-surface: #ffffff;
+    --dms-text: #16202c;
+    --dms-text-muted: #5c6b7a;
+    --dms-border: #e1e5eb;
+    --dms-success: #2e844a;
+    --dms-success-bg: #ddf0e4;
+    --dms-warning: #c47d00;
+    --dms-warning-bg: #fcefc7;
+    --dms-danger: #ba0517;
+    --dms-danger-bg: #fcdcdc;
+    --dms-info: #1b96ff;
+    --dms-info-bg: #d8e6fe;
+    --dms-neutral: #5c6b7a;
+    --dms-neutral-bg: #eceff3;
+    --dms-radius: 0.75rem;
+    --dms-radius-sm: 0.5rem;
+    --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
+    --dms-font: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dms-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.dms-badge_success {
+    color: var(--dms-success);
+    background: var(--dms-success-bg);
+}
+
+.dms-badge_warning {
+    color: var(--dms-warning);
+    background: var(--dms-warning-bg);
+}
+
+.dms-badge_danger {
+    color: var(--dms-danger);
+    background: var(--dms-danger-bg);
+}
+
+.dms-badge_info {
+    color: var(--dms-info);
+    background: var(--dms-info-bg);
+}
+
+.dms-badge_neutral {
+    color: var(--dms-neutral);
+    background: var(--dms-neutral-bg);
+}
+
+.dms-badge_purple {
+    color: #6d28d9;
+    background: #ede4fc;
+}

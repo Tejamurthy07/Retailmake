@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sold_From_Distributor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The distributor that services this retailer, resolved from the account&apos;s Parent Account when the order is created. When set, the sale is supplied from this distributor&apos;s stock: the company warehouse does NOT invoice it, and the distributor bills it from the DMS portal. Blank means direct distribution (warehouse-supplied).</description>
+    <label>Sold From Distributor</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Sales Orders (Sold From)</relationshipLabel>
+    <relationshipName>Sales_Orders_Sold_From</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

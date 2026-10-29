@@ -1,0 +1,361 @@
+<template>
+    <lightning-card title="Admin Configuration Console" icon-name="standard:settings">
+        <div slot="actions">
+            <div class="slds-grid slds-gutters_xx-small">
+                <div class="slds-col">
+                    <lightning-button
+                        variant="neutral"
+                        label="Export Config"
+                        icon-name="utility:download"
+                        onclick={handleExport}>
+                    </lightning-button>
+                </div>
+                <div class="slds-col">
+                    <lightning-button
+                        variant="neutral"
+                        label="Import Config"
+                        icon-name="utility:upload"
+                        onclick={handleImportClick}>
+                    </lightning-button>
+                    <input type="file" accept=".json" class="file-input" onchange={handleImport} />
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <div class="slds-grid slds-gutters">
+                <!-- Navigation Sidebar -->
+                <div class="slds-col slds-size_1-of-5">
+                    <nav class="config-sidebar">
+                        <ul class="sidebar-nav">
+                            <li class={featureTogglesNavClass}
+                                data-section="featureToggles" onclick={handleSectionChange}>
+                                <lightning-icon icon-name="utility:toggle_on" size="x-small"
+                                    class="slds-m-right_x-small"></lightning-icon>
+                                Feature Toggles
+                            </li>
+                            <li class={appConfigNavClass}
+                                data-section="appConfig" onclick={handleSectionChange}>
+                                <lightning-icon icon-name="utility:settings" size="x-small"
+                                    class="slds-m-right_x-small"></lightning-icon>
+                                App Config
+                            </li>
+                            <li class={geoSettingsNavClass}
+                                data-section="geoSettings" onclick={handleSectionChange}>
+                                <lightning-icon icon-name="utility:location" size="x-small"
+                                    class="slds-m-right_x-small"></lightning-icon>
+                                Geo Settings
+                            </li>
+                            <li class={approvalMatrixNavClass}
+                                data-section="approvalMatrix" onclick={handleSectionChange}>
+                                <lightning-icon icon-name="utility:approval" size="x-small"
+                                    class="slds-m-right_x-small"></lightning-icon>
+                                Approval Matrix
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Content Panel -->
+                <div class="slds-col slds-size_4-of-5">
+
+                    <!-- Feature Toggles Panel -->
+                    <template if:true={showFeatureToggles}>
+                        <div class="config-panel">
+                            <div class="panel-header">
+                                <h3 class="slds-text-heading_small">Feature Toggles</h3>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    Enable or disable features by module. Changes take effect immediately.
+                                </p>
+                            </div>
+                            <div class="toggles-grid">
+                                <template for:each={featureToggles} for:item="toggle">
+                                    <div class="toggle-card" key={toggle.id}>
+                                        <div class="toggle-header">
+                                            <div class="toggle-info">
+                                                <span class="toggle-name">{toggle.name}</span>
+                                                <span class="toggle-description">{toggle.description}</span>
+                                            </div>
+                                            <div class="toggle-controls">
+                                                <template if:true={toggle.tierBadge}>
+                                                    <span class={toggle.tierClass}>{toggle.tierBadge}</span>
+                                                </template>
+                                                <lightning-input
+                                                    type="toggle"
+                                                    label={toggle.name}
+                                                    variant="label-hidden"
+                                                    checked={toggle.isEnabled}
+                                                    data-toggle-id={toggle.id}
+                                                    onchange={handleToggle}
+                                                    message-toggle-active="ON"
+                                                    message-toggle-inactive="OFF">
+                                                </lightning-input>
+                                            </div>
+                                        </div>
+                                        <template if:true={toggle.module}>
+                                            <span class="toggle-module">{toggle.module}</span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="panel-actions slds-m-top_medium">
+                                <lightning-button variant="brand" label="Save All Toggles"
+                                    icon-name="utility:save" onclick={handleSaveToggles}
+                                    disabled={isSaving}>
+                                </lightning-button>
+                                <lightning-button variant="neutral" label="Reset to Default"
+                                    icon-name="utility:undo" onclick={handleResetToggles}
+                                    class="slds-m-left_x-small">
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- App Config Panel -->
+                    <template if:true={showAppConfig}>
+                        <div class="config-panel">
+                            <div class="panel-header">
+                                <h3 class="slds-text-heading_small">Application Configuration</h3>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    Key-value configuration settings for the SFA application.
+                                </p>
+                            </div>
+                            <div class="config-table-container">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col"><div class="slds-truncate">Key</div></th>
+                                            <th scope="col"><div class="slds-truncate">Value</div></th>
+                                            <th scope="col"><div class="slds-truncate">Data Type</div></th>
+                                            <th scope="col"><div class="slds-truncate">Description</div></th>
+                                            <th scope="col"><div class="slds-truncate">Action</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={appConfigs} for:item="config">
+                                            <tr key={config.id}>
+                                                <td>
+                                                    <span class="config-key">{config.key}</span>
+                                                </td>
+                                                <td>
+                                                    <template if:true={config.isEditing}>
+                                                        <lightning-input
+                                                            type={config.inputType}
+                                                            value={config.value}
+                                                            variant="label-hidden"
+                                                            data-config-id={config.id}
+                                                            onchange={handleConfigValueChange}>
+                                                        </lightning-input>
+                                                    </template>
+                                                    <template if:false={config.isEditing}>
+                                                        <span class="config-value">{config.displayValue}</span>
+                                                    </template>
+                                                </td>
+                                                <td>
+                                                    <lightning-badge label={config.dataType}></lightning-badge>
+                                                </td>
+                                                <td>
+                                                    <span class="config-desc">{config.description}</span>
+                                                </td>
+                                                <td>
+                                                    <template if:false={config.isEditing}>
+                                                        <lightning-button-icon
+                                                            icon-name="utility:edit"
+                                                            alternative-text="Edit"
+                                                            data-config-id={config.id}
+                                                            onclick={handleEditConfig}>
+                                                        </lightning-button-icon>
+                                                    </template>
+                                                    <template if:true={config.isEditing}>
+                                                        <lightning-button-icon
+                                                            icon-name="utility:check"
+                                                            alternative-text="Save"
+                                                            variant="brand"
+                                                            data-config-id={config.id}
+                                                            onclick={handleSaveConfig}
+                                                            class="slds-m-right_xx-small">
+                                                        </lightning-button-icon>
+                                                        <lightning-button-icon
+                                                            icon-name="utility:close"
+                                                            alternative-text="Cancel"
+                                                            data-config-id={config.id}
+                                                            onclick={handleCancelEditConfig}>
+                                                        </lightning-button-icon>
+                                                    </template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-actions slds-m-top_medium">
+                                <lightning-button variant="brand" label="Save All"
+                                    icon-name="utility:save" onclick={handleSaveAllConfigs}
+                                    disabled={isSaving}>
+                                </lightning-button>
+                                <lightning-button variant="neutral" label="Reset"
+                                    icon-name="utility:undo" onclick={handleResetConfigs}
+                                    class="slds-m-left_x-small">
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Geo Settings Panel -->
+                    <template if:true={showGeoSettings}>
+                        <div class="config-panel">
+                            <div class="panel-header">
+                                <h3 class="slds-text-heading_small">Geo-Location Settings</h3>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    Configure GPS tracking, geo-fencing, and location-based settings.
+                                </p>
+                            </div>
+                            <div class="geo-settings-grid">
+                                <!-- Geofence Radius -->
+                                <div class="geo-setting-card">
+                                    <div class="setting-header">
+                                        <span class="setting-name">Check-In Geofence Radius</span>
+                                        <span class="setting-current">{geoConfigs.geofenceRadius} meters</span>
+                                    </div>
+                                    <lightning-slider
+                                        label="Radius (meters)"
+                                        min="50"
+                                        max="1000"
+                                        step="25"
+                                        value={geoConfigs.geofenceRadius}
+                                        onchange={handleGeofenceRadiusChange}>
+                                    </lightning-slider>
+                                </div>
+
+                                <!-- Tracking Interval -->
+                                <div class="geo-setting-card">
+                                    <div class="setting-header">
+                                        <span class="setting-name">Location Tracking Interval</span>
+                                        <span class="setting-current">{geoConfigs.trackingInterval} seconds</span>
+                                    </div>
+                                    <lightning-slider
+                                        label="Interval (seconds)"
+                                        min="15"
+                                        max="300"
+                                        step="15"
+                                        value={geoConfigs.trackingInterval}
+                                        onchange={handleTrackingIntervalChange}>
+                                    </lightning-slider>
+                                </div>
+
+                                <!-- GPS Accuracy -->
+                                <div class="geo-setting-card">
+                                    <div class="setting-header">
+                                        <span class="setting-name">Required GPS Accuracy</span>
+                                        <span class="setting-current">{geoConfigs.gpsAccuracy} meters</span>
+                                    </div>
+                                    <lightning-slider
+                                        label="Accuracy (meters)"
+                                        min="10"
+                                        max="200"
+                                        step="10"
+                                        value={geoConfigs.gpsAccuracy}
+                                        onchange={handleGpsAccuracyChange}>
+                                    </lightning-slider>
+                                </div>
+
+                                <!-- Additional Geo Settings -->
+                                <div class="geo-setting-card">
+                                    <div class="setting-toggles">
+                                        <div class="inline-toggle">
+                                            <lightning-input type="toggle"
+                                                label="Enable Location Tracking"
+                                                checked={geoConfigs.enableTracking}
+                                                onchange={handleEnableTrackingChange}
+                                                message-toggle-active="ON"
+                                                message-toggle-inactive="OFF">
+                                            </lightning-input>
+                                        </div>
+                                        <div class="inline-toggle">
+                                            <lightning-input type="toggle"
+                                                label="Enforce Geofence for Check-In"
+                                                checked={geoConfigs.enforceGeofence}
+                                                onchange={handleEnforceGeofenceChange}
+                                                message-toggle-active="ON"
+                                                message-toggle-inactive="OFF">
+                                            </lightning-input>
+                                        </div>
+                                        <div class="inline-toggle">
+                                            <lightning-input type="toggle"
+                                                label="Track Distance Traveled"
+                                                checked={geoConfigs.trackDistance}
+                                                onchange={handleTrackDistanceChange}
+                                                message-toggle-active="ON"
+                                                message-toggle-inactive="OFF">
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-actions slds-m-top_medium">
+                                <lightning-button variant="brand" label="Save Geo Settings"
+                                    icon-name="utility:save" onclick={handleSaveGeoSettings}
+                                    disabled={isSaving}>
+                                </lightning-button>
+                                <lightning-button variant="neutral" label="Reset"
+                                    icon-name="utility:undo" onclick={handleResetGeoSettings}
+                                    class="slds-m-left_x-small">
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Approval Matrix Panel -->
+                    <template if:true={showApprovalMatrix}>
+                        <div class="config-panel">
+                            <div class="panel-header">
+                                <h3 class="slds-text-heading_small">Approval Matrix</h3>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    Configure approval thresholds and routing rules.
+                                </p>
+                            </div>
+                            <div class="approval-matrix-container">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Process</th>
+                                            <th>Condition</th>
+                                            <th>Approver Level 1</th>
+                                            <th>Approver Level 2</th>
+                                            <th>Auto-Approve</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={approvalMatrix} for:item="rule">
+                                            <tr key={rule.id}>
+                                                <td class="process-name">{rule.process}</td>
+                                                <td>{rule.condition}</td>
+                                                <td>{rule.approverL1}</td>
+                                                <td>{rule.approverL2}</td>
+                                                <td>
+                                                    <lightning-input type="toggle"
+                                                        label="Auto" variant="label-hidden"
+                                                        checked={rule.autoApprove}
+                                                        data-rule-id={rule.id}
+                                                        onchange={handleAutoApproveChange}
+                                                        message-toggle-active="Yes"
+                                                        message-toggle-inactive="No">
+                                                    </lightning-input>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

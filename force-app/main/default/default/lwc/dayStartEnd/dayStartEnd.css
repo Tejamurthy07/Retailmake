@@ -1,0 +1,666 @@
+/* ================================================================
+   dayStartEnd.css
+   Production styles for Day Attendance LWC
+   Desktop + Mobile responsive via SLDS grid & media queries
+   ================================================================ */
+
+:host {
+    --brand-primary: #0176d3;
+    --brand-dark: #014486;
+    --success-color: #2e844a;
+    --success-light: #e6f9e6;
+    --warning-color: #dd7a01;
+    --warning-light: #fef3e0;
+    --error-color: #ea001e;
+    --error-light: #fde4e4;
+    --info-color: #1b96ff;
+    --purple-color: #9b59b6;
+    --purple-light: #f3e8f9;
+    --teal-color: #06a59a;
+    --teal-light: #e0f5f5;
+    --orange-color: #e67e22;
+    --orange-light: #fef0e0;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+    --text-primary: #181818;
+    --text-secondary: #706e6b;
+    --text-weak: #939393;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ================================================================
+   OFFLINE BADGE
+   ================================================================ */
+
+.offline-badge {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--error-color);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(234, 0, 30, 0.35);
+    animation: pulse-offline 2s ease-in-out infinite;
+}
+
+@keyframes pulse-offline {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ================================================================
+   HEADER ACTIONS / LIVE CLOCK
+   ================================================================ */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.live-clock {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+}
+
+.clock-time {
+    letter-spacing: 0.5px;
+}
+
+/* ================================================================
+   DAY START PANEL
+   ================================================================ */
+
+.day-start-panel {
+    text-align: center;
+}
+
+.start-header {
+    padding: 24px 0 16px;
+}
+
+.start-header h2 {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.start-info {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/* Device Info Cards */
+.info-card {
+    display: flex;
+    align-items: center;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+    box-shadow: var(--card-shadow);
+}
+
+.info-label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.info-value {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 1px;
+}
+
+.network-online {
+    color: var(--success-color);
+}
+
+.network-offline {
+    color: var(--error-color);
+}
+
+/* ================================================================
+   SELFIE / PHOTO SECTIONS
+   ================================================================ */
+
+.selfie-section {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.photo-upload-area {
+    border: 2px dashed #d0d0d0;
+    border-radius: 10px;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    transition: border-color 0.2s ease;
+}
+
+.photo-upload-area:hover {
+    border-color: var(--brand-primary);
+}
+
+.photo-upload-area-small {
+    border: 2px dashed #d0d0d0;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    background: var(--bg-light);
+}
+
+.upload-placeholder {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+.file-input {
+    display: none;
+}
+
+.photo-preview,
+.photo-preview-small {
+    position: relative;
+    display: inline-block;
+}
+
+.captured-photo {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: block;
+}
+
+.captured-photo-small {
+    max-width: 100%;
+    max-height: 120px;
+    border-radius: 6px;
+    object-fit: cover;
+    display: block;
+}
+
+.remove-photo-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 2;
+}
+
+.remove-photo-btn button {
+    background: #c23934 !important;
+    border: 2px solid #fff !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --sds-c-icon-color-foreground-default: #fff;
+    color: #fff !important;
+}
+
+.remove-photo-btn-small {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    z-index: 2;
+}
+
+.remove-photo-btn-small button {
+    background: #c23934 !important;
+    border: 2px solid #fff !important;
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --sds-c-icon-color-foreground-default: #fff;
+    color: #fff !important;
+}
+
+/* ================================================================
+   START DAY BUTTON
+   ================================================================ */
+
+.start-day-btn {
+    --sds-c-button-brand-color-background: var(--success-color);
+    --sds-c-button-brand-color-border: var(--success-color);
+    --sds-c-button-brand-color-background-hover: #236b3b;
+    --sds-c-button-brand-color-border-hover: #236b3b;
+}
+
+/* ================================================================
+   ACTIVE DAY HEADER
+   ================================================================ */
+
+.active-day-header {
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-dark) 100%);
+    border-radius: 12px;
+    padding: 20px 24px;
+    color: #ffffff;
+}
+
+.active-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 4px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(4px);
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.timer-col {
+    text-align: right;
+}
+
+.running-timer {
+    text-align: right;
+}
+
+.timer-label {
+    display: block;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timer-value {
+    font-size: 36px;
+    font-weight: 800;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    letter-spacing: 3px;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+/* ================================================================
+   KPI STAT CARDS (6 tiles)
+   ================================================================ */
+
+.stats-grid {
+    padding: 0;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Colored top accent stripe per tile */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+
+.stat-visits::before   { background: var(--brand-primary); }
+.stat-productive::before { background: var(--warning-color); }
+.stat-orders::before   { background: var(--purple-color); }
+.stat-order-value::before { background: var(--success-color); }
+.stat-collections::before { background: var(--teal-color); }
+.stat-distance::before { background: var(--orange-color); }
+
+/* Colored icon backgrounds */
+.stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.stat-icon-visits { background: #e1f0ff; }
+.stat-icon-productive { background: var(--warning-light); }
+.stat-icon-orders { background: var(--purple-light); }
+.stat-icon-order-value { background: var(--success-light); }
+.stat-icon-collections { background: var(--teal-light); }
+.stat-icon-distance { background: var(--orange-light); }
+
+.stat-number {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* ================================================================
+   PROGRESS BAR
+   ================================================================ */
+
+.progress-section {
+    padding: 0 4px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 10px;
+    background: #e5e5e5;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s ease, background-color 0.4s ease;
+    min-width: 0;
+}
+
+.progress-percentage {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+/* ================================================================
+   GPS TRACKING STATUS
+   ================================================================ */
+
+.gps-tracking-status {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 16px;
+}
+
+.gps-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.gps-indicator-active {
+    background-color: var(--success-color);
+    box-shadow: 0 0 6px var(--success-color);
+    animation: pulse-gps 1.5s ease-in-out infinite;
+}
+
+.gps-indicator-inactive {
+    background-color: var(--text-weak);
+}
+
+@keyframes pulse-gps {
+    0%, 100% { box-shadow: 0 0 4px var(--success-color); }
+    50% { box-shadow: 0 0 10px var(--success-color); }
+}
+
+.offline-queue-badge {
+    display: inline-block;
+    background: var(--warning-light);
+    color: var(--warning-color);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ================================================================
+   END DAY BUTTON
+   ================================================================ */
+
+.end-day-btn {
+    /* Inherits destructive styling from lightning-button variant */
+}
+
+/* ================================================================
+   END DAY MODAL - SUMMARY TABLE
+   ================================================================ */
+
+.summary-grid {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-row:nth-child(even) {
+    background: var(--bg-light);
+}
+
+.summary-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ================================================================
+   RESPONSIVE - TABLET (max-width: 768px)
+   ================================================================ */
+
+@media (max-width: 768px) {
+    .active-day-header {
+        padding: 16px;
+        border-radius: 8px;
+    }
+
+    .timer-col {
+        text-align: left;
+        margin-top: 12px;
+    }
+
+    .running-timer {
+        text-align: left;
+    }
+
+    .timer-value {
+        font-size: 28px;
+        letter-spacing: 2px;
+    }
+
+    .stat-card {
+        min-height: 95px;
+        padding: 12px 8px;
+    }
+
+    .stat-number {
+        font-size: 18px;
+    }
+
+    .stat-icon {
+        width: 34px;
+        height: 34px;
+        margin-bottom: 6px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .live-clock {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+
+    .info-card {
+        padding: 10px 12px;
+    }
+
+    .info-value {
+        font-size: 12px;
+    }
+
+    .start-header {
+        padding: 16px 0 12px;
+    }
+
+    .selfie-section {
+        max-width: 100%;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE - SMALL MOBILE (max-width: 480px)
+   ================================================================ */
+
+@media (max-width: 480px) {
+    .timer-value {
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+
+    .active-day-header {
+        padding: 12px;
+    }
+
+    .stat-card {
+        min-height: 85px;
+        padding: 10px 6px;
+        border-radius: 8px;
+    }
+
+    .stat-number {
+        font-size: 16px;
+    }
+
+    .stat-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 9px;
+    }
+
+    .progress-bar-container {
+        height: 8px;
+    }
+
+    .summary-row {
+        padding: 8px 12px;
+    }
+
+    .summary-label,
+    .summary-value {
+        font-size: 12px;
+    }
+
+    .photo-upload-area {
+        min-height: 130px;
+    }
+
+    .captured-photo {
+        max-height: 150px;
+    }
+
+    .offline-badge {
+        top: 4px;
+        right: 4px;
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+
+    .gps-tracking-status {
+        padding: 8px 12px;
+    }
+}
+
+/* ================================================================
+   MODAL RESPONSIVE OVERRIDES
+   ================================================================ */
+
+@media (max-width: 768px) {
+    .slds-modal__container {
+        margin: 0;
+        max-width: 100%;
+        min-width: 100%;
+        border-radius: 0;
+    }
+
+    .slds-modal__content {
+        max-height: 70vh;
+    }
+}

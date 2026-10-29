@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Weight_Requires_Unit</fullName>
+    <active>true</active>
+    <description>Weight Unit is required when Weight is specified and greater than zero.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Weight__c)),
+    Weight__c &gt; 0,
+    ISPICKVAL(Weight_Unit__c, &quot;&quot;)
+)</errorConditionFormula>
+    <errorDisplayField>Weight_Unit__c</errorDisplayField>
+    <errorMessage>Weight Unit is required when Weight is specified.</errorMessage>
+</ValidationRule>

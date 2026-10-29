@@ -1,0 +1,130 @@
+<template>
+    <template if:true={isLoading}>
+        <div class="fw-loading">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            <p class="fw-loading-text">Loading configuration...</p>
+        </div>
+    </template>
+
+    <template if:false={isLoading}>
+        <!-- HEADER (matches FMCG Workspace) -->
+        <div class="fw-header">
+            <div class="fw-header-left">
+                <lightning-icon icon-name="standard:settings" size="small"></lightning-icon>
+                <div class="fw-header-text">
+                    <h1 class="fw-header-title">FMCG Workspace Configuration</h1>
+                    <span class="fw-header-date">Tap any card to add or remove it for the selected profile</span>
+                </div>
+            </div>
+            <div class="fw-header-right">
+                <button class="fw-save-btn" onclick={handleSave} disabled={saveDisabled} title="Save">
+                    <lightning-icon icon-name="utility:save" size="xx-small" variant="inverse"></lightning-icon>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PROFILE SELECTOR + ACTIONS -->
+        <div class="fw-toolbar">
+            <div class="fw-toolbar-left">
+                <lightning-combobox
+                    variant="label-stacked"
+                    label="Configure for Profile"
+                    value={selectedProfile}
+                    options={profiles}
+                    onchange={handleProfileChange}
+                    placeholder="Select a profile..."
+                    required>
+                </lightning-combobox>
+            </div>
+            <div class="fw-toolbar-right">
+                <div class="fw-counter">
+                    <span class="fw-counter-num">{selectedCount}</span>
+                    <span class="fw-counter-sep">/</span>
+                    <span class="fw-counter-tot">{totalCount}</span>
+                    <span class="fw-counter-lbl">selected</span>
+                </div>
+                <button class="fw-mini-action" onclick={handleSelectAll} disabled={isSaving} title="Add all">
+                    <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                </button>
+                <button class="fw-mini-action" onclick={handleClearAll} disabled={isSaving} title="Clear all">
+                    <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB PILLS (matches FMCG Workspace tab style) -->
+        <nav class="fw-tab-bar">
+            <template for:each={tabFilterPills} for:item="pill">
+                <button key={pill.key}
+                        class={pill.cssClass}
+                        data-tab={pill.key}
+                        onclick={handleTabFilterClick}>
+                    <span class={pill.dotClass}></span>
+                    <span class="fw-tab-label">{pill.label}</span>
+                </button>
+            </template>
+        </nav>
+
+        <template if:false={hasProfile}>
+            <div class="fw-empty">
+                <lightning-icon icon-name="utility:filterList" size="large"></lightning-icon>
+                <p>Pick a profile above to start configuring.</p>
+            </div>
+        </template>
+
+        <template if:true={noResults}>
+            <div class="fw-empty">
+                <lightning-icon icon-name="utility:search" size="large"></lightning-icon>
+                <p>No components match your filter.</p>
+            </div>
+        </template>
+
+        <!-- CONTENT — sections of square cards matching Quick Actions style -->
+        <template if:true={hasProfile}>
+            <div class="fw-content">
+                <template for:each={groupedSections} for:item="tabGroup">
+                    <template for:each={tabGroup.sections} for:item="section">
+                        <div key={section.sectionKey} class="fw-section">
+                            <div class="fw-section-row">
+                                <h2 class="fw-section-title">{section.sectionLabel}</h2>
+                                <span class={section.countBadgeClass}>{section.countBadge}</span>
+                                <div class="fw-section-actions">
+                                    <button class="fw-mini-action fw-mini-action-sm" data-tab={section.tab} data-section={section.section} onclick={handleSectionAddAll} title="Add all in section">
+                                        <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                                    </button>
+                                    <button class="fw-mini-action fw-mini-action-sm" data-tab={section.tab} data-section={section.section} onclick={handleSectionClear} title="Clear section">
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="fw-grid">
+                                <template for:each={section.items} for:item="item">
+                                    <div key={item.key}
+                                         class={item.cardClass}
+                                         data-key={item.key}
+                                         onclick={handleToggleCard}>
+                                        <div class={item.iconCircleClass}>
+                                            <lightning-icon icon-name={item.icon} size="small" variant="inverse"></lightning-icon>
+                                        </div>
+                                        <span class="fw-card-label">{item.label}</span>
+                                        <div class={item.actionBtnClass}>
+                                            <lightning-icon icon-name={item.actionIconName} size="xx-small" variant="inverse"></lightning-icon>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+
+        <template if:true={isSaving}>
+            <div class="fw-saving-overlay">
+                <lightning-spinner alternative-text="Saving" size="small"></lightning-spinner>
+            </div>
+        </template>
+    </template>
+</template>

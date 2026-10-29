@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <label>Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>National Holiday</fullName>
+                <default>true</default>
+                <label>National Holiday</label>
+            </value>
+            <value>
+                <fullName>Regional Holiday</fullName>
+                <default>false</default>
+                <label>Regional Holiday</label>
+            </value>
+            <value>
+                <fullName>Optional Holiday</fullName>
+                <default>false</default>
+                <label>Optional Holiday</label>
+            </value>
+            <value>
+                <fullName>Restricted Holiday</fullName>
+                <default>false</default>
+                <label>Restricted Holiday</label>
+            </value>
+            <value>
+                <fullName>Company Holiday</fullName>
+                <default>false</default>
+                <label>Company Holiday</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

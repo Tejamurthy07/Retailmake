@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Claimed_Amount_Non_Negative</fullName>
+    <active>true</active>
+    <description>Claimed Amount must be non-negative.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Claimed_Amount__c)),
+    Claimed_Amount__c &lt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Claimed_Amount__c</errorDisplayField>
+    <errorMessage>Claimed Amount cannot be negative.</errorMessage>
+</ValidationRule>

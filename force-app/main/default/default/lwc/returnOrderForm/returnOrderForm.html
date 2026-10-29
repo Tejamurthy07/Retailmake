@@ -1,0 +1,221 @@
+<template>
+    <lightning-card title="Sales Return Entry" icon-name="standard:return_order">
+        <div class="slds-p-around_medium">
+
+            <!-- Invoice Selector -->
+            <div class="invoice-selector slds-m-bottom_medium">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Select Invoice</h3>
+                <div class="slds-grid slds-gutters slds-grid_vertical-align-end">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox
+                            label="Invoice"
+                            value={selectedInvoiceId}
+                            options={invoiceOptions}
+                            placeholder="Search and select invoice..."
+                            onchange={handleInvoiceSelect}>
+                        </lightning-combobox>
+                    </div>
+                    <template if:true={selectedInvoice}>
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="invoice-info-card">
+                                <div class="slds-grid slds-grid_align-spread">
+                                    <div>
+                                        <span class="invoice-label">Invoice #</span>
+                                        <span class="invoice-value">{selectedInvoice.invoiceNumber}</span>
+                                    </div>
+                                    <div>
+                                        <span class="invoice-label">Date</span>
+                                        <span class="invoice-value">{selectedInvoice.dateFormatted}</span>
+                                    </div>
+                                    <div>
+                                        <span class="invoice-label">Amount</span>
+                                        <span class="invoice-value">{selectedInvoice.amountFormatted}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Invoice Lines Table -->
+            <template if:true={hasInvoiceLines}>
+                <div class="invoice-lines-section slds-m-bottom_medium">
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">
+                        Invoice Items - Select items to return
+                    </h3>
+                    <div class="slds-scrollable_y lines-table-container">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col"><div class="slds-truncate">Product</div></th>
+                                    <th scope="col"><div class="slds-truncate">SKU</div></th>
+                                    <th scope="col"><div class="slds-truncate">Qty Sold</div></th>
+                                    <th scope="col"><div class="slds-truncate">Already Returned</div></th>
+                                    <th scope="col"><div class="slds-truncate">Max Return</div></th>
+                                    <th scope="col" class="return-qty-col"><div class="slds-truncate">Return Qty</div></th>
+                                    <th scope="col"><div class="slds-truncate">Reason</div></th>
+                                    <th scope="col"><div class="slds-truncate">Photo</div></th>
+                                    <th scope="col"><div class="slds-truncate">Return Amt</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={invoiceLines} for:item="line">
+                                    <tr key={line.id} class={line.rowClass}>
+                                        <td>
+                                            <div class="slds-truncate" title={line.productName}>
+                                                {line.productName}
+                                            </div>
+                                        </td>
+                                        <td><div class="slds-truncate">{line.sku}</div></td>
+                                        <td class="qty-cell">{line.qtySold}</td>
+                                        <td class="qty-cell returned-qty">{line.qtyAlreadyReturned}</td>
+                                        <td class="qty-cell max-return">{line.maxReturnQty}</td>
+                                        <td class="return-qty-col">
+                                            <lightning-input
+                                                type="number"
+                                                label="Return Qty"
+                                                variant="label-hidden"
+                                                min="0"
+                                                max={line.maxReturnQty}
+                                                value={line.returnQty}
+                                                data-line-id={line.id}
+                                                onchange={handleReturnQtyChange}
+                                                disabled={line.isFullyReturned}>
+                                            </lightning-input>
+                                        </td>
+                                        <td>
+                                            <template if:true={line.returnQty}>
+                                                <lightning-combobox
+                                                    label="Reason"
+                                                    variant="label-hidden"
+                                                    value={line.returnReason}
+                                                    options={returnReasonOptions}
+                                                    placeholder="Select..."
+                                                    data-line-id={line.id}
+                                                    onchange={handleReturnReasonChange}
+                                                    required>
+                                                </lightning-combobox>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={line.returnQty}>
+                                                <template if:false={line.photoPreview}>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:photo"
+                                                        alternative-text="Upload photo"
+                                                        data-line-id={line.id}
+                                                        onclick={triggerLinePhotoUpload}>
+                                                    </lightning-button-icon>
+                                                </template>
+                                                <template if:true={line.photoPreview}>
+                                                    <div class="line-photo-preview">
+                                                        <img src={line.photoPreview} alt="Return photo"
+                                                            class="line-thumbnail" />
+                                                        <lightning-button-icon
+                                                            icon-name="utility:close"
+                                                            alternative-text="Remove"
+                                                            size="x-small"
+                                                            data-line-id={line.id}
+                                                            onclick={removeLinePhoto}
+                                                            class="remove-line-photo">
+                                                        </lightning-button-icon>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </td>
+                                        <td class="return-amount-cell">
+                                            <template if:true={line.returnQty}>
+                                                {line.returnAmountFormatted}
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Hidden file input for photo uploads -->
+                    <input type="file" accept="image/*" class="file-input"
+                        onchange={handleLinePhotoCapture} />
+                </div>
+            </template>
+
+            <!-- Return Summary -->
+            <template if:true={hasReturnLines}>
+                <div class="return-summary slds-m-bottom_medium">
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">Return Summary</h3>
+                    <div class="summary-card">
+                        <div class="slds-grid slds-grid_align-end">
+                            <div class="slds-col slds-size_1-of-3">
+                                <div class="summary-row">
+                                    <span class="summary-label">Total Return Items</span>
+                                    <span class="summary-value">{returnSummary.totalItems}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Total Return Qty</span>
+                                    <span class="summary-value">{returnSummary.totalQuantity}</span>
+                                </div>
+                                <div class="summary-row total-row">
+                                    <span class="summary-label">Total Return Amount</span>
+                                    <span class="summary-value return-total">{returnSummary.totalAmountFormatted}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Return Remarks -->
+                <div class="slds-m-bottom_medium">
+                    <lightning-textarea
+                        label="Return Remarks"
+                        value={returnRemarks}
+                        onchange={handleReturnRemarksChange}
+                        placeholder="Reason for return, additional notes..."
+                        max-length="1000">
+                    </lightning-textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-section">
+                    <div class="slds-grid slds-grid_align-center slds-gutters">
+                        <template if:true={isEmbedded}>
+                            <div class="slds-col">
+                                <lightning-button
+                                    variant="neutral"
+                                    label="Cancel"
+                                    icon-name="utility:back"
+                                    onclick={handleCancel}>
+                                </lightning-button>
+                            </div>
+                        </template>
+                        <div class="slds-col">
+                            <lightning-button
+                                variant="brand"
+                                label="Submit Return"
+                                icon-name="utility:check"
+                                onclick={handleSubmit}
+                                disabled={isSubmitting}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty State when no invoice selected -->
+            <template if:false={selectedInvoiceId}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="utility:undo" size="large"></lightning-icon>
+                    <p class="slds-m-top_small slds-text-heading_small">Select an Invoice</p>
+                    <p class="slds-text-body_small slds-text-color_weak">
+                        Choose an invoice to begin processing a sales return.
+                    </p>
+                </div>
+            </template>
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

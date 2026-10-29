@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Expense Manager</masterLabel>
+    <description>Expense Management component - monthly expense claims with accordion day view, inline editing, receipt upload, and approval workflow</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__Tab</target>
+    </targets>
+</LightningComponentBundle>

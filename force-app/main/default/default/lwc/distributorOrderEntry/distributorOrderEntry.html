@@ -1,0 +1,243 @@
+<template>
+    <div class="oe">
+        <template if:true={error}>
+            <div class="oe-err">{error}</div>
+        </template>
+
+        <!-- ░░ Catalog column ░░ -->
+        <section class="oe-main">
+            <div class="oe-head">
+                <div>
+                    <h2 class="oe-head__title">{headerTitle}</h2>
+                    <p class="oe-head__sub">{headerSub}</p>
+                </div>
+                <span class="oe-head__count">{count} products</span>
+            </div>
+
+            <template if:true={isSecondary}>
+                <div class="oe-retailer">
+                    <lightning-combobox variant="label-hidden" label="Retailer"
+                        placeholder="Select a retailer to bill" options={retailerOptions}
+                        value={retailerId} onchange={handleRetailer}></lightning-combobox>
+                </div>
+            </template>
+
+            <div class="oe-toolbar">
+                <div class="oe-search">
+                    <lightning-icon icon-name="utility:search" size="x-small" class="oe-search__ic"></lightning-icon>
+                    <input type="search" placeholder="Search product, SKU or brand…"
+                        onchange={handleSearch} oninput={handleSearch} class="oe-search__in" />
+                </div>
+                <div class="oe-filters">
+                    <lightning-combobox variant="label-hidden" label="Brand" options={brandOptions}
+                        value={brand} onchange={handleBrand} class="oe-filter"></lightning-combobox>
+                    <lightning-combobox variant="label-hidden" label="Category" options={categoryOptions}
+                        value={category} onchange={handleCategory} class="oe-filter"></lightning-combobox>
+                </div>
+            </div>
+
+            <div class="oe-grid">
+                <template for:each={products} for:item="p">
+                    <article key={p.id} class="oe-pcard">
+                        <div class="oe-pcard__media">
+                            <template if:true={p.hasImage}>
+                                <img src={p.imageUrl} alt={p.name} loading="lazy" />
+                            </template>
+                            <template if:false={p.hasImage}>
+                                <span class="oe-pcard__ph">{p.initials}</span>
+                            </template>
+                        </div>
+                        <div class="oe-pcard__body">
+                            <p class="oe-pcard__name" title={p.name}>{p.name}</p>
+                            <p class="oe-pcard__sku">{p.sku} · {p.brand}</p>
+                            <div class="oe-pcard__chips">
+                                <template if:true={p.hasClass}>
+                                    <span class={p.classCss}>{p.classLabel}</span>
+                                </template>
+                                <template if:true={p.hasMin}>
+                                    <span class="oe-chip oe-chip_min">{p.minLabel}</span>
+                                </template>
+                                <template if:true={p.showStock}>
+                                    <span class={p.stockCss}>{p.stockStatus}</span>
+                                </template>
+                                <template if:true={p.hasScheme}>
+                                    <span class="oe-chip oe-chip_promo">🎁 {p.schemeLabel}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="oe-pcard__right">
+                            <span class="oe-pcard__price">{p.priceFmt}</span>
+                            <span class="oe-pcard__unit">{p.priceUnitLabel}</span>
+                            <template if:true={p.showMrp}>
+                                <span class="oe-pcard__mrp">MRP {p.mrpFmt}</span>
+                            </template>
+                            <template if:true={p.inCart}>
+                                <div class="oe-step">
+                                    <button class="oe-step__btn" data-id={p.id} onclick={decItem}
+                                        aria-label="Decrease">−</button>
+                                    <span class="oe-step__val">{p.cartQty}</span>
+                                    <button class="oe-step__btn" data-id={p.id} onclick={incItem}
+                                        aria-label="Increase">+</button>
+                                </div>
+                            </template>
+                            <template if:false={p.inCart}>
+                                <button class="oe-add" data-id={p.id} onclick={addToCart}
+                                    disabled={p.addDisabled}>{p.addLabel}</button>
+                            </template>
+                        </div>
+                    </article>
+                </template>
+                <template if:false={count}>
+                    <p class="oe-empty">No products match your filters.</p>
+                </template>
+            </div>
+        </section>
+
+        <!-- ░░ Mobile scrim ░░ -->
+        <div class={scrimClass} onclick={closeCart}></div>
+
+        <!-- ░░ Cart (desktop rail / mobile sheet) ░░ -->
+        <aside class={cartClass}>
+            <div class="oe-cart__grip"></div>
+            <div class="oe-cart__head">
+                <div>
+                    <span class="oe-cart__title">Order Summary</span>
+                    <span class="oe-cart__count">{cartCountLabel}</span>
+                </div>
+                <div class="oe-cart__headact">
+                    <template if:true={hasCart}>
+                        <button class="oe-cart__clear" onclick={clearCart}>Clear</button>
+                    </template>
+                    <button class="oe-cart__close" onclick={closeCart} aria-label="Close">✕</button>
+                </div>
+            </div>
+
+            <template if:true={hasCart}>
+                <div class="oe-cart__lines">
+                    <template for:each={cart} for:item="l">
+                        <div key={l.id} class={l.lineCss}>
+                            <div class="oe-line__media">
+                                <template if:true={l.imageUrl}>
+                                    <img src={l.imageUrl} alt={l.name} loading="lazy" />
+                                </template>
+                                <template if:false={l.imageUrl}>
+                                    <span class="oe-line__ph">{l.initials}</span>
+                                </template>
+                            </div>
+                            <div class="oe-line__info">
+                                <p class="oe-line__name" title={l.name}>{l.name}</p>
+                                <span class="oe-line__unit">{l.unitPriceFmt}</span>
+                                <span class="oe-line__uom-tag">{l.uomLabel}</span>
+                                <template if:true={l.baseQtyLabel}>
+                                    <span class="oe-line__base">{l.baseQtyLabel}</span>
+                                </template>
+                                <template if:true={l.showPerUnit}>
+                                    <span class="oe-line__base">{l.perUnitFmt}</span>
+                                </template>
+                                <div class="oe-line__tags">
+                                    <template if:true={l.classification}>
+                                        <span class={l.classBadgeCss}>{l.classification}</span>
+                                    </template>
+                                    <template if:true={l.minQtyLabel}>
+                                        <span class="oe-tag oe-tag_min">{l.minQtyLabel}</span>
+                                    </template>
+                                    <template if:true={l.schemeLabel}>
+                                        <span class="oe-tag oe-tag_promo">🎁 {l.schemeLabel}</span>
+                                    </template>
+                                    <template if:true={l.freeLabel}>
+                                        <span class="oe-tag oe-tag_free">{l.freeLabel}</span>
+                                    </template>
+                                    <template if:true={l.discountFmt}>
+                                        <span class="oe-tag oe-tag_disc">{l.discountFmt}</span>
+                                    </template>
+                                </div>
+                                <template if:true={l.minWarn}>
+                                    <span class="oe-line__warn">{l.minWarn}</span>
+                                </template>
+                                <template if:true={l.stockWarn}>
+                                    <span class="oe-line__warn">{l.stockWarn}</span>
+                                </template>
+                            </div>
+                            <div class="oe-line__right">
+                                <div class="oe-step oe-step_sm">
+                                    <button class="oe-step__btn" data-id={l.id} onclick={decItem}
+                                        aria-label="Decrease">−</button>
+                                    <span class="oe-step__val">{l.qty}</span>
+                                    <button class="oe-step__btn" data-id={l.id} onclick={incItem}
+                                        aria-label="Increase">+</button>
+                                </div>
+                                <span class="oe-line__total">{l.lineTotalFmt}</span>
+                                <button class="oe-line__del" data-id={l.id} onclick={removeLine}
+                                    aria-label="Remove">
+                                    <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="oe-cart__foot">
+                    <div class="oe-totals">
+                        <div class="oe-trow"><span>Gross</span><span>{grossFmt}</span></div>
+                        <template if:true={hasDiscount}>
+                            <div class="oe-trow oe-trow_disc"><span>Scheme discount</span><span>{discountFmt}</span></div>
+                        </template>
+                        <div class="oe-trow"><span>Taxable</span><span>{taxableFmt}</span></div>
+                        <div class="oe-trow"><span>Est. GST</span><span>{taxFmt}</span></div>
+                        <template if:true={hasFree}>
+                            <div class="oe-trow oe-trow_free"><span>Free goods</span><span>{freeFmt}</span></div>
+                        </template>
+                        <div class="oe-trow oe-trow_total"><span>Total</span><span>{netFmt}</span></div>
+                    </div>
+
+                    <template if:true={submitError}>
+                        <div class="oe-submiterr">{submitError}</div>
+                    </template>
+
+                    <button class="oe-place" disabled={isSubmitDisabled} onclick={submit}>
+                        <template if:true={submitting}>
+                            <lightning-spinner alternative-text="Placing" size="small" variant="inverse"></lightning-spinner>
+                        </template>
+                        <template if:false={submitting}>{submitLabel} · {netFmt}</template>
+                    </button>
+                </div>
+            </template>
+
+            <template if:false={hasCart}>
+                <div class="oe-cart__empty">
+                    <lightning-icon icon-name="utility:cart" size="small"></lightning-icon>
+                    <p>Your order is empty</p>
+                    <span>Tap <strong>Add</strong> on a product to start building the order.</span>
+                </div>
+            </template>
+        </aside>
+
+        <!-- ░░ Mobile sticky cart bar ░░ -->
+        <template if:true={hasCart}>
+            <button class="oe-bar" onclick={openCart}>
+                <span class="oe-bar__badge">{itemCount}</span>
+                <span class="oe-bar__label">{barLabel}</span>
+                <span class="oe-bar__cta">View order
+                    <lightning-icon icon-name="utility:chevronright" size="xx-small" variant="inverse"></lightning-icon>
+                </span>
+            </button>
+        </template>
+
+        <!-- ░░ Remove must-sell reason prompt ░░ -->
+        <template if:true={showRemovePrompt}>
+            <div class="oe-scrim is-open" onclick={cancelRemove}></div>
+            <div class="oe-reason" role="dialog">
+                <p class="oe-reason__title">Remove must-sell product</p>
+                <p class="oe-reason__sub"><strong>{removeProductName}</strong> is a Must-Sell item. Enter a reason to remove it from this order.</p>
+                <textarea class="oe-reason__input" placeholder="Reason for removal…" value={removeReason} onchange={handleReason}></textarea>
+                <template if:true={removeError}>
+                    <p class="oe-reason__err">{removeError}</p>
+                </template>
+                <div class="oe-reason__actions">
+                    <button class="oe-reason__cancel" onclick={cancelRemove}>Keep</button>
+                    <button class="oe-reason__confirm" onclick={confirmRemove}>Remove</button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

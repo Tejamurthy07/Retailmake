@@ -1,0 +1,16 @@
+<html>
+<body>
+<p>Dear {!Receiving_User.FirstName},</p>
+<p>A leave request requires your approval:</p>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr><td><b>Leave Request</b></td><td>{!Leave_Request__c.Name}</td></tr>
+    <tr><td><b>Leave Type</b></td><td>{!Leave_Request__c.Leave_Type__c}</td></tr>
+    <tr><td><b>Start Date</b></td><td>{!Leave_Request__c.Start_Date__c}</td></tr>
+    <tr><td><b>End Date</b></td><td>{!Leave_Request__c.End_Date__c}</td></tr>
+    <tr><td><b>Number of Days</b></td><td>{!Leave_Request__c.Number_of_Days__c}</td></tr>
+    <tr><td><b>Reason</b></td><td>{!Leave_Request__c.Reason__c}</td></tr>
+</table>
+<p>Please review and take action on this request.</p>
+<p>Thank you.</p>
+</body>
+</html>

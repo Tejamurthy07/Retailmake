@@ -1,0 +1,80 @@
+<template>
+    <div class="route-card">
+        <header class="route-header">
+            <div class="header-left">
+                <div class="header-icon">
+                    <lightning-icon icon-name="standard:location" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div>
+                    <h2 class="header-title">Visit Route</h2>
+                    <p class="header-subtitle">{subtitleText}</p>
+                </div>
+            </div>
+            <template lwc:if={hasData}>
+                <div class="stat-chips">
+                    <div class="chip">
+                        <span class="chip-value">{totalVisitsDisplay}</span>
+                        <span class="chip-label">Visits</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip-value">{distanceDisplay}</span>
+                        <span class="chip-label">System km</span>
+                    </div>
+                    <template lwc:if={hasRoadDistance}>
+                        <div class="chip chip-road">
+                            <span class="chip-value">{roadDistanceDisplay}</span>
+                            <span class="chip-label">Map km</span>
+                        </div>
+                    </template>
+                    <div class="chip">
+                        <span class="chip-value">{productiveDisplay}</span>
+                        <span class="chip-label">Productive</span>
+                    </div>
+                    <div class="chip">
+                        <span class="chip-value">{hoursDisplay}</span>
+                        <span class="chip-label">Hours</span>
+                    </div>
+                </div>
+            </template>
+        </header>
+
+        <template lwc:if={isLoading}>
+            <div class="state-wrap">
+                <lightning-spinner alternative-text="Loading map" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="state-wrap error">
+                <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <template lwc:if={showEmptyState}>
+            <div class="state-wrap empty">
+                <lightning-icon icon-name="utility:map" size="large"></lightning-icon>
+                <p>No visits with GPS coordinates were recorded for this day.</p>
+            </div>
+        </template>
+
+        <div class="map-container" lwc:dom="manual"></div>
+
+        <template lwc:if={hasData}>
+            <footer class="route-footer">
+                <div class="legend">
+                    <span class="legend-dot start"></span><span>Day start</span>
+                    <span class="legend-dot visit"></span><span>Visit</span>
+                    <span class="legend-dot end"></span><span>Day end</span>
+                </div>
+                <div class="route-meta">{metaText}</div>
+            </footer>
+            <template lwc:if={hasDistanceComparison}>
+                <div class={distanceComparisonClass}>
+                    <lightning-icon icon-name="utility:routing_offline" size="xx-small"></lightning-icon>
+                    <span>{distanceComparisonText}</span>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

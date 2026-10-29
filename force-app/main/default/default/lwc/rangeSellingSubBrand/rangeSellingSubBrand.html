@@ -1,0 +1,42 @@
+<template>
+    <lightning-card>
+        <div class="header slds-p-horizontal_medium slds-p-top_small">
+            <h2 class="title">Range Selling — Sub-Brand</h2>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template if:true={loading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={error}>
+                <div class="slds-text-color_error">{error}</div>
+            </template>
+
+            <template if:true={hasRows}>
+                <div class="table-head">
+                    <span class="col-name">Name</span>
+                    <span class="col-covered">Outlets Covered</span>
+                    <span class="col-bar">Coverage %</span>
+                </div>
+
+                <template for:each={rows} for:item="row">
+                    <div key={row.name} class="table-row">
+                        <span class="col-name">{row.name}</span>
+                        <span class="col-covered">{row.display}</span>
+                        <span class="col-bar">
+                            <span class="track">
+                                <span class="fill" style={row.barStyle}></span>
+                            </span>
+                            <span class="pct">{row.pctLabel}</span>
+                        </span>
+                    </div>
+                </template>
+            </template>
+
+            <template if:true={noData}>
+                <div class="slds-text-color_weak">No data found.</div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

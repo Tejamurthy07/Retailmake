@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saudas · Gem Edible CRM</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <div class="breadcrumb">Home / Sauda</div>
+        <h1>Saudas (Agreements)</h1>
+        <div class="sub">Price-locked purchase / sale agreements for a defined product, quantity, time, location &amp; delivery type.</div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href="sauda-create.html"><span class="ico">＋</span> New Sauda</a>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search" id="search" placeholder="🔍 Search by sauda no, party or product…" />
+      <select id="statusFilter" style="max-width:180px">
+        <option value="">All statuses</option>
+        <option>Draft</option>
+        <option>Active</option>
+        <option>Extended</option>
+        <option>Buyback</option>
+        <option>Converted</option>
+        <option>Cancelled</option>
+        <option>Closed</option>
+      </select>
+      <span class="spacer"></span>
+    </div>
+
+    <div class="card">
+      <div class="line-table-wrap">
+        <table class="data-table stack" id="saudaTable">
+          <thead>
+            <tr>
+              <th>Sauda No.</th>
+              <th>Party</th>
+              <th>Validity</th>
+              <th>Delivery</th>
+              <th>Source Location</th>
+              <th class="cell-num">Items</th>
+              <th class="cell-num">Sauda Value</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty" style="display:none">
+        <div class="big">📄</div>
+        <div>No saudas match your filter.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    mountTopbar("list");
+
+    const rowsEl = document.getElementById("rows");
+    const emptyEl = document.getElementById("emptyState");
+    const searchEl = document.getElementById("search");
+    const statusEl = document.getElementById("statusFilter");
+
+    function render() {
+      const q = searchEl.value.trim().toLowerCase();
+      const sf = statusEl.value;
+      const list = loadSaudas().filter(s => {
+        if (sf && s.status !== sf) return false;
+        if (!q) return true;
+        const hay = [
+          s.id, s.party, s.broker,
+          ...(s.lines || []).map(l => productName(l.product))
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (!list.length) {
+        rowsEl.innerHTML = "";
+        emptyEl.style.display = "block";
+        return;
+      }
+      emptyEl.style.display = "none";
+
+      rowsEl.innerHTML = list.map(s => `
+        <tr onclick="location.href='sauda-detail.html?id=${encodeURIComponent(s.id)}'">
+          <td data-label="Sauda No."><span class="sauda-no">${s.id}</span></td>
+          <td data-label="Party">${s.party}</td>
+          <td data-label="Validity">${fmtDate(s.effectiveFrom)} – ${fmtDate(s.effectiveTo)}</td>
+          <td data-label="Delivery">${deliveryPill(s.deliveryType)}</td>
+          <td data-label="Source Location">${locationName(s.location)} <span class="note-line">${locationType(s.location)}</span></td>
+          <td data-label="Items" class="cell-num">${(s.lines || []).length}</td>
+          <td data-label="Sauda Value" class="cell-num">${inr(saudaSellValue(s))}</td>
+          <td data-label="Status">${statusBadge(s.status)}</td>
+        </tr>
+      `).join("");
+    }
+
+    searchEl.addEventListener("input", render);
+    statusEl.addEventListener("change", render);
+
+    render();
+  </script>
+</body>
+</html>

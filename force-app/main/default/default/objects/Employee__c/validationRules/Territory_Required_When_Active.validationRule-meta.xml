@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Territory_Required_When_Active</fullName>
+    <active>true</active>
+    <description>Active employees must have a Territory so journey plans, visits, and orders can auto-inherit one when the outlet or beat doesn&apos;t specify.</description>
+    <errorConditionFormula>AND(Is_Active__c, ISBLANK(Territory__c))</errorConditionFormula>
+    <errorDisplayField>Territory__c</errorDisplayField>
+    <errorMessage>Active employees must be assigned to a territory.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,144 @@
+<template>
+    <div class="dms-claims">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filter">
+                    <span class="dms-filter__label">Status:</span>
+                    <lightning-combobox variant="label-hidden" value={statusFilter}
+                        options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                </div>
+                <button class="dms-btn" type="button" onclick={openModal}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Claim
+                </button>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-card">
+                        <span class="dms-card__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={error}>
+                <div class="dms-empty" style="color:var(--dms-danger)">{error}</div>
+            </template>
+            <template if:true={hasRows}>
+                <div class="dms-tbl dms-tbl_claims">
+                    <div class="dms-thead">
+                        <span>Claim #</span><span>Date</span><span>Type</span><span>Scheme</span>
+                        <span class="dms-num">Amount</span><span>Status</span><span>Credit Note</span>
+                    </div>
+                    <template for:each={rows} for:item="c">
+                        <div key={c.key} class="dms-trow">
+                            <span class="dms-link" data-label="Claim #" data-id={c.id} onclick={openDetail}>{c.name}</span>
+                            <span data-label="Date"><lightning-formatted-date-time value={c.claimDate}></lightning-formatted-date-time></span>
+                            <span data-label="Type">{c.type}</span>
+                            <span class="dms-strong" data-label="Scheme">{c.scheme}</span>
+                            <span class="dms-num dms-strong" data-label="Amount"><lightning-formatted-number value={c.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                            <span data-label="Status"><c-dms-status-badge label={c.status}></c-dms-status-badge></span>
+                            <span class="dms-code" data-label="Credit Note">{c.creditNote}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasRows}>
+                <p class="dms-empty">No claims yet.</p>
+            </template>
+        </div>
+
+        <!-- ===================== New Claim ===================== -->
+        <template if:true={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>New Claim</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Claim Type *</label>
+                    <lightning-combobox variant="label-hidden" value={formType} options={typeOptions} onchange={handleType}></lightning-combobox>
+
+                    <template if:true={isSchemeClaim}>
+                        <label class="dms-flabel">Scheme</label>
+                        <lightning-combobox variant="label-hidden" value={formScheme} options={schemeOptions} onchange={handleScheme}></lightning-combobox>
+                    </template>
+
+                    <label class="dms-flabel">Claim Amount *</label>
+                    <lightning-input type="number" variant="label-hidden" min="0" placeholder="e.g. 2880"
+                        value={formAmount} onchange={handleAmount}></lightning-input>
+
+                    <label class="dms-flabel">Description</label>
+                    <lightning-textarea variant="label-hidden" placeholder="Describe what this claim covers..."
+                        value={formNotes} onchange={handleNotes}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={submit} disabled={submitDisabled}>Submit Claim</button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Claim detail (flyout) ===================== -->
+        <template if:true={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{selected.name}</h2>
+                        <p class="dms-flyout__sub">
+                            <lightning-formatted-date-time value={selected.claimDate}></lightning-formatted-date-time>
+                            &nbsp;·&nbsp;{selected.type}
+                            <template if:true={selected.scheme}>&nbsp;·&nbsp;{selected.scheme}</template>
+                        </p>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Status</span><span class="dms-flyout__val"><c-dms-status-badge label={selected.status}></c-dms-status-badge></span></div>
+                    <div><span class="dms-flyout__lbl">Claimed</span><span class="dms-flyout__val"><lightning-formatted-number value={selected.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span></div>
+                    <div><span class="dms-flyout__lbl">Approved</span><span class="dms-flyout__val"><lightning-formatted-number value={selected.approved} format-style="currency" currency-code="INR"></lightning-formatted-number></span></div>
+                    <template if:true={selected.creditNote}>
+                        <div><span class="dms-flyout__lbl">Credit Note</span><span class="dms-flyout__val">{selected.creditNote}</span></div>
+                    </template>
+                </div>
+                <template if:true={selected.notes}>
+                    <p class="dms-detailnotes">{selected.notes}</p>
+                </template>
+                <template if:true={hasDetailLines}>
+                    <p class="dms-flyout__section">Claim Lines</p>
+                    <div class="dms-tbl dms-tbl_cdetail">
+                        <div class="dms-thead">
+                            <span>Product</span><span>Batch</span><span class="dms-num">Qty</span>
+                            <span class="dms-num">Claimed</span><span>Reason</span>
+                        </div>
+                        <template for:each={detailLines} for:item="l">
+                            <div key={l.key} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">{l.productName}</span>
+                                <span class="dms-code" data-label="Batch">{l.batch}</span>
+                                <span class="dms-num" data-label="Qty">{l.quantity}</span>
+                                <span class="dms-num" data-label="Claimed"><lightning-formatted-number value={l.claimedAmount} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                                <span class="dms-reason" data-label="Reason">{l.reason}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </aside>
+        </template>
+    </div>
+</template>

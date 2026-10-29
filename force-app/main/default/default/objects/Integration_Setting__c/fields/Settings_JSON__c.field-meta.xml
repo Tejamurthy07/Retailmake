@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Settings_JSON__c</fullName>
+    <description>Non-secret settings for this integration as a JSON object, keyed by the definition&apos;s schema field keys. Never contains secrets.</description>
+    <label>Settings (JSON)</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>8</visibleLines>
+</CustomField>

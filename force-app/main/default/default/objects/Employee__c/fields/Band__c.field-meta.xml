@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Band__c</fullName>
+    <description>Employee band for expense eligibility calculation. Maps to Expense_Eligibility__mdt rules.</description>
+    <label>Band</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Band 1</fullName>
+                <default>true</default>
+                <label>Band 1</label>
+            </value>
+            <value>
+                <fullName>Band 2</fullName>
+                <default>false</default>
+                <label>Band 2</label>
+            </value>
+            <value>
+                <fullName>Band 3</fullName>
+                <default>false</default>
+                <label>Band 3</label>
+            </value>
+            <value>
+                <fullName>Band 4</fullName>
+                <default>false</default>
+                <label>Band 4</label>
+            </value>
+            <value>
+                <fullName>Band 5</fullName>
+                <default>false</default>
+                <label>Band 5</label>
+            </value>
+            <value>
+                <fullName>Band 6</fullName>
+                <default>false</default>
+                <label>Band 6</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

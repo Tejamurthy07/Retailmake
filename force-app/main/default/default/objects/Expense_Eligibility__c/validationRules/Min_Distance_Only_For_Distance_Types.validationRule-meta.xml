@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Min_Distance_Only_For_Distance_Types</fullName>
+    <active>true</active>
+    <description>Min Distance KM can only be set when Rate Type is Per Day or Per KM.</description>
+    <errorConditionFormula>AND(
+    NOT(ISPICKVAL(Rate_Type__c, &quot;Per Day&quot;)),
+    NOT(ISPICKVAL(Rate_Type__c, &quot;Per KM&quot;)),
+    NOT(ISBLANK(Min_Distance_KM__c)),
+    Min_Distance_KM__c &gt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Min_Distance_KM__c</errorDisplayField>
+    <errorMessage>Min Distance KM is only applicable for Per Day and Per KM rate types.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,62 @@
+<template>
+    <div class="searchable-combobox-container" onfocusout={handleBlur}>
+        <template if:true={showLabel}>
+            <label class="combobox-label">
+                {label}
+                <template if:true={required}>
+                    <abbr class="slds-required" title="required">*</abbr>
+                </template>
+            </label>
+        </template>
+        <div class="combobox-input-wrapper">
+            <div class="combobox-input-group">
+                <lightning-icon icon-name="utility:search" size="xx-small"
+                    class="search-icon" alternative-text="Search"></lightning-icon>
+                <input type="text"
+                    class="combobox-input"
+                    placeholder={computedPlaceholder}
+                    value={searchTerm}
+                    onfocus={handleFocus}
+                    oninput={handleSearchInput}
+                    onkeydown={handleKeyDown}
+                    aria-expanded={isDropdownOpen}
+                    aria-haspopup="listbox"
+                    role="combobox"
+                    autocomplete="off" />
+                <template if:true={hasSelection}>
+                    <button class="clear-btn" onclick={handleClear}
+                        aria-label="Clear selection" type="button">
+                        <lightning-icon icon-name="utility:close" size="xx-small"
+                            alternative-text="Clear"></lightning-icon>
+                    </button>
+                </template>
+                <lightning-icon icon-name="utility:chevrondown" size="xx-small"
+                    class="chevron-icon" alternative-text="Open"></lightning-icon>
+            </div>
+            <template if:true={isDropdownOpen}>
+                <div class="dropdown-list" role="listbox">
+                    <template if:true={hasFilteredOptions}>
+                        <template for:each={filteredOptions} for:item="opt">
+                            <div key={opt.value}
+                                class={opt.itemClass}
+                                data-value={opt.value}
+                                onmousedown={handleOptionSelect}
+                                onmouseenter={handleOptionHover}
+                                role="option"
+                                aria-selected={opt.isSelected}>
+                                <span class="option-label">{opt.label}</span>
+                                <template if:true={opt.isSelected}>
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        class="check-icon" alternative-text="Selected"></lightning-icon>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasFilteredOptions}>
+                        <div class="no-results">No matches found</div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

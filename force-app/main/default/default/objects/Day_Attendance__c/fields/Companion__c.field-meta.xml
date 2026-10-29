@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Companion__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The companion employee accompanying the salesperson for the day</description>
+    <label>Companion</label>
+    <referenceTo>Employee__c</referenceTo>
+    <relationshipLabel>Accompanied Days</relationshipLabel>
+    <relationshipName>Accompanied_Days</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

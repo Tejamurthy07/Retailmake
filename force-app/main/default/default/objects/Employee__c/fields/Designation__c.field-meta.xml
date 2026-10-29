@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Designation__c</fullName>
+    <label>Designation</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sales Representative</fullName>
+                <default>true</default>
+                <label>Sales Representative</label>
+            </value>
+            <value>
+                <fullName>Senior Sales Representative</fullName>
+                <default>false</default>
+                <label>Senior Sales Representative</label>
+            </value>
+            <value>
+                <fullName>Area Sales Manager</fullName>
+                <default>false</default>
+                <label>Area Sales Manager</label>
+            </value>
+            <value>
+                <fullName>Regional Sales Manager</fullName>
+                <default>false</default>
+                <label>Regional Sales Manager</label>
+            </value>
+            <value>
+                <fullName>Zonal Sales Manager</fullName>
+                <default>false</default>
+                <label>Zonal Sales Manager</label>
+            </value>
+            <value>
+                <fullName>National Sales Manager</fullName>
+                <default>false</default>
+                <label>National Sales Manager</label>
+            </value>
+            <value>
+                <fullName>Territory Manager</fullName>
+                <default>false</default>
+                <label>Territory Manager</label>
+            </value>
+            <value>
+                <fullName>Key Account Manager</fullName>
+                <default>false</default>
+                <label>Key Account Manager</label>
+            </value>
+            <value>
+                <fullName>Admin</fullName>
+                <default>false</default>
+                <label>Admin</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

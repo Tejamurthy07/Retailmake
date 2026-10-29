@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Priority__c</fullName>
+    <description>Auto-calculated priority based on which dimension fields are populated. 1=Customer-wise (highest), 2=Category+Territory+Channel, 3=Territory+Channel, 4=Category+Territory, 5=Territory-wise, 6=Channel-wise, 7=Category-wise, 8=Base price (no dimensions).</description>
+    <externalId>false</externalId>
+    <label>Priority</label>
+    <precision>2</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

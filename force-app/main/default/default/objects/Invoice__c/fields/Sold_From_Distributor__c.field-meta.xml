@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sold_From_Distributor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>For secondary (distributor-to-retailer) invoices, the distributor whose stock the goods were billed from.</description>
+    <label>Sold From Distributor</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Secondary Invoices</relationshipLabel>
+    <relationshipName>Secondary_Invoices</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

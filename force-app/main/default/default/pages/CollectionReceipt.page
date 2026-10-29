@@ -1,0 +1,361 @@
+<apex:page standardController="Collection__c" extensions="CollectionReceiptController" renderAs="pdf" applyHtmlTag="false" showHeader="false" sidebar="false">
+<html>
+<head>
+<style type="text/css">
+    @page {
+        size: A4;
+        margin: 15mm;
+    }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11px;
+        color: #333;
+    }
+    .header {
+        border-bottom: 2px solid #2c3e50;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .company-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    .receipt-title {
+        font-size: 16px;
+        color: #27ae60;
+        text-align: right;
+    }
+    .info-table {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    .info-table td {
+        vertical-align: top;
+        padding: 5px;
+    }
+    .label {
+        font-weight: bold;
+        color: #555;
+        width: 150px;
+    }
+    .value {
+        color: #333;
+    }
+    .section-title {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 12px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid #2c3e50;
+        padding-bottom: 3px;
+        margin-top: 15px;
+    }
+    .amount-box {
+        border: 2px solid #2c3e50;
+        padding: 15px;
+        margin-top: 20px;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    .amount-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    .amount-words {
+        font-size: 11px;
+        color: #555;
+        margin-top: 5px;
+        font-style: italic;
+    }
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .details-table td {
+        padding: 8px 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .details-table .label-col {
+        width: 35%;
+        font-weight: bold;
+        color: #555;
+        background-color: #f9f9f9;
+    }
+    .details-table .value-col {
+        width: 65%;
+    }
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 9px;
+        color: #999;
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+    }
+    .stamp-box {
+        border: 1px dashed #999;
+        width: 120px;
+        height: 120px;
+        text-align: center;
+        line-height: 120px;
+        color: #999;
+        font-size: 10px;
+        display: inline-block;
+    }
+    .signature-line {
+        margin-top: 40px;
+        border-top: 1px solid #333;
+        display: inline-block;
+        padding-top: 5px;
+        min-width: 200px;
+        text-align: center;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 3px;
+        font-weight: bold;
+        font-size: 10px;
+        color: white;
+    }
+    .status-cleared {
+        background-color: #27ae60;
+    }
+    .status-pending {
+        background-color: #f39c12;
+    }
+    .status-bounced {
+        background-color: #e74c3c;
+    }
+</style>
+</head>
+<body>
+    <div class="header">
+        <table width="100%">
+            <tr>
+                <td width="60%">
+                    <div class="company-name">{!collection.Account__r.Name}</div>
+                    <div>Payment Receipt</div>
+                </td>
+                <td width="40%" style="text-align: right;">
+                    <div class="receipt-title">RECEIPT</div>
+                    <div><strong>Receipt #:</strong> {!collection.Receipt_Number__c}</div>
+                    <div><strong>Date:</strong>
+                        <apex:outputText value="{0,date,dd-MMM-yyyy}">
+                            <apex:param value="{!collection.Collection_Date__c}"/>
+                        </apex:outputText>
+                    </div>
+                    <div>
+                        <span class="status-badge {!IF(collection.Status__c == 'Cleared', 'status-cleared', IF(collection.Status__c == 'Bounced', 'status-bounced', 'status-pending'))}">
+                            {!collection.Status__c}
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-title">Received From</div>
+    <table class="details-table">
+        <tr>
+            <td class="label-col">Account Name</td>
+            <td class="value-col"><strong>{!collection.Account__r.Name}</strong></td>
+        </tr>
+        <tr>
+            <td class="label-col">Address</td>
+            <td class="value-col">
+                {!collection.Account__r.BillingStreet}<br/>
+                {!collection.Account__r.BillingCity}, {!collection.Account__r.BillingState} {!collection.Account__r.BillingPostalCode}
+            </td>
+        </tr>
+    </table>
+
+    <div class="amount-box">
+        <div style="font-size: 11px; color: #777;">Amount Received</div>
+        <div class="amount-value">
+            <apex:outputText value="{0, number, ###,##0.00}">
+                <apex:param value="{!collection.Amount__c}"/>
+            </apex:outputText>
+        </div>
+        <div class="amount-words">{!amountInWords} Only</div>
+    </div>
+
+    <div class="section-title">Payment Details</div>
+    <table class="details-table">
+        <tr>
+            <td class="label-col">Payment Mode</td>
+            <td class="value-col">{!collection.Payment_Mode__c}</td>
+        </tr>
+        <apex:outputPanel layout="none" rendered="{!collection.Payment_Mode__c == 'Cheque'}">
+            <tr>
+                <td class="label-col">Cheque Number</td>
+                <td class="value-col">{!collection.Cheque_Number__c}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Cheque Date</td>
+                <td class="value-col">
+                    <apex:outputText value="{0,date,dd-MMM-yyyy}">
+                        <apex:param value="{!collection.Cheque_Date__c}"/>
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">Bank Name</td>
+                <td class="value-col">{!collection.Bank_Name__c}</td>
+            </tr>
+        </apex:outputPanel>
+        <apex:outputPanel layout="none" rendered="{!OR(collection.Payment_Mode__c == 'NEFT', collection.Payment_Mode__c == 'RTGS', collection.Payment_Mode__c == 'Online')}">
+            <tr>
+                <td class="label-col">Transaction Reference</td>
+                <td class="value-col">{!collection.Transaction_Reference__c}</td>
+            </tr>
+        </apex:outputPanel>
+        <apex:outputPanel layout="none" rendered="{!collection.Payment_Mode__c == 'UPI'}">
+            <tr>
+                <td class="label-col">UPI Reference</td>
+                <td class="value-col">{!collection.UPI_Reference__c}</td>
+            </tr>
+        </apex:outputPanel>
+    </table>
+
+    <div class="section-title">Invoice Allocation</div>
+
+    <!-- Multi-invoice allocations table -->
+    <apex:outputPanel layout="none" rendered="{!hasAllocations}">
+        <table class="details-table" style="margin-bottom: 10px;">
+            <thead>
+                <tr style="background-color: #f5f5f5;">
+                    <th style="text-align: left; padding: 6px; font-weight: bold;">Invoice #</th>
+                    <th style="text-align: left; padding: 6px; font-weight: bold;">Invoice Date</th>
+                    <th style="text-align: right; padding: 6px; font-weight: bold;">Allocated Amount</th>
+                    <th style="text-align: right; padding: 6px; font-weight: bold;">Balance Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!allocations}" var="alloc">
+                    <tr>
+                        <td style="padding: 6px;">{!alloc.Invoice__r.Name}</td>
+                        <td style="padding: 6px;">
+                            <apex:outputText value="{0,date,dd-MMM-yyyy}">
+                                <apex:param value="{!alloc.Invoice__r.Invoice_Date__c}"/>
+                            </apex:outputText>
+                        </td>
+                        <td style="text-align: right; padding: 6px;">
+                            <apex:outputText value="{0, number, ###,##0.00}">
+                                <apex:param value="{!alloc.Allocated_Amount__c}"/>
+                            </apex:outputText>
+                        </td>
+                        <td style="text-align: right; padding: 6px;">
+                            <apex:outputText value="{0, number, ###,##0.00}">
+                                <apex:param value="{!alloc.Invoice__r.Balance_Due__c}"/>
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </apex:repeat>
+                <tr style="font-weight: bold; border-top: 2px solid #333;">
+                    <td colspan="2" style="padding: 6px;">Total Allocated to Invoices</td>
+                    <td style="text-align: right; padding: 6px;">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!totalAllocated}"/>
+                        </apex:outputText>
+                    </td>
+                    <td></td>
+                </tr>
+                <apex:outputPanel layout="none" rendered="{!hasOnAccountPortion}">
+                    <tr style="font-style: italic; color: #555;">
+                        <td colspan="2" style="padding: 6px;">On Account Credit</td>
+                        <td style="text-align: right; padding: 6px;">
+                            <apex:outputText value="{0, number, ###,##0.00}">
+                                <apex:param value="{!onAccountAmount}"/>
+                            </apex:outputText>
+                        </td>
+                        <td></td>
+                    </tr>
+                </apex:outputPanel>
+            </tbody>
+        </table>
+    </apex:outputPanel>
+
+    <!-- Legacy single-invoice display (when no allocations exist but Invoice is set) -->
+    <apex:outputPanel layout="none" rendered="{!AND(NOT(hasAllocations), NOT(ISBLANK(collection.Invoice__c)))}">
+        <table class="details-table">
+            <tr>
+                <td class="label-col">Invoice Number</td>
+                <td class="value-col">{!collection.Invoice__r.Name}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Invoice Date</td>
+                <td class="value-col">
+                    <apex:outputText value="{0,date,dd-MMM-yyyy}">
+                        <apex:param value="{!collection.Invoice__r.Invoice_Date__c}"/>
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">Invoice Amount</td>
+                <td class="value-col">
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!collection.Invoice__r.Net_Amount__c}"/>
+                    </apex:outputText>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">Balance Due After Payment</td>
+                <td class="value-col">
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!balanceDue}"/>
+                    </apex:outputText>
+                </td>
+            </tr>
+        </table>
+    </apex:outputPanel>
+
+    <!-- Pure On Account payment (no allocations, no invoice) -->
+    <apex:outputPanel layout="none" rendered="{!AND(NOT(hasAllocations), ISBLANK(collection.Invoice__c))}">
+        <table class="details-table">
+            <tr>
+                <td class="label-col" colspan="2">
+                    <em>This is an on-account payment (not linked to a specific invoice).</em>
+                </td>
+            </tr>
+        </table>
+    </apex:outputPanel>
+
+    <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(collection.Notes__c))}">
+        <div class="section-title">Notes</div>
+        <div style="padding: 5px; font-size: 10px;">{!collection.Notes__c}</div>
+    </apex:outputPanel>
+
+    <div style="margin-top: 40px;">
+        <table width="100%">
+            <tr>
+                <td width="33%" style="text-align: center;">
+                    <div class="stamp-box">Company Stamp</div>
+                </td>
+                <td width="34%" style="text-align: center;">
+                    <div style="font-size: 10px; color: #777;">Collected By</div>
+                    <div style="margin-top: 5px;"><strong>{!collection.Salesperson__r.Name}</strong></div>
+                    <div class="signature-line">Salesperson Signature</div>
+                </td>
+                <td width="33%" style="text-align: right;">
+                    <div class="signature-line">Authorized Signatory</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        This is a computer-generated receipt and does not require a physical signature.
+        | Receipt ID: {!collection.Name} | Generated on:
+        <apex:outputText value="{0,date,dd-MMM-yyyy}">
+            <apex:param value="{!TODAY()}"/>
+        </apex:outputText>
+    </div>
+</body>
+</html>
+</apex:page>

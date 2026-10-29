@@ -1,0 +1,904 @@
+<template>
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1 class="admin-title">Expense Policy Manager</h1>
+            <div class="tab-bar">
+                <button class={rulesTabClass} onclick={handleTabChange} data-tab="rules">Eligibility Rules</button>
+                <button class={cityTiersTabClass} onclick={handleTabChange} data-tab="cityTiers">City Tiers</button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="spinner-overlay">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error Message -->
+        <template if:true={errorMessage}>
+            <div class="message-bar error">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="inverse"></lightning-icon>
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <!-- ==================== RULES TAB ==================== -->
+        <template if:true={isRulesTab}>
+            <div class="two-panel-layout">
+                <!-- Left Panel: Rules List -->
+                <div class="left-panel">
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Rules</h2>
+                            <lightning-button
+                                label="New Rule"
+                                variant="brand"
+                                icon-name="utility:add"
+                                onclick={handleNewRule}
+                            ></lightning-button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <lightning-combobox
+                                    label="Band"
+                                    value={bandFilter}
+                                    options={bandOptions}
+                                    onchange={handleBandFilter}
+                                    variant="label-hidden"
+                                    placeholder="All Bands"
+                                ></lightning-combobox>
+                            </div>
+                            <div class="filter-item">
+                                <lightning-combobox
+                                    label="Type"
+                                    value={typeFilter}
+                                    options={expenseTypeOptions}
+                                    onchange={handleTypeFilter}
+                                    variant="label-hidden"
+                                    placeholder="All Types"
+                                ></lightning-combobox>
+                            </div>
+                            <div class="filter-item">
+                                <lightning-combobox
+                                    label="Duty"
+                                    value={dutyTypeFilter}
+                                    options={dutyTypeFilterOptions}
+                                    onchange={handleDutyTypeFilter}
+                                    variant="label-hidden"
+                                    placeholder="All Duty Types"
+                                ></lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- Rules Table -->
+                        <div class="rules-table-container">
+                            <table class="rules-table">
+                                <thead>
+                                    <tr>
+                                        <th>Band</th>
+                                        <th>Type</th>
+                                        <th>Duty</th>
+                                        <th>Rate Type</th>
+                                        <th>Rate</th>
+                                        <th>Modes</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template if:true={hasRules}>
+                                        <template for:each={filteredRules} for:item="rule">
+                                            <tr key={rule.Id}
+                                                class={rule.rowClass}
+                                                data-id={rule.Id}
+                                                onclick={handleSelectRule}>
+                                                <td>{rule.Band__c}</td>
+                                                <td>{rule.Expense_Type__c}</td>
+                                                <td>
+                                                    <span class={rule.dutyBadgeClass}>{rule.Travel_Type__c}</span>
+                                                </td>
+                                                <td>{rule.Rate_Type__c}</td>
+                                                <td>{rule.Rate_Amount__c}</td>
+                                                <td>{rule.modeCount}</td>
+                                                <td>
+                                                    <span class={rule.activeClass}>{rule.activeLabel}</span>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasRules}>
+                                        <tr>
+                                            <td colspan="7" class="empty-message">No rules found. Click "New Rule" to create one.</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Rule Editor -->
+                <div class="right-panel">
+                    <template if:true={hasSelectedRule}>
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h2 class="panel-title">
+                                    <template if:true={isNewRule}>New Rule</template>
+                                    <template if:false={isNewRule}>Edit Rule</template>
+                                </h2>
+                                <div class="header-actions">
+                                    <lightning-button
+                                        label="Cancel"
+                                        onclick={handleCancel}
+                                        class="slds-m-right_x-small"
+                                    ></lightning-button>
+                                    <template if:false={isNewRule}>
+                                        <lightning-button
+                                            label="Clone"
+                                            icon-name="utility:copy"
+                                            onclick={handleCloneRule}
+                                            class="slds-m-right_x-small"
+                                        ></lightning-button>
+                                        <lightning-button
+                                            label="Delete"
+                                            variant="destructive"
+                                            icon-name="utility:delete"
+                                            onclick={handleDeleteRule}
+                                            class="slds-m-right_x-small"
+                                        ></lightning-button>
+                                    </template>
+                                    <lightning-button
+                                        label="Save"
+                                        variant="brand"
+                                        icon-name="utility:save"
+                                        onclick={handleSaveRule}
+                                    ></lightning-button>
+                                </div>
+                            </div>
+
+                            <!-- Rule Details Section -->
+                            <div class="editor-section">
+                                <h3 class="section-title">Rule Details</h3>
+                                <div class="form-grid">
+                                    <div class="form-field">
+                                        <lightning-combobox
+                                            label="Band"
+                                            value={selectedRule.Band__c}
+                                            options={bandFormOptions}
+                                            onchange={handleFieldChange}
+                                            data-field="Band__c"
+                                            required
+                                        ></lightning-combobox>
+                                    </div>
+                                    <div class="form-field">
+                                        <lightning-combobox
+                                            label="Expense Type"
+                                            value={selectedRule.Expense_Type__c}
+                                            options={expenseTypeFormOptions}
+                                            onchange={handleExpenseTypeChange}
+                                            data-field="Expense_Type__c"
+                                            required
+                                        ></lightning-combobox>
+                                    </div>
+                                    <template if:true={showDutyType}>
+                                        <div class="form-field">
+                                            <lightning-combobox
+                                                label="Duty Type"
+                                                value={selectedRule.Travel_Type__c}
+                                                options={dutyTypeOptions}
+                                                onchange={handleFieldChange}
+                                                data-field="Travel_Type__c"
+                                            ></lightning-combobox>
+                                        </div>
+                                    </template>
+                                    <div class="form-field">
+                                        <lightning-combobox
+                                            label="Category"
+                                            value={selectedRule.Expense_Category__c}
+                                            options={categoryOptions}
+                                            onchange={handleFieldChange}
+                                            data-field="Expense_Category__c"
+                                        ></lightning-combobox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Travel Modes Section -->
+                            <template if:true={showTravelModes}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">Allowed Travel Modes</h3>
+                                    <div class="travel-mode-groups">
+                                        <template for:each={travelModeCheckboxes} for:item="group">
+                                            <div key={group.groupKey} class="mode-group">
+                                                <h4 class="mode-group-title">{group.group}</h4>
+                                                <div class="mode-checkboxes">
+                                                    <template for:each={group.modes} for:item="mode">
+                                                        <div key={mode.key} class="mode-checkbox">
+                                                            <lightning-input
+                                                                type="checkbox"
+                                                                label={mode.label}
+                                                                checked={mode.checked}
+                                                                data-mode={mode.value}
+                                                                onchange={handleTravelModeToggle}
+                                                            ></lightning-input>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Rate Configuration Section -->
+                            <div class="editor-section">
+                                <h3 class="section-title">Rate Configuration</h3>
+                                <div class="form-grid">
+                                    <div class="form-field">
+                                        <lightning-combobox
+                                            label="Rate Type"
+                                            value={selectedRule.Rate_Type__c}
+                                            options={rateTypeOptions}
+                                            onchange={handleFieldChange}
+                                            data-field="Rate_Type__c"
+                                        ></lightning-combobox>
+                                    </div>
+                                    <template if:true={showRateAmount}>
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Rate Amount"
+                                                value={selectedRule.Rate_Amount__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Rate_Amount__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Distance Settings -->
+                            <template if:true={showDistanceSettings}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">Distance Settings</h3>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Min Distance (KM)"
+                                                value={selectedRule.Min_Distance_KM__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Min_Distance_KM__c"
+                                                step="1"
+                                            ></lightning-input>
+                                        </div>
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Daily KM Limit"
+                                                value={selectedRule.Daily_KM_Limit__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Daily_KM_Limit__c"
+                                                step="1"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Mode Rate Configs Table -->
+                            <template if:true={showTravelModes}>
+                                <template if:true={hasModeRateConfigs}>
+                                    <div class="editor-section">
+                                        <h3 class="section-title">Mode Rate Configuration</h3>
+                                        <table class="config-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mode</th>
+                                                    <th>Rate Type</th>
+                                                    <th>Rate/KM</th>
+                                                    <th>Max Amount</th>
+                                                    <th>Slabs</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={modeRateConfigs} for:item="cfg">
+                                                    <tr key={cfg.key}>
+                                                        <td class="mode-label">{cfg.mode}</td>
+                                                        <td>
+                                                            <lightning-combobox
+                                                                value={cfg.rateType}
+                                                                options={slabRateTypeOptions}
+                                                                data-mode={cfg.mode}
+                                                                data-field="Rate_Type__c"
+                                                                onchange={handleSaveModeConfig}
+                                                                variant="label-hidden"
+                                                            ></lightning-combobox>
+                                                        </td>
+                                                        <td>
+                                                            <template if:true={cfg.isPerKm}>
+                                                                <lightning-input
+                                                                    type="number"
+                                                                    value={cfg.rateAmount}
+                                                                    data-mode={cfg.mode}
+                                                                    data-field="Rate_Amount__c"
+                                                                    onchange={handleSaveModeConfig}
+                                                                    variant="label-hidden"
+                                                                    step="0.01"
+                                                                ></lightning-input>
+                                                            </template>
+                                                            <template if:false={cfg.isPerKm}>
+                                                                <span class="na-text">—</span>
+                                                            </template>
+                                                        </td>
+                                                        <td>
+                                                            <lightning-input
+                                                                type="number"
+                                                                value={cfg.maxAmount}
+                                                                data-mode={cfg.mode}
+                                                                data-field="Max_Amount__c"
+                                                                onchange={handleSaveModeConfig}
+                                                                variant="label-hidden"
+                                                                step="0.01"
+                                                            ></lightning-input>
+                                                        </td>
+                                                        <td>
+                                                            <template if:true={cfg.isPerKm}>
+                                                                <span class="slab-count">{cfg.slabCount} slabs</span>
+                                                            </template>
+                                                        </td>
+                                                        <td>
+                                                            <template if:true={cfg.isPerKm}>
+                                                                <lightning-button
+                                                                    label="Slabs"
+                                                                    variant="base"
+                                                                    icon-name="utility:edit"
+                                                                    data-mode={cfg.mode}
+                                                                    onclick={handleEditSlabs}
+                                                                ></lightning-button>
+                                                            </template>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- City Tier Limits (Lodging) -->
+                            <template if:true={showCityTierLimits}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">City Tier Limits</h3>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Tier 1 Limit"
+                                                value={selectedRule.City_Tier_1_Limit__c}
+                                                onchange={handleFieldChange}
+                                                data-field="City_Tier_1_Limit__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Tier 2 Limit"
+                                                value={selectedRule.City_Tier_2_Limit__c}
+                                                onchange={handleFieldChange}
+                                                data-field="City_Tier_2_Limit__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Tier 3 Limit"
+                                                value={selectedRule.City_Tier_3_Limit__c}
+                                                onchange={handleFieldChange}
+                                                data-field="City_Tier_3_Limit__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Limits Section -->
+                            <template if:true={showMaxPerDay}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">Limits</h3>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Max Per Day"
+                                                value={selectedRule.Max_Per_Day__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Max_Per_Day__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:true={showMaxPerMonth}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">Limits</h3>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Max Per Month"
+                                                value={selectedRule.Max_Per_Month__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Max_Per_Month__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Receipt Section -->
+                            <template if:true={showReceiptFields}>
+                                <div class="editor-section">
+                                    <h3 class="section-title">Receipt Settings</h3>
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="checkbox"
+                                                label="Receipt Required"
+                                                checked={selectedRule.Receipt_Required__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Receipt_Required__c"
+                                            ></lightning-input>
+                                        </div>
+                                        <div class="form-field">
+                                            <lightning-input
+                                                type="number"
+                                                label="Receipt Threshold"
+                                                value={selectedRule.Receipt_Threshold__c}
+                                                onchange={handleFieldChange}
+                                                data-field="Receipt_Threshold__c"
+                                                formatter="currency"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Policy Dates -->
+                            <div class="editor-section">
+                                <h3 class="section-title">Policy Dates</h3>
+                                <div class="form-grid">
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="date"
+                                            label="Effective From"
+                                            value={selectedRule.Effective_From__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Effective_From__c"
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="date"
+                                            label="Effective To"
+                                            value={selectedRule.Effective_To__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Effective_To__c"
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Options -->
+                            <div class="editor-section">
+                                <h3 class="section-title">Options</h3>
+                                <div class="form-grid options-grid">
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="checkbox"
+                                            label="Auto Create"
+                                            checked={selectedRule.Auto_Create__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Auto_Create__c"
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="checkbox"
+                                            label="Active"
+                                            checked={selectedRule.Is_Active__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Is_Active__c"
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="checkbox"
+                                            label="Mandatory Remarks"
+                                            checked={selectedRule.Mandatory_Remarks__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Mandatory_Remarks__c"
+                                        ></lightning-input>
+                                    </div>
+                                    <div class="form-field">
+                                        <lightning-input
+                                            type="number"
+                                            label="Sort Order"
+                                            value={selectedRule.Sort_Order__c}
+                                            onchange={handleFieldChange}
+                                            data-field="Sort_Order__c"
+                                            step="1"
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:false={hasSelectedRule}>
+                        <div class="panel-card empty-editor">
+                            <div class="empty-state">
+                                <lightning-icon icon-name="utility:edit" size="large"></lightning-icon>
+                                <p>Select a rule to edit or click "New Rule" to create one.</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- ==================== CITY TIERS TAB ==================== -->
+        <template if:true={isCityTiersTab}>
+            <div class="panel-card city-tier-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">City Tiers</h2>
+                    <lightning-button
+                        label="New City Tier"
+                        variant="brand"
+                        icon-name="utility:add"
+                        onclick={handleNewCityTier}
+                    ></lightning-button>
+                </div>
+
+                <div class="city-tier-container">
+                    <table class="rules-table city-tier-table">
+                        <thead>
+                            <tr>
+                                <th>City Name</th>
+                                <th>Tier</th>
+                                <th>State</th>
+                                <th>Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasCityTiers}>
+                                <template for:each={cityTiers} for:item="tier" for:index="tierIndex">
+                                    <tr key={tier._key}>
+                                        <td>
+                                            <template if:true={tier.isEditing}>
+                                                <lightning-input
+                                                    type="text"
+                                                    value={tier.Name}
+                                                    data-index={tierIndex}
+                                                    data-field="Name"
+                                                    onchange={handleCityTierFieldChange}
+                                                    variant="label-hidden"
+                                                ></lightning-input>
+                                            </template>
+                                            <template if:false={tier.isEditing}>
+                                                {tier.Name}
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={tier.isEditing}>
+                                                <lightning-combobox
+                                                    value={tier.Tier__c}
+                                                    options={tierOptions}
+                                                    data-index={tierIndex}
+                                                    data-field="Tier__c"
+                                                    onchange={handleCityTierFieldChange}
+                                                    variant="label-hidden"
+                                                ></lightning-combobox>
+                                            </template>
+                                            <template if:false={tier.isEditing}>
+                                                {tier.Tier__c}
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={tier.isEditing}>
+                                                <lightning-input
+                                                    type="text"
+                                                    value={tier.State__c}
+                                                    data-index={tierIndex}
+                                                    data-field="State__c"
+                                                    onchange={handleCityTierFieldChange}
+                                                    variant="label-hidden"
+                                                ></lightning-input>
+                                            </template>
+                                            <template if:false={tier.isEditing}>
+                                                {tier.State__c}
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={tier.isEditing}>
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    checked={tier.Is_Active__c}
+                                                    data-index={tierIndex}
+                                                    data-field="Is_Active__c"
+                                                    onchange={handleCityTierFieldChange}
+                                                    variant="label-hidden"
+                                                ></lightning-input>
+                                            </template>
+                                            <template if:false={tier.isEditing}>
+                                                <span class={tier.Is_Active__c}>
+                                                    <template if:true={tier.Is_Active__c}>Active</template>
+                                                    <template if:false={tier.Is_Active__c}>Inactive</template>
+                                                </span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={tier.isEditing}>
+                                                <lightning-button-group>
+                                                    <lightning-button
+                                                        label="Save"
+                                                        variant="brand"
+                                                        data-index={tierIndex}
+                                                        onclick={handleSaveCityTier}
+                                                    ></lightning-button>
+                                                    <lightning-button
+                                                        label="Cancel"
+                                                        data-index={tierIndex}
+                                                        onclick={handleCancelCityTierEdit}
+                                                    ></lightning-button>
+                                                </lightning-button-group>
+                                            </template>
+                                            <template if:false={tier.isEditing}>
+                                                <lightning-button-group>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:edit"
+                                                        alternative-text="Edit"
+                                                        data-index={tierIndex}
+                                                        onclick={handleEditCityTier}
+                                                    ></lightning-button-icon>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:delete"
+                                                        alternative-text="Delete"
+                                                        data-index={tierIndex}
+                                                        onclick={handleDeleteCityTier}
+                                                        variant="destructive"
+                                                    ></lightning-button-icon>
+                                                </lightning-button-group>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasCityTiers}>
+                                <tr>
+                                    <td colspan="5" class="empty-message">No city tiers configured. Click "New City Tier" to add one.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+        <!-- ==================== SLAB EDITOR MODAL ==================== -->
+        <template if:true={showSlabModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open modal-container">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header modal-header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={handleCloseSlabModal}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-modal__title">{slabModalTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content modal-body">
+                        <table class="slab-table">
+                            <thead>
+                                <tr>
+                                    <th>From KM</th>
+                                    <th>To KM</th>
+                                    <th>Rate (per KM)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={currentModeSlabs} for:item="slab">
+                                    <tr key={slab.index}>
+                                        <td>
+                                            <lightning-input
+                                                type="number"
+                                                value={slab.Distance_From__c}
+                                                data-index={slab.index}
+                                                data-field="Distance_From__c"
+                                                onchange={handleSlabFieldChange}
+                                                variant="label-hidden"
+                                                step="1"
+                                            ></lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-input
+                                                type="number"
+                                                value={slab.Distance_To__c}
+                                                data-index={slab.index}
+                                                data-field="Distance_To__c"
+                                                onchange={handleSlabFieldChange}
+                                                variant="label-hidden"
+                                                step="1"
+                                            ></lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-input
+                                                type="number"
+                                                value={slab.Rate_Amount__c}
+                                                data-index={slab.index}
+                                                data-field="Rate_Amount__c"
+                                                onchange={handleSlabFieldChange}
+                                                variant="label-hidden"
+                                                step="0.01"
+                                            ></lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-button-icon
+                                                icon-name="utility:delete"
+                                                alternative-text="Remove"
+                                                data-index={slab.index}
+                                                onclick={handleRemoveSlab}
+                                                variant="destructive"
+                                            ></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <div class="slab-actions">
+                            <lightning-button
+                                label="Add Slab"
+                                icon-name="utility:add"
+                                onclick={handleAddSlab}
+                            ></lightning-button>
+                        </div>
+
+                        <!-- Slab Preview -->
+                        <template if:true={hasSlabPreview}>
+                            <div class="slab-preview">
+                                <h4 class="preview-title">Preview: {slabPreview.distance} KM trip</h4>
+                                <table class="preview-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Range</th>
+                                            <th>KM</th>
+                                            <th>Rate</th>
+                                            <th>Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={slabPreview.breakdown} for:item="item">
+                                            <tr key={item.key}>
+                                                <td>{item.range}</td>
+                                                <td>{item.km}</td>
+                                                <td>{item.rate}</td>
+                                                <td>{item.cost}</td>
+                                            </tr>
+                                        </template>
+                                        <tr class="total-row">
+                                            <td colspan="3"><strong>Total</strong></td>
+                                            <td><strong>{slabPreview.total}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer modal-footer">
+                        <lightning-button
+                            label="Close"
+                            onclick={handleCloseSlabModal}
+                        ></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- ==================== CLONE MODAL ==================== -->
+        <template if:true={showCloneModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open modal-container">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header modal-header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={handleCloneCancel}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-modal__title">Clone Rule</h2>
+                    </header>
+                    <div class="slds-modal__content modal-body slds-p-around_medium">
+                        <p class="slds-m-bottom_medium">Clone this rule to a different band or duty type:</p>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <lightning-combobox
+                                    label="Target Band"
+                                    value={cloneBand}
+                                    options={bandFormOptions}
+                                    onchange={handleCloneBandChange}
+                                    required
+                                ></lightning-combobox>
+                            </div>
+                            <div class="form-field">
+                                <lightning-combobox
+                                    label="Target Duty Type"
+                                    value={cloneDutyType}
+                                    options={dutyTypeOptions}
+                                    onchange={handleCloneDutyTypeChange}
+                                ></lightning-combobox>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer modal-footer">
+                        <lightning-button
+                            label="Cancel"
+                            onclick={handleCloneCancel}
+                            class="slds-m-right_x-small"
+                        ></lightning-button>
+                        <lightning-button
+                            label="Clone"
+                            variant="brand"
+                            onclick={handleCloneConfirm}
+                        ></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- ==================== DELETE CONFIRMATION MODAL ==================== -->
+        <template if:true={showDeleteConfirm}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open modal-container">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header modal-header">
+                        <h2 class="slds-modal__title">Confirm Delete</h2>
+                    </header>
+                    <div class="slds-modal__content modal-body slds-p-around_medium">
+                        <p>Are you sure you want to delete this eligibility rule? This action cannot be undone. All associated rate slabs will also be deleted.</p>
+                    </div>
+                    <footer class="slds-modal__footer modal-footer">
+                        <lightning-button
+                            label="Cancel"
+                            onclick={handleCancelDelete}
+                            class="slds-m-right_x-small"
+                        ></lightning-button>
+                        <lightning-button
+                            label="Delete"
+                            variant="destructive"
+                            onclick={handleConfirmDelete}
+                        ></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,98 @@
+<template>
+    <div class="dms-lg">
+        <div class="dms-lg__body">
+            <template if:true={error}>
+                <div class="dms-lg__err">{error}</div>
+            </template>
+
+            <!-- Header + controls -->
+            <div class="dms-lg__head">
+                <div>
+                    <h2 class="dms-lg__title">Statement of Account</h2>
+                    <p class="dms-lg__sub">{accountName} · {periodLabel}</p>
+                </div>
+                <div class="dms-lg__controls">
+                    <div class="dms-lg__field">
+                        <label class="dms-lg__lbl">From</label>
+                        <input type="date" class="dms-lg__date" value={fromDate} onchange={handleFrom} />
+                    </div>
+                    <div class="dms-lg__field">
+                        <label class="dms-lg__lbl">To</label>
+                        <input type="date" class="dms-lg__date" value={toDate} onchange={handleTo} />
+                    </div>
+                    <button class="dms-lg__btn" type="button" onclick={generate} disabled={loading}>
+                        <template if:true={loading}>Generating…</template>
+                        <template if:false={loading}>Generate</template>
+                    </button>
+                    <button class="dms-lg__btn dms-lg__btn_ghost" type="button" onclick={exportCsv} disabled={exportDisabled}>
+                        <lightning-icon icon-name="utility:download" size="xx-small"></lightning-icon>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary KPIs -->
+            <div class="dms-lg__kpis">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-lg-kpi">
+                        <span class="dms-lg-kpi__lbl">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Statement table -->
+            <div class="dms-lg__tbl">
+                <div class="dms-lg__thead">
+                    <span>Date</span><span>Particulars</span><span>Reference</span>
+                    <span class="dms-lg__num">Debit</span><span class="dms-lg__num">Credit</span>
+                    <span class="dms-lg__num">Balance</span>
+                </div>
+
+                <div class="dms-lg__trow dms-lg__trow_open">
+                    <span></span><span class="dms-lg__strong">Opening Balance</span><span></span>
+                    <span class="dms-lg__num"></span><span class="dms-lg__num"></span>
+                    <span class="dms-lg__num dms-lg__strong">{openingLabel}</span>
+                </div>
+
+                <template for:each={rows} for:item="r">
+                    <div key={r.key} class="dms-lg__trow">
+                        <span data-label="Date">{r.dateLabel}</span>
+                        <span data-label="Particulars">
+                            <span class="dms-lg__strong">{r.particulars}</span>
+                            <span class="dms-lg__type">{r.type}</span>
+                        </span>
+                        <span class="dms-lg__muted" data-label="Reference">{r.reference}</span>
+                        <span class="dms-lg__num dms-lg__debit" data-label="Debit">{r.debitLabel}</span>
+                        <span class="dms-lg__num dms-lg__credit" data-label="Credit">{r.creditLabel}</span>
+                        <span class="dms-lg__num dms-lg__strong" data-label="Balance">{r.balanceLabel}</span>
+                    </div>
+                </template>
+
+                <template if:false={hasRows}>
+                    <div class="dms-lg__empty">No transactions in this period.</div>
+                </template>
+
+                <div class="dms-lg__trow dms-lg__trow_close">
+                    <span></span><span class="dms-lg__strong">Closing Balance</span><span></span>
+                    <span class="dms-lg__num dms-lg__strong">{debitLabel}</span>
+                    <span class="dms-lg__num dms-lg__strong">{creditLabel}</span>
+                    <span class="dms-lg__num dms-lg__strong">{closingLabel}</span>
+                </div>
+            </div>
+
+            <!-- Aging (bonus) -->
+            <template if:true={hasBuckets}>
+                <p class="dms-lg__section">Outstanding Aging</p>
+                <div class="dms-lg__aging">
+                    <template for:each={buckets} for:item="b">
+                        <div key={b.label} class="dms-lg-age">
+                            <span class="dms-lg-age__lbl">{b.label}</span>
+                            <span class="dms-lg-age__val">{b.value}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

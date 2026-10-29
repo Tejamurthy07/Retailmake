@@ -1,0 +1,49 @@
+<template>
+    <div class={nodeClass}>
+        <div class={levelClass}>
+            <div class="hierarchy-card-left">
+                <template if:true={hasChildren}>
+                    <button class="hierarchy-toggle" onclick={handleToggle}>
+                        <lightning-icon icon-name={toggleIcon} size="xx-small"></lightning-icon>
+                    </button>
+                </template>
+                <template if:false={hasChildren}>
+                    <span class="hierarchy-toggle-spacer"></span>
+                </template>
+                <div class="hierarchy-avatar">
+                    <span class="hierarchy-initials">{initials}</span>
+                </div>
+                <div class="hierarchy-info" onclick={handleNodeClick}>
+                    <span class="hierarchy-name">{node.name}</span>
+                    <span class="hierarchy-meta">
+                        {designationLabel}
+                        <template if:true={territoryLabel}>
+                            &bull; {territoryLabel}
+                        </template>
+                    </span>
+                </div>
+            </div>
+            <div class="hierarchy-card-right">
+                <template if:true={node.code}>
+                    <span class="hierarchy-code">{node.code}</span>
+                </template>
+                <template if:true={hasChildren}>
+                    <span class="hierarchy-child-count">{childCountLabel}</span>
+                </template>
+            </div>
+        </div>
+        <template if:true={isExpanded}>
+            <template if:true={hasChildren}>
+                <div class="hierarchy-children">
+                    <template for:each={children} for:item="child">
+                        <c-employee-hierarchy-node
+                            key={child.id}
+                            node={child}
+                            highlighted-id={highlightedId}>
+                        </c-employee-hierarchy-node>
+                    </template>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

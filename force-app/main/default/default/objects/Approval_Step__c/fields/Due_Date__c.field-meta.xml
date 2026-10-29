@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Due_Date__c</fullName>
+    <inlineHelpText>When this step escalates if no decision is made. Derived from the rule&apos;s Escalation Hours.</inlineHelpText>
+    <label>Due Date</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

@@ -1,0 +1,305 @@
+<template>
+    <lightning-card title="Scheme Viewer" icon-name="standard:promotions">
+        <div class="slds-p-around_medium">
+
+            <!-- Filters -->
+            <div class="filter-section slds-m-bottom_medium">
+                <div class="slds-grid slds-gutters slds-grid_vertical-align-end">
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-combobox
+                            label="Scheme Category"
+                            value={filterCategory}
+                            options={schemeCategoryOptions}
+                            placeholder="All Categories"
+                            onchange={handleCategoryFilter}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-combobox
+                            label="Scheme Type"
+                            value={filterType}
+                            options={schemeTypeOptions}
+                            placeholder="All Types"
+                            onchange={handleTypeFilter}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-combobox
+                            label="Channel"
+                            value={filterChannel}
+                            options={channelOptions}
+                            placeholder="All Channels"
+                            onchange={handleChannelFilter}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-button
+                            variant="neutral"
+                            label="Clear Filters"
+                            icon-name="utility:clear"
+                            onclick={handleClearFilters}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-grid slds-gutters">
+                <!-- Schemes List (Left Panel) -->
+                <div class="slds-col slds-size_1-of-2">
+                    <div class="schemes-list-panel">
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">
+                            Active Schemes ({filteredSchemes.length})
+                        </h3>
+                        <template if:true={hasSchemes}>
+                            <div class="schemes-scroll-container">
+                                <template for:each={filteredSchemes} for:item="scheme">
+                                    <div class={scheme.cardClass} key={scheme.id}
+                                        data-scheme-id={scheme.id} onclick={handleSchemeSelect}>
+                                        <div class="scheme-card-header">
+                                            <div class="scheme-type-badge" style={scheme.categoryBadgeStyle}>
+                                                {scheme.categoryShort}
+                                            </div>
+                                            <div class="scheme-info">
+                                                <span class="scheme-name">{scheme.name}</span>
+                                                <span class="scheme-type-label">{scheme.category} &bull; {scheme.schemeType}</span>
+                                            </div>
+                                        </div>
+                                        <div class="scheme-card-body">
+                                            <p class="scheme-benefit">{scheme.benefitSummary}</p>
+                                            <p class="scheme-trigger">{scheme.triggerSummary}</p>
+                                            <div class="scheme-dates">
+                                                <lightning-icon icon-name="utility:date_input" size="xx-small"
+                                                    class="slds-m-right_xx-small"></lightning-icon>
+                                                <span>{scheme.validFrom} - {scheme.validTo}</span>
+                                            </div>
+                                        </div>
+                                        <template if:true={scheme.productBadges.length}>
+                                            <div class="scheme-products">
+                                                <template for:each={scheme.productBadges} for:item="product">
+                                                    <lightning-badge label={product} key={product}
+                                                        class="product-badge"></lightning-badge>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasSchemes}>
+                            <div class="empty-state">
+                                <lightning-icon icon-name="utility:info" size="large"></lightning-icon>
+                                <p class="slds-m-top_small">No active schemes found</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Scheme Details & Calculator (Right Panel) -->
+                <div class="slds-col slds-size_1-of-2">
+                    <!-- Scheme Details -->
+                    <template if:true={selectedScheme}>
+                        <div class="scheme-detail-panel slds-m-bottom_medium">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">Scheme Details</h3>
+                            <div class="detail-header">
+                                <h4 class="detail-title">{selectedScheme.name}</h4>
+                                <span class="detail-type-badge" style={selectedScheme.categoryBadgeStyle}>
+                                    {selectedScheme.category}
+                                </span>
+                            </div>
+                            <div class="detail-body">
+                                <div class="detail-row">
+                                    <span class="detail-label">Code</span>
+                                    <span class="detail-value">{selectedScheme.code}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Category</span>
+                                    <span class="detail-value">{selectedScheme.category}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trigger Type</span>
+                                    <span class="detail-value">{selectedScheme.schemeType}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Valid Period</span>
+                                    <span class="detail-value">{selectedScheme.validFrom} - {selectedScheme.validTo}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Channel</span>
+                                    <span class="detail-value">{selectedScheme.channel}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Benefit</span>
+                                    <span class="detail-value benefit-highlight">{selectedScheme.benefitSummary}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trigger</span>
+                                    <span class="detail-value">{selectedScheme.triggerSummary}</span>
+                                </div>
+                                <template if:true={selectedScheme.description}>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Description</span>
+                                        <span class="detail-value">{selectedScheme.description}</span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Buy Products -->
+                            <template if:true={selectedScheme.hasBuyProducts}>
+                                <h4 class="slds-text-title_caps slds-m-top_medium slds-m-bottom_x-small">
+                                    Scheme Materials (Buy)
+                                </h4>
+                                <div class="product-list">
+                                    <template for:each={selectedScheme.buyProducts} for:item="product">
+                                        <div class="product-item" key={product.id}>
+                                            <span class="product-name">{product.name}</span>
+                                            <span class="product-sku">Min Qty: {product.minQty} | {product.sku}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Get Products (for Free Products category) -->
+                            <template if:true={selectedScheme.hasGetProducts}>
+                                <h4 class="slds-text-title_caps slds-m-top_medium slds-m-bottom_x-small">
+                                    Free/Get Products
+                                </h4>
+                                <div class="product-list">
+                                    <template for:each={selectedScheme.getProducts} for:item="product">
+                                        <div class="product-item" key={product.id}>
+                                            <span class="product-name">{product.name}</span>
+                                            <span class="product-sku">{product.sku}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Slabs Table -->
+                            <template if:true={selectedScheme.hasSlabs}>
+                                <h4 class="slds-text-title_caps slds-m-top_medium slds-m-bottom_x-small">
+                                    Slab Tiers
+                                </h4>
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slab-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Min</th>
+                                            <th>Max</th>
+                                            <th>Benefit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={selectedScheme.slabs} for:item="slab">
+                                            <tr key={slab.id}>
+                                                <td>{slab.discountType}</td>
+                                                <td>{slab.minValue}</td>
+                                                <td>{slab.maxValue}</td>
+                                                <td>
+                                                    <template if:true={slab.discountPercent}>{slab.discountPercent}%</template>
+                                                    <template if:true={slab.freeQty}>{slab.freeQty} free {slab.freeProduct}</template>
+                                                    <template if:true={slab.priceDiscount}>Rs.{slab.priceDiscount}</template>
+                                                    <template if:true={slab.rewardPoints}>{slab.rewardPoints} pts</template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Scheme Calculator -->
+                    <div class="calculator-panel">
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon icon-name="utility:calculator" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            Scheme Calculator
+                        </h3>
+                        <template if:true={selectedScheme}>
+                            <div class="calculator-form">
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input
+                                            type="number"
+                                            label="Quantity"
+                                            value={calculatorQty}
+                                            onchange={handleCalculatorQtyChange}
+                                            min="0">
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input
+                                            type="number"
+                                            label="Order Value"
+                                            value={calculatorValue}
+                                            onchange={handleCalculatorValueChange}
+                                            min="0"
+                                            formatter="currency"
+                                            step="0.01">
+                                        </lightning-input>
+                                    </div>
+                                </div>
+                                <div class="slds-m-top_small slds-text-align_center">
+                                    <lightning-button
+                                        variant="brand"
+                                        label="Calculate"
+                                        icon-name="utility:calculator"
+                                        onclick={handleCalculate}>
+                                    </lightning-button>
+                                </div>
+
+                                <template if:true={calculatorResult}>
+                                    <div class="calculator-result slds-m-top_medium">
+                                        <h4 class="result-title">Calculation Result</h4>
+                                        <div class="result-grid">
+                                            <div class="result-item">
+                                                <span class="result-label">Gross Amount</span>
+                                                <span class="result-value">{calculatorResult.grossAmountFormatted}</span>
+                                            </div>
+                                            <template if:true={calculatorResult.hasDiscount}>
+                                                <div class="result-item highlight">
+                                                    <span class="result-label">Discount</span>
+                                                    <span class="result-value discount">{calculatorResult.discountFormatted}</span>
+                                                </div>
+                                            </template>
+                                            <template if:true={calculatorResult.hasFreeProduct}>
+                                                <div class="result-item highlight">
+                                                    <span class="result-label">Free Quantity</span>
+                                                    <span class="result-value free-qty">{calculatorResult.freeQty} x {calculatorResult.freeProductName}</span>
+                                                </div>
+                                            </template>
+                                            <template if:true={calculatorResult.hasRewardPoints}>
+                                                <div class="result-item highlight">
+                                                    <span class="result-label">Reward Points</span>
+                                                    <span class="result-value reward-pts">{calculatorResult.rewardPoints} pts</span>
+                                                </div>
+                                            </template>
+                                            <div class="result-item net">
+                                                <span class="result-label">Net Amount</span>
+                                                <span class="result-value net-value">{calculatorResult.netAmountFormatted}</span>
+                                            </div>
+                                            <template if:true={calculatorResult.effectiveDiscountPercent}>
+                                                <div class="result-item">
+                                                    <span class="result-label">Effective Discount %</span>
+                                                    <span class="result-value">{calculatorResult.effectiveDiscountPercent}%</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={selectedScheme}>
+                            <div class="calculator-placeholder">
+                                <p class="slds-text-color_weak">Select a scheme to use the calculator</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

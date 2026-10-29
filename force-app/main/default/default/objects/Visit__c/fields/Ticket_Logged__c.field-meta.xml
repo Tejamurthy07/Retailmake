@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Ticket_Logged__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indicates whether a ticket or complaint was logged during this visit</description>
+    <label>Ticket Logged</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

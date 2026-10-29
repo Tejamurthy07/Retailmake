@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Skipped_Visits</fullName>
+    <columns>NAME</columns>
+    <columns>Salesperson__c</columns>
+    <columns>Account__c</columns>
+    <columns>Visit_Date__c</columns>
+    <columns>Beat__c</columns>
+    <columns>Missed_Reason__c</columns>
+    <columns>Missed_Notes__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Visit_Status__c</field>
+        <operation>equals</operation>
+        <value>Skipped</value>
+    </filters>
+    <label>Skipped Visits</label>
+</ListView>

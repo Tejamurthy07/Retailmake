@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DMS_Location_Reference_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>OR(
+  AND(ISPICKVAL(Location_Type__c, &quot;Distributor&quot;), ISBLANK(Account__c)),
+  AND(ISPICKVAL(Location_Type__c, &quot;Warehouse&quot;), ISBLANK(Warehouse__c))
+)</errorConditionFormula>
+    <errorMessage>A Distributor (Account) is required for Distributor adjustments, and a Warehouse is required for Warehouse adjustments.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Reward_Points__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>Total reward points earned from schemes on this order</description>
+    <externalId>false</externalId>
+    <label>Total Reward Points</label>
+    <precision>10</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

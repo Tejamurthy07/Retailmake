@@ -1,0 +1,252 @@
+<template>
+    <div class="ta-container">
+
+        <!-- Header -->
+        <div class="ta-header">
+            <div class="ta-header-left">
+                <lightning-icon icon-name="standard:goals" size="medium"></lightning-icon>
+                <h1>Target Allocation</h1>
+            </div>
+            <div class="ta-header-right">
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                    alternative-text="Refresh" onclick={fetchAllData}></lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="ta-controls">
+            <div class="ta-control-item">
+                <lightning-combobox label="Period" value={selectedPeriod}
+                    options={periodOptions} onchange={handlePeriodChange}
+                    placeholder="Select Period"></lightning-combobox>
+            </div>
+            <div class="ta-control-item">
+                <lightning-combobox label="User" value={selectedUser}
+                    options={userOptions} onchange={handleUserChange}
+                    placeholder="Select User"></lightning-combobox>
+            </div>
+            <div class="ta-control-buttons">
+                <lightning-button label="Sync Achievements" variant="brand-outline" icon-name="utility:sync"
+                    onclick={handleSyncAchievements} class="slds-m-right_small"></lightning-button>
+                <lightning-button label="Distribute" variant="brand" icon-name="utility:hierarchy"
+                    onclick={openDistributeModal} class="slds-m-right_small"></lightning-button>
+                <template if:true={isAdmin}>
+                    <lightning-button label="Add Target" variant="brand-outline" icon-name="utility:add"
+                        onclick={openAddTargetModal}></lightning-button>
+                </template>
+            </div>
+        </div>
+
+        <!-- Main Targets Table -->
+        <template if:true={hasCurrentTargets}>
+            <div class="ta-table-wrapper">
+                <table class="ta-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="ta-th-name">Criteria</th>
+                            <th colspan="3" class="ta-th-group">Target</th>
+                            <th colspan="3" class="ta-th-group">Achievement</th>
+                            <th rowspan="2">Achievement %</th>
+                        </tr>
+                        <tr>
+                            <th>Individual</th>
+                            <th>Team</th>
+                            <th>Total</th>
+                            <th>Individual</th>
+                            <th>Team</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={computedTargets} for:item="t">
+                            <tr key={t.Id} class="ta-row">
+                                <td class="ta-name-cell">
+                                    <strong>{t.criteriaName}</strong>
+                                </td>
+                                <!-- Inline editable target value -->
+                                <td class="ta-edit-cell">
+                                    <template if:true={t.isEditing}>
+                                        <lightning-input type="number" variant="label-hidden"
+                                            value={t.editValue} data-id={t.Id}
+                                            onchange={handleInlineChange}
+                                            onblur={handleInlineSave}
+                                            class="ta-inline-input"></lightning-input>
+                                    </template>
+                                    <template if:false={t.isEditing}>
+                                        <span class="ta-editable-value" data-id={t.Id}
+                                            onclick={handleInlineEdit}>{t.targetValue}</span>
+                                    </template>
+                                </td>
+                                <td>{t.teamsTarget}</td>
+                                <td><strong>{t.totalTarget}</strong></td>
+                                <td>{t.achievementValue}</td>
+                                <td>{t.teamsAchievement}</td>
+                                <td><strong>{t.totalAchievement}</strong></td>
+                                <td>
+                                    <div class="ta-percent-cell">
+                                        <span class={t.percentClass}>{t.achievementPercent}%</span>
+                                        <div class="ta-progress-bar">
+                                            <div class="ta-progress-fill" style={t.progressStyle}></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <template if:false={hasCurrentTargets}>
+            <template if:false={isLoading}>
+                <div class="ta-empty">
+                    <lightning-icon icon-name="standard:empty" size="large"></lightning-icon>
+                    <h2>No Targets Found</h2>
+                    <p>No targets assigned for the selected period and user.</p>
+                </div>
+            </template>
+        </template>
+
+        <!-- ═══════ DISTRIBUTE MODAL ═══════ -->
+        <template if:true={showDistributeModal}>
+            <section class="slds-modal slds-fade-in-open slds-modal_large" role="dialog">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                            class="slds-modal__close" onclick={closeDistributeModal}></lightning-button-icon>
+                        <h2 class="slds-modal__title">Distribute Targets</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <template if:true={hasSubordinates}>
+                            <div class="ta-table-wrapper">
+                                <table class="ta-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Executive</th>
+                                            <template for:each={distributionColumns} for:item="col">
+                                                <th key={col.Id}>{col.Name}</th>
+                                            </template>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={distributionRows} for:item="exec">
+                                            <tr key={exec.id}>
+                                                <td><strong>{exec.name}</strong></td>
+                                                <template for:each={exec.targets} for:item="t">
+                                                    <td key={t.Target_Criteria__c} class="ta-edit-cell">
+                                                        <lightning-input type="number" variant="label-hidden"
+                                                            value={t.Target_Value__c}
+                                                            data-targetcriteria={t.Target_Criteria__c}
+                                                            data-userid={exec.id}
+                                                            data-targetid={t.Id}
+                                                            min={t.Min_Value__c}
+                                                            max={t.Max_Value__c}
+                                                            message-when-range-overflow={t.Message}
+                                                            message-when-range-underflow={t.Message}
+                                                            onchange={handleDistributeChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                        <template if:false={hasSubordinates}>
+                            <div class="ta-empty">
+                                <p>No subordinates found for the selected user.</p>
+                            </div>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeDistributeModal}
+                            class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Save" variant="brand" onclick={saveDistribution}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- ═══════ ADD TARGET MODAL ═══════ -->
+        <template if:true={showAddTargetModal}>
+            <section class="slds-modal slds-fade-in-open" role="dialog">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                            class="slds-modal__close" onclick={closeAddTargetModal}></lightning-button-icon>
+                        <h2 class="slds-modal__title">Add / Edit Targets</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <template if:true={isPopupLoading}>
+                            <div class="slds-align_absolute-center" style="height: 150px;">
+                                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:false={isPopupLoading}>
+                            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-combobox label="Period" value={selectedAdminPeriod}
+                                        options={currentPeriodOptions}
+                                        onchange={handleAdminPeriodChange}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning-combobox label="User" value={selectedUser}
+                                        options={userOptions} disabled></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <template if:true={hasAdminTargets}>
+                                <div class="ta-table-wrapper">
+                                    <table class="ta-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Criteria</th>
+                                                <th>Target Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={adminTargets} for:item="t">
+                                                <tr key={t.Target_Criteria__c}>
+                                                    <td><strong>{t.Target_Criteria__r.Name}</strong></td>
+                                                    <td class="ta-edit-cell">
+                                                        <lightning-input type="number" variant="label-hidden"
+                                                            value={t.Target_Value__c}
+                                                            data-id={t.Id}
+                                                            data-targetcriteria={t.Target_Criteria__c}
+                                                            min={t.Min_Value__c}
+                                                            message-when-range-underflow={t.Message}
+                                                            onchange={handleAdminTargetChange}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasAdminTargets}>
+                                <div class="ta-empty">
+                                    <p>No active target criteria found.</p>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeAddTargetModal}
+                            class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Save" variant="brand" onclick={saveAdminTargets}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+
+    <template if:true={isLoading}>
+        <div class="ta-spinner-backdrop">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+</template>

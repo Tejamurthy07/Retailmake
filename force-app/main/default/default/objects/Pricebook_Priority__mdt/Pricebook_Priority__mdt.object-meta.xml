@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Configurable priority rules for price book resolution. Each record defines a combination of dimensions (Customer, Category, Territory, Channel) and its priority order. Lower priority number = higher precedence.</description>
+    <label>Pricebook Priority</label>
+    <pluralLabel>Pricebook Priorities</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

@@ -1,0 +1,114 @@
+<template>
+    <div class="vas">
+        <!-- Header -->
+        <div class="vas-head">
+            <div>
+                <h1 class="vas-title">Visit Activities</h1>
+                <p class="vas-sub">
+                    Choose which activity tiles a rep sees during a visit, by Profile and Outlet Type.
+                    An activity with no rule is shown by default.
+                </p>
+            </div>
+            <lightning-button label="Preview as rep" icon-name="utility:preview"
+                onclick={handlePreview}
+                title="Show exactly what a rep on this Profile would see at this Outlet Type"></lightning-button>
+        </div>
+
+        <!-- Scope picker -->
+        <div class="vas-scope">
+            <div class="vas-scope-fields">
+                <lightning-combobox label="Profile" value={scopeProfile} options={profileOptions}
+                    onchange={handleProfileChange}></lightning-combobox>
+                <lightning-combobox label="Outlet Type" value={scopeOutletType} options={outletTypeOptions}
+                    onchange={handleOutletTypeChange}></lightning-combobox>
+            </div>
+            <p class="vas-scope-note">
+                Editing: <strong>{scopeLabel}</strong>
+                <template if:true={isGlobalScope}>
+                    &mdash; this is the base rule everything else overrides.
+                </template>
+                <template if:false={isGlobalScope}>
+                    &mdash; overrides the broader rules for this combination.
+                </template>
+            </p>
+        </div>
+
+        <!-- Preview -->
+        <template if:true={previewOpen}>
+            <div class="vas-preview">
+                <div class="vas-preview-head">
+                    <span class="vas-preview-title">A rep would see {visibleCount} tile(s)</span>
+                    <span class="vas-preview-scope">{scopeLabel}</span>
+                </div>
+                <template for:each={previewRows} for:item="p">
+                    <div key={p.key} class={p.cls}>
+                        <span class="vas-prev-mark">{p.mark}</span>
+                        <span class="vas-prev-label">{p.label}</span>
+                        <span class="vas-prev-reason">{p.reason}</span>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Matrix -->
+        <div class="vas-matrix">
+            <div class="vas-matrix-head">
+                <span>Activity</span>
+                <span>Status for this scope</span>
+                <span class="vas-actions-head">Set</span>
+            </div>
+            <template for:each={rows} for:item="r">
+                <div key={r.key} class={r.rowClass}>
+                    <span class="vas-act">
+                        <lightning-icon icon-name={r.icon} size="small"></lightning-icon>
+                        <span class="vas-act-text">
+                            <span class="vas-act-label">{r.label}</span>
+                            <template if:true={r.toggleCode}>
+                                <span class="vas-act-toggle">{r.toggleCode}</span>
+                            </template>
+                        </span>
+                    </span>
+
+                    <span class={r.badgeClass}>{r.stateLabel}</span>
+
+                    <span class="vas-actions">
+                        <button class="vas-btn vas-btn_show" data-key={r.key}
+                            onclick={handleShow} disabled={r.showDisabled}>Show</button>
+                        <button class="vas-btn vas-btn_hide" data-key={r.key}
+                            onclick={handleHide} disabled={r.hideDisabled}>Hide</button>
+                        <button class="vas-btn vas-btn_reset" data-key={r.key}
+                            onclick={handleReset} disabled={r.resetDisabled}
+                            title="Remove the explicit rule and fall back to the default">Default</button>
+                    </span>
+                </div>
+            </template>
+        </div>
+
+        <!-- All configured rules -->
+        <div class="vas-rules">
+            <div class="vas-rules-head">
+                <span>Configured rules ({ruleCount})</span>
+                <span class="vas-rules-hint">Most specific wins: Profile + Outlet Type &gt; Profile &gt; Outlet Type &gt; All</span>
+            </div>
+            <template if:true={hasRules}>
+                <template for:each={ruleList} for:item="r">
+                    <div key={r.Id} class="vas-rule">
+                        <span class="vas-rule-act">{r.Activity_Key__c}</span>
+                        <span class="vas-rule-scope">{r.scopeText}</span>
+                        <span class={r.effectClass}>{r.effectText}</span>
+                        <template if:true={r.inactive}>
+                            <span class="vas-badge vas-badge_inherit">Inactive</span>
+                        </template>
+                        <button class="vas-del" data-id={r.Id} onclick={handleDeleteRule}
+                            title="Delete this rule">&times;</button>
+                    </div>
+                </template>
+            </template>
+            <template if:false={hasRules}>
+                <p class="vas-empty">
+                    No rules yet — every activity follows its feature toggle, exactly as before.
+                </p>
+            </template>
+        </div>
+    </div>
+</template>

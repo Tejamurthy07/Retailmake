@@ -1,0 +1,62 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "canPlace" : {
+      "title" : "Can Place",
+      "description" : "True if every item resolved and the order is within credit, so it can be placed.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "creditWarning" : {
+      "title" : "Credit Warning",
+      "description" : "A warning if the estimated total exceeds the outlet available credit. Empty if fine.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "draftLines" : {
+      "title" : "Draft Lines",
+      "description" : "Each priced line: product, quantity, rate and estimated line total. One per line.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "mustSellWarning" : {
+      "title" : "Must-Sell Warning",
+      "description" : "A warning if required must-sell products are missing from the order. Empty if fine.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "stockWarning" : {
+      "title" : "Stock Warning",
+      "description" : "A stock note for the order. Stock is validated when the order is submitted.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "summary" : {
+      "title" : "Summary",
+      "description" : "A ready-to-read draft summary that ends by asking the rep to confirm. Prefer this for the reply.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    },
+    "totalAmount" : {
+      "title" : "Total Amount",
+      "description" : "Estimated order total, in rupees. Final pricing and schemes are applied when the order is placed.",
+      "lightning:type" : "lightning__numberType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

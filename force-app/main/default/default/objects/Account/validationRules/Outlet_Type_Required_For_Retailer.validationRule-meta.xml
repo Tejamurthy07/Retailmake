@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Outlet_Type_Required_For_Retailer</fullName>
+    <active>true</active>
+    <description>Outlet Type is mandatory for Retailer record type accounts</description>
+    <errorConditionFormula>AND(
+    RecordType.DeveloperName = &quot;Retailer&quot;,
+    ISPICKVAL(Outlet_Type__c, &quot;&quot;)
+)</errorConditionFormula>
+    <errorDisplayField>Outlet_Type__c</errorDisplayField>
+    <errorMessage>Outlet Type is required for Retailer accounts. Please select an outlet type.</errorMessage>
+</ValidationRule>

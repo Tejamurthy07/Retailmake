@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Cumulative__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When true, incentive calculation sums achievements from all child periods. Used for cumulative quarterly/annual calculations.</description>
+    <inlineHelpText>If checked, the incentive calculation for this period will aggregate achievements from all child periods (linked via Parent Period). Example: A Quarterly period with cumulative enabled will sum achievements from its 3 monthly child periods. Useful for FMCG quarterly PBIS where Q2 = Q1+Q2 cumulative.</inlineHelpText>
+    <label>Cumulative Calculation</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

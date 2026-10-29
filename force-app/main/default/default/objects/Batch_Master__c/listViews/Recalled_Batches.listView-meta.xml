@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recalled_Batches</fullName>
+    <columns>NAME</columns>
+    <columns>Batch_Number__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Manufacturing_Date__c</columns>
+    <columns>Expiry_Date__c</columns>
+    <columns>Quantity_Manufactured__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Recalled</value>
+    </filters>
+    <label>Recalled Batches</label>
+</ListView>

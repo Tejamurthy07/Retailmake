@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Territory__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Territory-specific slab targeting. Blank = applies to all territories.</description>
+    <inlineHelpText>Region/territory this slab applies to. Leave blank for a slab that applies to all territories. Useful when different regions have different incentive structures (e.g., Kerala vs Karnataka).</inlineHelpText>
+    <label>Territory</label>
+    <referenceTo>Territory_Master__c</referenceTo>
+    <relationshipLabel>Incentive Slabs</relationshipLabel>
+    <relationshipName>Incentive_Slabs</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

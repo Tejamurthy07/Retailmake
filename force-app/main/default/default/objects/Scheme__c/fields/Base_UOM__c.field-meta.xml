@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Base_UOM__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Base Unit of Measure for the scheme. Order line item quantities are converted to this UOM before scheme evaluation.</description>
+    <label>Base UOM</label>
+    <referenceTo>UOM__c</referenceTo>
+    <relationshipLabel>Schemes</relationshipLabel>
+    <relationshipName>Schemes</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

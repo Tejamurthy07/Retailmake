@@ -1,0 +1,685 @@
+<template>
+    <div class="hub-container">
+        <!-- ─── Sidebar Navigation ──────────────────────────────────────── -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Survey Manager</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a class={dashboardNavClass} data-section="dashboard" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:dashboard" size="x-small"></lightning-icon>
+                    <span>Dashboard</span>
+                </a>
+                <a class={surveysNavClass} data-section="surveys" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:survey" size="x-small"></lightning-icon>
+                    <span>Surveys</span>
+                </a>
+                <a class={questionsNavClass} data-section="questions" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:question_feed" size="x-small"></lightning-icon>
+                    <span>Questions</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <a class={responsesNavClass} data-section="responses" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:feedback" size="x-small"></lightning-icon>
+                    <span>Responses</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- ─── Main Content Area ───────────────────────────────────────── -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1>{sectionTitle}</h1>
+            </div>
+
+            <template if:true={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- ─── Dashboard Section ───────────────────────────────────── -->
+            <template if:true={showDashboard}>
+                <div class="dashboard-grid">
+                    <div class="stat-card stat-blue" data-section="surveys" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalSurveys}</div>
+                        <div class="stat-label">Total Surveys</div>
+                    </div>
+                    <div class="stat-card stat-green" data-section="surveys" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activeSurveys}</div>
+                        <div class="stat-label">Active Surveys</div>
+                    </div>
+                    <div class="stat-card stat-purple" data-section="questions" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalQuestions}</div>
+                        <div class="stat-label">Total Questions</div>
+                    </div>
+                    <div class="stat-card stat-teal" data-section="responses" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalResponses}</div>
+                        <div class="stat-label">Total Responses</div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ─── Surveys Section ─────────────────────────────────────── -->
+            <template if:true={showSurveys}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="checkbox" label="Active Only"
+                            checked={activeOnly}
+                            onchange={handleActiveOnlyChange}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Survey" variant="brand"
+                            icon-name="utility:add"
+                            onclick={handleNewSurvey}></lightning-button>
+                    </div>
+                </div>
+
+                <div class="info-banner">
+                    <lightning-icon icon-name="utility:info" size="x-small" class="info-banner-icon"></lightning-icon>
+                    <span>Click <strong>View Questions</strong> on a survey row to manage its questions. Surveys marked as <strong>Mandatory</strong> must be completed during qualifying visits.</span>
+                </div>
+
+                <template if:true={hasSurveys}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Outlet Type</th>
+                                    <th>Active</th>
+                                    <th>Mandatory</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th class="cell-number">Questions</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={surveys} for:item="survey">
+                                    <tr key={survey.Id}>
+                                        <td>{survey.Name}</td>
+                                        <td class="cell-mono">{survey.Survey_Code__c}</td>
+                                        <td>
+                                            <template if:true={survey.Survey_Type__c}>
+                                                <span class="badge badge-blue">{survey.Survey_Type__c}</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={survey.Outlet_Type__c}>
+                                                <span class="badge badge-purple">{survey.Outlet_Type__c}</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={survey.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={survey.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={survey.Is_Mandatory__c}>
+                                                <span class="badge badge-orange">Mandatory</span>
+                                            </template>
+                                            <template if:false={survey.Is_Mandatory__c}>
+                                                <span class="badge badge-gray">Optional</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-mono">{survey.Effective_From__c}</td>
+                                        <td class="cell-mono">{survey.Effective_To__c}</td>
+                                        <td class="cell-number">{survey.questionCount}</td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:list" alternative-text="View Questions"
+                                                title="View Questions"
+                                                data-id={survey.Id} onclick={handleSelectSurvey}
+                                                variant="border-filled" size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                title="Edit"
+                                                data-id={survey.Id} onclick={handleEditSurvey}
+                                                variant="border-filled" size="small"
+                                                class="slds-m-left_xx-small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                title="Delete"
+                                                data-id={survey.Id} onclick={handleDeleteSurvey}
+                                                variant="border-filled" size="small"
+                                                class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasSurveys}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:survey" size="large"></lightning-icon>
+                        <p>No surveys found. Click "New Survey" to create one.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Questions Section ───────────────────────────────────── -->
+            <template if:true={showQuestions}>
+                <template if:false={hasSelectedSurvey}>
+                    <div class="info-banner">
+                        <lightning-icon icon-name="utility:info" size="x-small" class="info-banner-icon"></lightning-icon>
+                        <span>Select a survey from the <strong>Surveys</strong> tab first to manage its questions.</span>
+                    </div>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:question_feed" size="large"></lightning-icon>
+                        <p>No survey selected. Go to the Surveys tab and click the list icon on a survey row.</p>
+                    </div>
+                </template>
+
+                <template if:true={hasSelectedSurvey}>
+                    <div class="section-toolbar">
+                        <div class="toolbar-left">
+                            <h2 style="margin:0;font-size:15px;color:#1b2a4a;font-weight:600;">{selectedSurveyHeading}</h2>
+                        </div>
+                        <div class="toolbar-right">
+                            <lightning-button label="New Question" variant="brand"
+                                icon-name="utility:add"
+                                onclick={handleNewQuestion}></lightning-button>
+                        </div>
+                    </div>
+
+                    <template if:true={hasQuestions}>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="cell-number">Sort Order</th>
+                                        <th>Question Text</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th class="cell-number">Weight</th>
+                                        <th>Options</th>
+                                        <th class="cell-actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={questions} for:item="q">
+                                        <tr key={q.Id}>
+                                            <td class="cell-number">{q.Sort_Order__c}</td>
+                                            <td>{q.Question_Text__c}</td>
+                                            <td>
+                                                <template if:true={q.Question_Type__c}>
+                                                    <span class="badge badge-blue">{q.Question_Type__c}</span>
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <template if:true={q.Is_Required__c}>
+                                                    <span class="badge badge-orange">Required</span>
+                                                </template>
+                                                <template if:false={q.Is_Required__c}>
+                                                    <span class="badge badge-gray">Optional</span>
+                                                </template>
+                                            </td>
+                                            <td class="cell-number">{q.Score_Weight__c}</td>
+                                            <td class="cell-mono">{q.Options__c}</td>
+                                            <td class="cell-actions">
+                                                <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                    data-id={q.Id} onclick={handleEditQuestion}
+                                                    variant="border-filled" size="small"></lightning-button-icon>
+                                                <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                    data-id={q.Id} onclick={handleDeleteQuestion}
+                                                    variant="border-filled" size="small"
+                                                    class="slds-m-left_xx-small"></lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+
+                    <template if:false={hasQuestions}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="standard:question_feed" size="large"></lightning-icon>
+                            <p>No questions defined for this survey yet. Click "New Question" to add one.</p>
+                        </div>
+                    </template>
+
+                    <!-- Preview Button -->
+                    <template if:true={hasQuestions}>
+                        <div class="slds-m-top_medium slds-text-align_center">
+                            <lightning-button label="Preview Survey" icon-name="utility:preview"
+                                variant="neutral" onclick={handlePreviewSurvey}></lightning-button>
+                        </div>
+                    </template>
+                </template>
+            </template>
+
+            <!-- ─── Responses Section ───────────────────────────────────── -->
+            <template if:true={showResponses}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-combobox label="Survey" variant="label-hidden"
+                            placeholder="All Surveys"
+                            value={responseSurveyFilter}
+                            options={responseSurveyFilterOptions}
+                            onchange={handleResponseSurveyFilter}
+                            class="toolbar-filter-wide"></lightning-combobox>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="Refresh" variant="neutral"
+                            icon-name="utility:refresh"
+                            onclick={handleLoadResponses}></lightning-button>
+                    </div>
+                </div>
+
+                <template if:true={hasResponses}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Response #</th>
+                                    <th>Survey</th>
+                                    <th>Account</th>
+                                    <th>Visit</th>
+                                    <th>Respondent</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="cell-number">Total Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={responses} for:item="r">
+                                    <tr key={r.Id}>
+                                        <td class="cell-mono">{r.Name}</td>
+                                        <td>{r.surveyName}</td>
+                                        <td>{r.accountName}</td>
+                                        <td>{r.visitName}</td>
+                                        <td>{r.respondentName}</td>
+                                        <td class="cell-mono">{r.Response_Date__c}</td>
+                                        <td>
+                                            <template if:true={r.Status__c}>
+                                                <span class="badge badge-blue">{r.Status__c}</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-number">{r.Total_Score__c}</td>
+                                        <td>
+                                            <lightning-button-icon icon-name="utility:preview"
+                                                alternative-text="View Answers" title="View Answers"
+                                                variant="bare" size="small"
+                                                data-id={r.Id}
+                                                onclick={handleViewResponse}></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasResponses}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:feedback" size="large"></lightning-icon>
+                        <p>No responses found for the current filter.</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+
+    <!-- ─── Survey Modal ────────────────────────────────────────────────── -->
+    <template if:true={showSurveyModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseSurveyModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{surveyModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input type="text" label="Name" required
+                                value={editSurvey.Name}
+                                data-field="Name"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="text" label="Survey Code" required
+                                value={editSurvey.Survey_Code__c}
+                                data-field="Survey_Code__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-combobox label="Survey Type"
+                                placeholder="Select type..."
+                                value={editSurvey.Survey_Type__c}
+                                options={surveyTypeOptions}
+                                data-field="Survey_Type__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-combobox>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-dual-listbox label="Outlet Types"
+                                source-label="Available" selected-label="Applies To"
+                                options={outletTypeMultiOptions}
+                                value={editSurveyOutletTypes}
+                                onchange={handleSurveyOutletTypesChange}
+                                class="slds-m-bottom_small"
+                                field-level-help="Surveys appear for outlets matching any of the selected types. Leave empty to apply to all outlets."></lightning-dual-listbox>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input type="checkbox" label="Is Active"
+                                checked={editSurvey.Is_Active__c}
+                                data-field="Is_Active__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="checkbox" label="Is Mandatory"
+                                checked={editSurvey.Is_Mandatory__c}
+                                data-field="Is_Mandatory__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective From"
+                                value={editSurvey.Effective_From__c}
+                                data-field="Effective_From__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective To"
+                                value={editSurvey.Effective_To__c}
+                                data-field="Effective_To__c"
+                                onchange={handleSurveyFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                    </div>
+
+                    <lightning-textarea label="Description"
+                        value={editSurvey.Description__c}
+                        data-field="Description__c"
+                        onchange={handleSurveyFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseSurveyModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand"
+                        onclick={handleSaveSurvey}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Question Modal ──────────────────────────────────────────────── -->
+    <template if:true={showQuestionModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseQuestionModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{questionModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea label="Question Text" required
+                        value={editQuestion.Question_Text__c}
+                        data-field="Question_Text__c"
+                        onchange={handleQuestionFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-combobox label="Question Type" required
+                                placeholder="Select type..."
+                                value={editQuestion.Question_Type__c}
+                                options={questionTypeOptions}
+                                data-field="Question_Type__c"
+                                onchange={handleQuestionFieldChange}
+                                class="slds-m-bottom_small"></lightning-combobox>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="number" label="Sort Order"
+                                value={editQuestion.Sort_Order__c}
+                                data-field="Sort_Order__c"
+                                onchange={handleQuestionFieldChange}
+                                class="slds-m-bottom_small"></lightning-input>
+                        </div>
+                        <template if:true={isScorableQuestionType}>
+                            <div class="slds-col">
+                                <lightning-input type="number" label="Score Weight"
+                                    value={editQuestion.Score_Weight__c}
+                                    data-field="Score_Weight__c"
+                                    min="0" step="0.1"
+                                    field-level-help="Weight for scoring. 0 = not scored. e.g., 1 = normal, 2 = double weight."
+                                    onchange={handleQuestionFieldChange}
+                                    class="slds-m-bottom_small"></lightning-input>
+                            </div>
+                        </template>
+                    </div>
+
+                    <lightning-textarea label="Options (comma-separated)"
+                        placeholder="E.g. Excellent, Good, Average, Poor"
+                        value={editQuestion.Options__c}
+                        data-field="Options__c"
+                        onchange={handleQuestionFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+
+                    <lightning-input type="checkbox" label="Required"
+                        checked={editQuestion.Is_Required__c}
+                        data-field="Is_Required__c"
+                        onchange={handleQuestionFieldChange}
+                        class="slds-m-bottom_small"></lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseQuestionModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand"
+                        onclick={handleSaveQuestion}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Response Detail Modal -->
+    <template if:true={showResponseDetailModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close"
+                        onclick={handleCloseResponseDetail} variant="bare-inverse"
+                        class="slds-modal__close"></lightning-button-icon>
+                    <h2 class="slds-modal__title">Survey Response: {responseDetail.Name}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-m-bottom_small">
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Survey</span>
+                            <span class="info-value">{responseDetail.surveyName}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Account</span>
+                            <span class="info-value">{responseDetail.accountName}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Visit</span>
+                            <span class="info-value">{responseDetail.visitName}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Respondent</span>
+                            <span class="info-value">{responseDetail.respondentName}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Response Date</span>
+                            <span class="info-value">
+                                <lightning-formatted-date-time value={responseDetail.Response_Date__c}
+                                    year="numeric" month="short" day="2-digit">
+                                </lightning-formatted-date-time>
+                            </span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Total Score</span>
+                            <span class="info-value"><strong>{responseDetail.Total_Score__c}</strong> / {responseDetail.Max_Possible_Score__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_xx-small">
+                            <span class="info-label">Score %</span>
+                            <span class="info-value"><strong>{responseDetail.Score_Percentage__c}%</strong></span>
+                        </div>
+                    </div>
+
+                    <h3 class="slds-text-title_caps slds-m-top_medium slds-m-bottom_x-small">Questions &amp; Answers</h3>
+                    <template if:true={responseAnswers.length}>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50%">Question</th>
+                                        <th>Type</th>
+                                        <th>Answer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={responseAnswers} for:item="a">
+                                        <tr key={a.id}>
+                                            <td>{a.questionText}</td>
+                                            <td>{a.questionType}</td>
+                                            <td>
+                                                <template if:true={a.displayValue}>
+                                                    <strong>{a.displayValue}</strong>
+                                                </template>
+                                                <template if:true={a.hasPhoto}>
+                                                    <lightning-button
+                                                        label="Preview Photo"
+                                                        icon-name="utility:preview"
+                                                        variant="base"
+                                                        data-content-id={a.contentDocumentId}
+                                                        data-url={a.photoUrl}
+                                                        onclick={handlePreviewPhoto}></lightning-button>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={responseAnswers.length}>
+                        <p class="slds-text-color_weak">No answers recorded.</p>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={handleCloseResponseDetail}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══ Survey Preview Modal ═══ -->
+    <template if:true={showPreviewModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header" style="background:#1b2a4a">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        class="slds-modal__close" onclick={handleClosePreview}></lightning-button-icon>
+                    <h2 class="slds-modal__title" style="color:#fff">
+                        Survey Preview — {selectedSurveyName}
+                    </h2>
+                    <p style="color:#94a3b8;font-size:13px;margin-top:4px">This is how the survey will appear to field reps during visits</p>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="background:#f8fafc">
+                    <div style="max-width:600px;margin:0 auto">
+                        <div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:24px;border:1px solid #e2e8f0">
+                            <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #0176d3">
+                                {selectedSurveyName}
+                            </h3>
+                            <template for:each={previewQuestions} for:item="pq">
+                                <div key={pq.Id} style="margin-bottom:20px">
+                                    <label style="display:block;font-size:14px;font-weight:600;color:#334155;margin-bottom:6px">
+                                        {pq.displayIndex}. {pq.Question_Text__c}
+                                        <template if:true={pq.Is_Required__c}>
+                                            <abbr title="Required" style="color:#ef4444;margin-left:2px">*</abbr>
+                                        </template>
+                                    </label>
+
+                                    <template if:true={pq.isText}>
+                                        <lightning-textarea disabled></lightning-textarea>
+                                    </template>
+
+                                    <template if:true={pq.isNumber}>
+                                        <lightning-input type="number" disabled></lightning-input>
+                                    </template>
+
+                                    <template if:true={pq.isRating}>
+                                        <div style="display:flex;gap:4px;margin-top:4px">
+                                            <span style="font-size:28px;color:#e5e7eb;cursor:default">&#9733;</span>
+                                            <span style="font-size:28px;color:#e5e7eb;cursor:default">&#9733;</span>
+                                            <span style="font-size:28px;color:#f59e0b;cursor:default">&#9733;</span>
+                                            <span style="font-size:28px;color:#f59e0b;cursor:default">&#9733;</span>
+                                            <span style="font-size:28px;color:#f59e0b;cursor:default">&#9733;</span>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={pq.isYesNo}>
+                                        <lightning-radio-group name={pq.Id}
+                                            options={pq.picklistOptions}
+                                            value=""
+                                            type="radio">
+                                        </lightning-radio-group>
+                                    </template>
+
+                                    <template if:true={pq.isMultiSelect}>
+                                        <lightning-checkbox-group name={pq.Id}
+                                            options={pq.picklistOptions}
+                                            value={pq.emptyArray}>
+                                        </lightning-checkbox-group>
+                                    </template>
+
+                                    <template if:true={pq.isPhoto}>
+                                        <div style="border:2px dashed #d1d5db;border-radius:10px;padding:24px;text-align:center;background:#f9fafb;margin-top:4px">
+                                            <lightning-icon icon-name="utility:upload" size="small" style="color:#94a3b8"></lightning-icon>
+                                            <p style="font-size:13px;color:#6b7280;margin-top:8px">Upload Photo</p>
+                                            <p style="font-size:11px;color:#94a3b8">Camera / Gallery</p>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={pq.isDate}>
+                                        <lightning-input type="date" disabled></lightning-input>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:right">
+                                <span style="display:inline-block;padding:10px 32px;background:#0176d3;color:#fff;border-radius:8px;font-weight:600;font-size:14px">Submit Survey</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Google Maps</label>
+    <protected>false</protected>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">ERP &amp; Maps</value>
+    </values>
+    <values>
+        <field>Connector_Class__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Geocoding and distance for geofencing, beat routing and territory maps.</value>
+    </values>
+    <values>
+        <field>Docs_URL__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Icon__c</field>
+        <value xsi:type="xsd:string">utility:location</value>
+    </values>
+    <values>
+        <field>Named_Credential_Name__c</field>
+        <value xsi:type="xsd:string">Integration_Maps</value>
+    </values>
+    <values>
+        <field>Provider_Options__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Requires_Credential__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Settings_Schema__c</field>
+        <value xsi:type="xsd:string">[{&quot;key&quot;:&quot;region&quot;,&quot;label&quot;:&quot;Region Bias&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;India&quot;,&quot;Global&quot;]},{&quot;key&quot;:&quot;apiKey&quot;,&quot;label&quot;:&quot;API Key&quot;,&quot;type&quot;:&quot;password&quot;,&quot;secret&quot;:true,&quot;required&quot;:true}]</value>
+    </values>
+    <values>
+        <field>Sort_Order__c</field>
+        <value xsi:type="xsd:double">90.0</value>
+    </values>
+</CustomMetadata>

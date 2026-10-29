@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Norms</fullName>
+    <columns>NAME</columns>
+    <columns>Account__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Reorder_Level__c</columns>
+    <columns>Max_Stock_Level__c</columns>
+    <columns>Is_Active__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Norms</label>
+</ListView>

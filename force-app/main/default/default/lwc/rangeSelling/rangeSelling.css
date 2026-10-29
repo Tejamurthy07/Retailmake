@@ -1,0 +1,83 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #16171b;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.tab-btn {
+    border: 1px solid #d8dde6;
+    background: #ffffff;
+    color: #444;
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.tab-btn[data-active="brand"] {
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.table-head,
+.table-row {
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 0.5rem;
+}
+
+.table-head {
+    background: #f4f6f9;
+    border-radius: 0.4rem;
+    font-size: 0.78rem;
+    color: #5b6270;
+    font-weight: 600;
+}
+
+.table-row {
+    border-bottom: 1px solid #f0f1f4;
+    font-size: 0.85rem;
+    color: #16171b;
+}
+
+.col-name    { flex: 2 1 0; }
+.col-covered { flex: 1.2 1 0; }
+.col-bar     { flex: 2 1 0; display: flex; align-items: center; gap: 0.6rem; }
+
+.track {
+    flex: 1 1 auto;
+    max-width: 130px;
+    height: 6px;
+    background: #e9e9ef;
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.fill {
+    display: block;
+    height: 100%;
+    background: #7c3aed;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.pct {
+    font-weight: 700;
+    min-width: 2.6rem;
+}

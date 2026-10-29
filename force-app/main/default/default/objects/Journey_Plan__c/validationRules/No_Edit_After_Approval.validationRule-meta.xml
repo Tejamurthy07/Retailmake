@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Edit_After_Approval</fullName>
+    <active>false</active>
+    <description>Deactivated: blocked system-managed Total_Planned_Visits__c rollup updates during plan-day inserts/deletes, breaking admin regenerate. Non-admin protection is enforced in BPM_JourneyPlan_Service.regeneratePlan.</description>
+    <errorConditionFormula>AND(ISCHANGED(Total_Planned_Visits__c), OR(ISPICKVAL(PRIORVALUE(Status__c), &apos;Approved&apos;), ISPICKVAL(PRIORVALUE(Status__c), &apos;Active&apos;)))</errorConditionFormula>
+    <errorMessage>Cannot modify an approved or active Journey Plan. Please create a new plan or request revision.</errorMessage>
+</ValidationRule>

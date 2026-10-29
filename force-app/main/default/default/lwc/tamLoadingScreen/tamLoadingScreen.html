@@ -1,0 +1,8 @@
+<template>
+    <template for:each={placeholders} for:item="placeholder">
+        <div key={placeholder.id} class="card" for:index="i">
+            <div class={placeholder.titleClass}></div>
+            <div class={placeholder.descriptionClass}></div>
+        </div>
+    </template>
+</template>

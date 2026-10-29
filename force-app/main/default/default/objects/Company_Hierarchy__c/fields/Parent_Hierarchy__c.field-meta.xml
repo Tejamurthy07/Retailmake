@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Parent_Hierarchy__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Parent Hierarchy</label>
+    <referenceTo>Company_Hierarchy__c</referenceTo>
+    <relationshipLabel>Child Hierarchies</relationshipLabel>
+    <relationshipName>Child_Hierarchies</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

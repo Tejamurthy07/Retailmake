@@ -1,0 +1,358 @@
+<template>
+    <div class="approval-container">
+
+        <!-- ═══ HEADER ═══════════════════════════════════════════ -->
+        <div class="approval-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <h1 class="slds-text-heading_medium header-title">
+                        <lightning-icon icon-name="standard:approval" size="small"
+                            class="slds-m-right_x-small"></lightning-icon>
+                        Leave Approvals
+                    </h1>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                        Review and approve/reject team leave requests
+                    </p>
+                </div>
+                <template if:true={pendingCount}>
+                    <div class="slds-col slds-no-flex">
+                        <span class="pending-badge">
+                            {pendingCount} Pending
+                        </span>
+                    </div>
+                </template>
+            </div>
+
+            <!-- View Tabs -->
+            <div class="view-tabs slds-m-top_small">
+                <button class={pendingTabClass} onclick={handlePendingTab}>
+                    <lightning-icon icon-name="utility:clock" size="xx-small"
+                        class="slds-m-right_xx-small"></lightning-icon>
+                    Pending Approvals
+                    <template if:true={pendingCount}>
+                        <span class="tab-badge">{pendingCount}</span>
+                    </template>
+                </button>
+                <button class={historyTabClass} onclick={handleHistoryTab}>
+                    <lightning-icon icon-name="utility:activity" size="xx-small"
+                        class="slds-m-right_xx-small"></lightning-icon>
+                    Approval History
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- ═══ NOT A MANAGER MESSAGE ═════════════════════════════ -->
+        <template if:false={isManager}>
+            <template if:false={isLoading}>
+                <div class="empty-state slds-p-around_large">
+                    <lightning-icon icon-name="utility:lock" size="large"
+                        class="empty-icon slds-m-bottom_small"></lightning-icon>
+                    <p class="slds-text-heading_small slds-m-bottom_xx-small">Access Restricted</p>
+                    <p class="slds-text-body_small slds-text-color_weak">
+                        This screen is only available for managers with direct reports and administrators.
+                    </p>
+                </div>
+            </template>
+        </template>
+
+        <!-- ═══ MANAGER CONTENT ═══════════════════════════════════ -->
+        <template if:true={isManager}>
+
+            <!-- ═══ PENDING APPROVALS TAB ═════════════════════════ -->
+            <template if:true={isPendingTab}>
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium slds-m-top_medium">
+                    <template if:true={hasPendingRequests}>
+                        <!-- Table Header -->
+                        <div class="table-header">
+                            <span class="col-employee">Employee</span>
+                            <span class="col-type">Type</span>
+                            <span class="col-dates">Date Range</span>
+                            <span class="col-days">Days</span>
+                            <span class="col-reason">Reason</span>
+                            <span class="col-actions">Actions</span>
+                        </div>
+
+                        <!-- Pending Rows -->
+                        <template for:each={processedPendingRequests} for:item="req">
+                            <div class={req.rowClass} key={req.Id}>
+                                <div class="approval-row-main" data-id={req.Id}
+                                    onclick={handleToggleRow}>
+                                    <span class="col-employee">
+                                        <lightning-icon icon-name="standard:user" size="xx-small"
+                                            class="slds-m-right_xx-small"></lightning-icon>
+                                        {req.employeeName}
+                                    </span>
+                                    <span class="col-type">
+                                        <span class={req.typeBadgeClass}
+                                            style={req.typeBadgeStyle}>{req.typeShort}</span>
+                                    </span>
+                                    <span class="col-dates">{req.dateRange}</span>
+                                    <span class="col-days">{req.daysDisplay}</span>
+                                    <span class="col-reason">{req.reasonPreview}</span>
+                                    <span class="col-actions">
+                                        <lightning-button-icon icon-name="utility:preview" variant="bare"
+                                            alternative-text="View Details" data-id={req.Id}
+                                            onclick={handleViewDetail}
+                                            class="slds-m-right_xx-small"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:check" variant="bare"
+                                            alternative-text="Approve" data-id={req.Id}
+                                            onclick={handleApprove}
+                                            class="approve-icon slds-m-right_xx-small"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:close" variant="bare"
+                                            alternative-text="Reject" data-id={req.Id}
+                                            onclick={handleReject}
+                                            class="reject-icon"></lightning-button-icon>
+                                    </span>
+                                </div>
+
+                                <!-- Expanded Detail Row -->
+                                <template if:true={req.isExpanded}>
+                                    <div class="approval-row-detail">
+                                        <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_small">
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Leave Type</span>
+                                                    <span class="detail-field-value">{req.Leave_Type__c}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Number of Days</span>
+                                                    <span class="detail-field-value">{req.daysDisplay}</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">From</span>
+                                                    <span class="detail-field-value">{req.startDateFormatted} ({req.startSessionDisplay})</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">To</span>
+                                                    <span class="detail-field-value">{req.endDateFormatted} ({req.endSessionDisplay})</span>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="detail-field">
+                                                    <span class="detail-field-label">Full Reason</span>
+                                                    <span class="detail-field-value">{req.Reason__c}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="slds-grid slds-gutters_x-small slds-grid_vertical-align-end">
+                                            <div class="slds-col slds-grow">
+                                                <lightning-textarea label="Comments" data-id={req.Id}
+                                                    value={req.commentValue}
+                                                    onchange={handleCommentChange}
+                                                    placeholder="Add comments (required for rejection)..."
+                                                    variant="label-hidden"
+                                                    class="comment-input"></lightning-textarea>
+                                            </div>
+                                            <div class="slds-col slds-no-flex">
+                                                <div class="slds-button-group">
+                                                    <lightning-button variant="success" label="Approve"
+                                                        icon-name="utility:check" data-id={req.Id}
+                                                        onclick={handleApprove}
+                                                        class="slds-m-right_xx-small"></lightning-button>
+                                                    <lightning-button variant="destructive" label="Reject"
+                                                        icon-name="utility:close" data-id={req.Id}
+                                                        onclick={handleReject}></lightning-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Empty Pending State -->
+                    <template if:false={hasPendingRequests}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:check" size="large"
+                                class="empty-icon slds-m-bottom_small"></lightning-icon>
+                            <p class="slds-text-heading_small slds-m-bottom_xx-small">All caught up!</p>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                No pending leave requests to approve.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ═══ APPROVAL HISTORY TAB ══════════════════════════ -->
+            <template if:true={isHistoryTab}>
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium slds-m-top_medium">
+                    <template if:true={hasHistoryRequests}>
+                        <!-- Table Header -->
+                        <div class="table-header">
+                            <span class="col-employee">Employee</span>
+                            <span class="col-type">Type</span>
+                            <span class="col-dates">Date Range</span>
+                            <span class="col-days">Days</span>
+                            <span class="col-reason">Status</span>
+                            <span class="col-actions">Decision Date</span>
+                        </div>
+
+                        <!-- History Rows -->
+                        <template for:each={processedHistoryRequests} for:item="hist">
+                            <div class="approval-row history-row" key={hist.Id}>
+                                <div class="approval-row-main" data-id={hist.Id}
+                                    onclick={handleViewDetail}>
+                                    <span class="col-employee">
+                                        <lightning-icon icon-name="standard:user" size="xx-small"
+                                            class="slds-m-right_xx-small"></lightning-icon>
+                                        {hist.employeeName}
+                                    </span>
+                                    <span class="col-type">
+                                        <span class={hist.typeBadgeClass}
+                                            style={hist.typeBadgeStyle}>{hist.typeShort}</span>
+                                    </span>
+                                    <span class="col-dates">{hist.dateRange}</span>
+                                    <span class="col-days">{hist.daysDisplay}</span>
+                                    <span class="col-reason">
+                                        <span class={hist.statusBadgeClass}>{hist.Status__c}</span>
+                                    </span>
+                                    <span class="col-actions">{hist.approvalDateFormatted}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Empty History State -->
+                    <template if:false={hasHistoryRequests}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:activity" size="large"
+                                class="empty-icon slds-m-bottom_small"></lightning-icon>
+                            <p class="slds-text-heading_small slds-m-bottom_xx-small">No history yet</p>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                Approval decisions will appear here.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </template>
+    </div>
+
+    <!-- ═══ LEAVE DETAIL MODAL ════════════════════════════════ -->
+    <template if:true={showDetailModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                        alternative-text="Close" onclick={handleCloseDetailModal}
+                        class="slds-modal__close"></lightning-button-icon>
+                    <h2 class="slds-modal__title slds-hyphenate">
+                        Leave Request Details
+                        <template if:true={detailLeave}>
+                            <span class="detail-modal-ref"> &mdash; {detailLeave.Name}</span>
+                        </template>
+                    </h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={detailLeave}>
+                        <!-- Request Information -->
+                        <div class="detail-section slds-m-bottom_medium">
+                            <h3 class="detail-section-title">Request Information</h3>
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Employee</span>
+                                        <span class="detail-field-value">{detailLeave.employeeName}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Status</span>
+                                        <span class={detailLeave.statusBadgeClass}>{detailLeave.Status__c}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Leave Type</span>
+                                        <span class="detail-field-value">
+                                            <span class={detailLeave.typeBadgeClass}
+                                                style={detailLeave.typeBadgeStyle}>{detailLeave.typeShort}</span>
+                                            &nbsp;{detailLeave.Leave_Type__c}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Number of Days</span>
+                                        <span class="detail-field-value">{detailLeave.daysDisplay}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">From Date</span>
+                                        <span class="detail-field-value">{detailLeave.startDateFormatted} ({detailLeave.startSessionDisplay})</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">To Date</span>
+                                        <span class="detail-field-value">{detailLeave.endDateFormatted} ({detailLeave.endSessionDisplay})</span>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-m-bottom_x-small">
+                                    <div class="detail-field">
+                                        <span class="detail-field-label">Reason</span>
+                                        <span class="detail-field-value detail-reason">{detailLeave.Reason__c}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previous Comments -->
+                        <template if:true={detailLeave.Comments__c}>
+                            <div class="detail-section slds-m-bottom_medium">
+                                <h3 class="detail-section-title">Previous Comments</h3>
+                                <p class="detail-field-value detail-reason">{detailLeave.commentsDisplay}</p>
+                            </div>
+                        </template>
+
+                        <!-- Approval Action (only for pending/submitted) -->
+                        <template if:true={canApproveSelected}>
+                            <div class="detail-section">
+                                <h3 class="detail-section-title">Your Decision</h3>
+                                <div class="slds-m-bottom_small">
+                                    <lightning-textarea label="Comments"
+                                        value={detailComments}
+                                        onchange={handleDetailCommentChange}
+                                        placeholder="Add comments (required for rejection)..."
+                                        max-length="500"></lightning-textarea>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <template if:true={canApproveSelected}>
+                        <lightning-button variant="success" label="Approve"
+                            icon-name="utility:check"
+                            onclick={handleApproveFromDetail}
+                            class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button variant="destructive" label="Reject"
+                            icon-name="utility:close"
+                            onclick={handleRejectFromDetail}
+                            class="slds-m-right_x-small"></lightning-button>
+                    </template>
+                    <lightning-button variant="neutral" label="Close"
+                        onclick={handleCloseDetailModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

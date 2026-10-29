@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tier_Required</fullName>
+    <active>true</active>
+    <description>Tier classification is required for every city tier record.</description>
+    <errorConditionFormula>ISBLANK(TEXT(Tier__c))</errorConditionFormula>
+    <errorDisplayField>Tier__c</errorDisplayField>
+    <errorMessage>Tier is required. Please select Tier 1, Tier 2, or Tier 3.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,186 @@
+<template>
+    <!-- Visit Header Card -->
+    <lightning-card>
+        <div class="va-header">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap">
+                <div class="slds-col slds-size_12-of-12 slds-medium-size_7-of-12">
+                    <div class="va-outlet-info">
+                        <div class="va-sequence">#{visitSequence}</div>
+                        <div class="va-outlet-details">
+                            <h2 class="va-outlet-name">{outletName}</h2>
+                            <div class="va-outlet-meta">
+                                <template if:true={beatName}>
+                                    <span class="va-beat-badge">{beatName}</span>
+                                </template>
+                                <template if:true={isAdHoc}>
+                                    <span class="va-adhoc-badge">Ad-hoc</span>
+                                </template>
+                                <span class={statusBadgeClass}>{visitStatus}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_12-of-12 slds-medium-size_5-of-12 slds-m-top_small">
+                    <div class="va-kpi-row">
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{checkInTime}</span>
+                            <span class="va-kpi-label">Check-In</span>
+                        </div>
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{checkOutTime}</span>
+                            <span class="va-kpi-label">Check-Out</span>
+                        </div>
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{durationDisplay}</span>
+                            <span class="va-kpi-label">Duration</span>
+                        </div>
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{totalOrdersCount}</span>
+                            <span class="va-kpi-label">Orders</span>
+                        </div>
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{orderValue}</span>
+                            <span class="va-kpi-label">Value</span>
+                        </div>
+                        <div class="va-kpi">
+                            <span class="va-kpi-value">{collectionAmount}</span>
+                            <span class="va-kpi-label">Collected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Priority Sell Compliance -->
+            <template if:true={hasMustSellData}>
+                <div class="must-sell-compliance slds-m-top_small">
+                    <div class="compliance-header">
+                        <span class="compliance-title">Priority Sell Compliance</span>
+                        <span class={mustSellComplianceClass}>{mustSellComplianceFormatted}</span>
+                    </div>
+                    <div class="compliance-detail">{mustSellSummaryText}</div>
+                    <div class="compliance-bar">
+                        <div class="compliance-bar-fill" style={complianceBarStyle}></div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Productivity -->
+            <template if:true={isCompletedVisit}>
+                <div class="va-productivity slds-m-top_small">
+                    <template if:true={isProductiveVisit}>
+                        <span class="va-productive-badge va-productive-yes">Productive</span>
+                    </template>
+                    <template if:false={isProductiveVisit}>
+                        <span class="va-productive-badge va-productive-no">Non-Productive</span>
+                        <template if:true={nonProductiveReasonDisplay}>
+                            <span class="va-productive-reason"> &mdash; {nonProductiveReasonDisplay}</span>
+                        </template>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Summary Tabs -->
+    <div class="va-content slds-m-top_small">
+        <lightning-card>
+            <div class="va-tabs">
+                <button class={ordersTabClass} data-tab="orders" onclick={handleTabClick}>
+                    Orders
+                    <template if:true={hasOrders}>
+                        <span class="va-tab-count">{orders.length}</span>
+                    </template>
+                </button>
+                <button class={collectionsTabClass} data-tab="collections" onclick={handleTabClick}>
+                    Collections
+                    <template if:true={hasCollections}>
+                        <span class="va-tab-count">{collections.length}</span>
+                    </template>
+                </button>
+                <button class={returnsTabClass} data-tab="returns" onclick={handleTabClick}>
+                    Returns
+                    <template if:true={hasReturns}>
+                        <span class="va-tab-count">{returns.length}</span>
+                    </template>
+                </button>
+            </div>
+
+            <!-- Orders Tab -->
+            <template if:true={isOrdersTab}>
+                <div class="va-tab-content">
+                    <template if:true={hasOrders}>
+                        <template for:each={orders} for:item="order">
+                            <div class="va-record-row" key={order.Id} data-id={order.Id} data-object="Sales_Order__c" onclick={handleViewRecord}>
+                                <div class="va-record-info">
+                                    <span class="va-record-name">{order.Name}</span>
+                                    <span class="va-record-detail">{order.Status__c}</span>
+                                </div>
+                                <div class="va-record-amount">{order.amountFormatted}</div>
+                                <lightning-icon icon-name="utility:chevronright" size="xx-small" class="va-record-chevron"></lightning-icon>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasOrders}>
+                        <div class="va-empty-tab">
+                            <lightning-icon icon-name="utility:cart" size="small" class="slds-m-bottom_small"></lightning-icon>
+                            <p>No orders placed during this visit</p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Collections Tab -->
+            <template if:true={isCollectionsTab}>
+                <div class="va-tab-content">
+                    <template if:true={hasCollections}>
+                        <template for:each={collections} for:item="coll">
+                            <div class="va-record-row" key={coll.Id} data-id={coll.Id} data-object="Collection__c" onclick={handleViewRecord}>
+                                <div class="va-record-info">
+                                    <span class="va-record-name">{coll.Name}</span>
+                                    <span class="va-record-detail">{coll.Payment_Mode__c} - {coll.Status__c}</span>
+                                </div>
+                                <div class="va-record-amount">{coll.amountFormatted}</div>
+                                <lightning-icon icon-name="utility:chevronright" size="xx-small" class="va-record-chevron"></lightning-icon>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasCollections}>
+                        <div class="va-empty-tab">
+                            <lightning-icon icon-name="utility:moneybag" size="small" class="slds-m-bottom_small"></lightning-icon>
+                            <p>No collections recorded during this visit</p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Returns Tab -->
+            <template if:true={isReturnsTab}>
+                <div class="va-tab-content">
+                    <template if:true={hasReturns}>
+                        <template for:each={returns} for:item="ret">
+                            <div class="va-record-row" key={ret.Id} data-id={ret.Id} data-object="Return_Order__c" onclick={handleViewRecord}>
+                                <div class="va-record-info">
+                                    <span class="va-record-name">{ret.Name}</span>
+                                    <span class="va-record-detail">{ret.Status__c}</span>
+                                </div>
+                                <div class="va-record-amount">{ret.amountFormatted}</div>
+                                <lightning-icon icon-name="utility:chevronright" size="xx-small" class="va-record-chevron"></lightning-icon>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasReturns}>
+                        <div class="va-empty-tab">
+                            <lightning-icon icon-name="utility:undo" size="small" class="slds-m-bottom_small"></lightning-icon>
+                            <p>No returns recorded during this visit</p>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </lightning-card>
+    </div>
+
+    <!-- Loading -->
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+    </template>
+</template>

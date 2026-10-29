@@ -1,0 +1,61 @@
+<template>
+    <lightning-card title="New P2 Order (from Super Stockist)" icon-name="standard:orders">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={hasSupplier}>
+                <p class="slds-text-body_small slds-m-bottom_small supplier-note">
+                    Ordering from your supplier: <strong>{supplierName}</strong>.
+                    Goods are billed from their stock (FEFO) and received into your inventory.
+                </p>
+
+                <div class="slds-grid slds-gutters slds-grid_vertical-align-end">
+                    <div class="slds-col slds-size_3-of-5">
+                        <lightning-combobox
+                            label="Product"
+                            placeholder="Select a product"
+                            options={productOptions}
+                            value={productId}
+                            onchange={handleProduct}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <lightning-input type="number" label="Qty" min="1" value={quantity} onchange={handleQty}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <lightning-button label="Add" onclick={addLine} variant="neutral"></lightning-button>
+                    </div>
+                </div>
+
+                <template if:true={lines.length}>
+                    <div class="slds-m-top_medium">
+                        <lightning-datatable
+                            key-field="productId"
+                            data={lines}
+                            columns={columns}
+                            hide-checkbox-column="true"
+                            onrowaction={handleRowAction}>
+                        </lightning-datatable>
+                    </div>
+                </template>
+
+                <div class="slds-m-top_medium slds-text-align_right">
+                    <lightning-button
+                        label="Place P2 Order"
+                        variant="brand"
+                        disabled={isSubmitDisabled}
+                        onclick={submit}>
+                    </lightning-button>
+                </div>
+            </template>
+
+            <template if:false={hasSupplier}>
+                <div class="slds-illustration slds-p-around_medium">
+                    <p class="slds-text-body_regular slds-text-color_weak">
+                        No supplier (Super Stockist) is linked to your account, so P2 ordering is unavailable.
+                        Ask your administrator to set the "Supplied By" parent account.
+                    </p>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

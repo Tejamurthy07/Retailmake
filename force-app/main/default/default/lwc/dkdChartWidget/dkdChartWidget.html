@@ -1,0 +1,15 @@
+<template>
+    <div class="dkd-chart-widget">
+        <template if:true={title}>
+            <h3 class="dkd-chart-title">{title}</h3>
+        </template>
+        <div class="dkd-chart-canvas-wrap" style={canvasContainerStyle} lwc:dom="manual">
+        </div>
+        <template if:false={hasData}>
+            <div class="dkd-chart-empty">
+                <lightning-icon icon-name="utility:chart" size="small"></lightning-icon>
+                <p>No data to display</p>
+            </div>
+        </template>
+    </div>
+</template>

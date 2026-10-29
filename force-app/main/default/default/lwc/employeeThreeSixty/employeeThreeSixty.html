@@ -1,0 +1,851 @@
+<template>
+    <div class="emp360-container">
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading Employee 360..." size="large"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+
+            <!-- ═══════════════════════════════════════════════════════════
+                 PROFILE HEADER - Gradient Banner
+                 ═══════════════════════════════════════════════════════════ -->
+            <div class="profile-banner">
+                <div class="banner-bg">
+                    <!-- SVG wave pattern overlay -->
+                    <svg class="banner-wave" viewBox="0 0 1440 120" preserveAspectRatio="none">
+                        <path d="M0,64 C360,120 720,0 1080,64 C1260,96 1380,48 1440,64 L1440,120 L0,120 Z" fill="rgba(255,255,255,0.08)"></path>
+                        <path d="M0,80 C240,40 480,100 720,80 C960,60 1200,100 1440,80 L1440,120 L0,120 Z" fill="rgba(255,255,255,0.05)"></path>
+                    </svg>
+                </div>
+
+                <div class="profile-header-content">
+                    <div class="profile-main-row">
+                        <!-- Avatar -->
+                        <div class="profile-avatar-wrapper">
+                            <template if:true={hasProfilePhoto}>
+                                <img src={profilePhotoUrl} alt={employeeName} class="profile-avatar-img" />
+                            </template>
+                            <template if:false={hasProfilePhoto}>
+                                <div class="profile-avatar-initials">
+                                    <span>{employeeInitials}</span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="profile-info">
+                            <div class="profile-name-row">
+                                <h1 class="profile-name">{employeeName}</h1>
+                                <span class={statusBadgeClass}>{statusLabel}</span>
+                            </div>
+                            <div class="profile-meta-row">
+                                <template if:true={employeeDesignation}>
+                                    <span class="profile-designation">{employeeDesignation}</span>
+                                </template>
+                                <template if:true={hasDepartment}>
+                                    <span class="profile-dept-badge">{employeeDepartment}</span>
+                                </template>
+                                <template if:true={employeeCode}>
+                                    <span class="profile-code">{employeeCode}</span>
+                                </template>
+                            </div>
+
+                            <!-- Contact Row -->
+                            <div class="profile-contact-row">
+                                <template if:true={hasEmail}>
+                                    <span class="contact-item">
+                                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                            <path d="M22,4 L12,13 L2,4"></path>
+                                        </svg>
+                                        {employeeEmail}
+                                    </span>
+                                </template>
+                                <template if:true={hasPhone}>
+                                    <span class="contact-item">
+                                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"></path>
+                                        </svg>
+                                        {employeePhone}
+                                    </span>
+                                </template>
+                                <template if:true={hasTenure}>
+                                    <span class="contact-item">
+                                        <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        {tenure}
+                                    </span>
+                                </template>
+                            </div>
+
+                            <!-- Manager Row -->
+                            <template if:true={hasReportingManager}>
+                                <div class="profile-manager-row">
+                                    <span class="manager-label">Reports to</span>
+                                    <div class="manager-chip">
+                                        <span class="manager-avatar">{managerInitials}</span>
+                                        <span class="manager-name">{reportingManagerName}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="profile-actions">
+                            <button class="action-btn action-btn-primary" onclick={handleEditEmployee} title="Edit Employee">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                            <template if:true={hasEmail}>
+                                <button class="action-btn" onclick={handleSendEmail} title="Send Email">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <path d="M22,4 L12,13 L2,4"></path>
+                                    </svg>
+                                    <span>Email</span>
+                                </button>
+                            </template>
+                            <button class="action-btn" onclick={handleViewAttendance} title="View Attendance">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <span>Attendance</span>
+                            </button>
+                            <button class="action-btn" onclick={handleRefresh} title="Refresh">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════
+                 KPI TILES ROW
+                 ═══════════════════════════════════════════════════════════ -->
+            <div class="kpi-tiles-row">
+                <!-- 1. Attendance % with ring -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-attendance"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-ring-wrapper">
+                            <svg class="kpi-ring" viewBox="0 0 40 40">
+                                <circle cx="20" cy="20" r="16" fill="none" stroke="#e5e5e5" stroke-width="3"></circle>
+                                <circle cx="20" cy="20" r="16" fill="none"
+                                    stroke={attendanceRingColor}
+                                    stroke-width="3"
+                                    stroke-dasharray={attendanceRingDasharray}
+                                    stroke-linecap="round"
+                                    transform="rotate(-90 20 20)"></circle>
+                            </svg>
+                            <span class="kpi-ring-value">{attendancePercent}%</span>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main">{mtdAttendance}/{totalWorkingDays}</span>
+                            <span class="kpi-label">Attendance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. MTD Orders -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-orders"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-icon-wrapper kpi-icon-orders">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 01-8 0"></path>
+                            </svg>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main">{mtdOrderCount}</span>
+                            <span class="kpi-label">MTD Orders</span>
+                            <span class="kpi-sub-value">{mtdOrderValue}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MTD Collection -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-collection"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-icon-wrapper kpi-icon-collection">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
+                            </svg>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main kpi-value-success">{mtdCollection}</span>
+                            <span class="kpi-label">MTD Collection</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Total Visits -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-visits"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-icon-wrapper kpi-icon-visits">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main">{mtdVisits}</span>
+                            <span class="kpi-label">Total Visits</span>
+                            <span class="kpi-sub-value">{productivePercent}% productive</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Beats Assigned -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-beats"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-icon-wrapper kpi-icon-beats">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                <line x1="8" y1="2" x2="8" y2="18"></line>
+                                <line x1="16" y1="6" x2="16" y2="22"></line>
+                            </svg>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main">{totalBeats}</span>
+                            <span class="kpi-label">Beats Assigned</span>
+                            <span class="kpi-sub-value">{totalOutlets} outlets</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Leave Balance -->
+                <div class="kpi-tile">
+                    <div class="kpi-tile-accent kpi-accent-leave"></div>
+                    <div class="kpi-tile-body">
+                        <div class="kpi-icon-wrapper kpi-icon-leave">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"></path>
+                            </svg>
+                        </div>
+                        <div class="kpi-text">
+                            <span class="kpi-value-main">{totalLeaveBalance}</span>
+                            <span class="kpi-label">Leave Balance</span>
+                            <span class="kpi-sub-value">days remaining</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════
+                 TABBED CONTENT AREA
+                 ═══════════════════════════════════════════════════════════ -->
+            <div class="tab-section">
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class={overviewTabClass} data-tab="overview" onclick={handleTabClick}>
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Overview
+                    </button>
+                    <button class={attendanceTabClass} data-tab="attendance" onclick={handleTabClick}>
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Attendance
+                    </button>
+                    <button class={leavesTabClass} data-tab="leaves" onclick={handleTabClick}>
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        Leaves
+                    </button>
+                    <button class={beatsTabClass} data-tab="beats" onclick={handleTabClick}>
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                            <line x1="8" y1="2" x2="8" y2="18"></line>
+                            <line x1="16" y1="6" x2="16" y2="22"></line>
+                        </svg>
+                        Beats &amp; Territory
+                    </button>
+                    <template if:true={showTeamTab}>
+                        <button class={teamTabClass} data-tab="team" onclick={handleTabClick}>
+                            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 010 7.75"></path>
+                            </svg>
+                            Team
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Tab Loading Spinner -->
+                <template if:true={isTabLoading}>
+                    <div class="tab-loading">
+                        <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                    </div>
+                </template>
+
+                <!-- ═══════════ TAB 1: OVERVIEW ═══════════ -->
+                <template if:true={isOverviewTab}>
+                    <div class="tab-content overview-content">
+                        <div class="overview-grid">
+                            <!-- Left: Performance Trend Chart -->
+                            <div class="overview-left">
+                                <div class="section-card">
+                                    <div class="section-header">
+                                        <h3 class="section-title">Performance Trend</h3>
+                                        <span class="section-subtitle">Last 6 months - Order Value</span>
+                                    </div>
+                                    <div class="section-body">
+                                        <template if:true={hasChartData}>
+                                            <div class="chart-container">
+                                                <svg class="perf-chart" viewBox={chartData.chartViewBox} preserveAspectRatio="xMidYMid meet">
+                                                    <!-- Y-axis grid lines -->
+                                                    <template for:each={chartData.yLabels} for:item="yl">
+                                                        <line key={yl.key}
+                                                            x1="50" y1={yl.lineY}
+                                                            x2={chartData.chartWidth} y2={yl.lineY}
+                                                            class="chart-gridline"></line>
+                                                        <text key={yl.key}
+                                                            x="46" y={yl.y}
+                                                            class="chart-ylabel"
+                                                            text-anchor="end"
+                                                            dominant-baseline="middle">{yl.label}</text>
+                                                    </template>
+                                                    <!-- Bars -->
+                                                    <template for:each={chartData.bars} for:item="bar">
+                                                        <g key={bar.key} class="chart-bar-group">
+                                                            <rect
+                                                                x={bar.x} y={bar.y}
+                                                                width={bar.width} height={bar.height}
+                                                                rx={bar.rx}
+                                                                class="chart-bar"></rect>
+                                                            <text
+                                                                x={bar.labelX} y={bar.labelY}
+                                                                class="chart-bar-label"
+                                                                text-anchor="middle">{bar.valueFormatted}</text>
+                                                            <text
+                                                                x={bar.monthX} y={bar.monthY}
+                                                                class="chart-month-label"
+                                                                text-anchor="middle">{bar.month}</text>
+                                                        </g>
+                                                    </template>
+                                                </svg>
+                                            </div>
+                                        </template>
+                                        <template if:false={hasChartData}>
+                                            <div class="empty-state">
+                                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                                </svg>
+                                                <p class="empty-text">No performance data available yet</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Recent Activity Feed -->
+                            <div class="overview-right">
+                                <div class="section-card">
+                                    <div class="section-header">
+                                        <h3 class="section-title">Recent Activity</h3>
+                                        <span class="section-subtitle">Last 10 days</span>
+                                    </div>
+                                    <div class="section-body activity-feed-body">
+                                        <template if:true={hasRecentActivity}>
+                                            <div class="activity-feed">
+                                                <template for:each={recentActivity} for:item="act">
+                                                    <div key={act.key} class="activity-item">
+                                                        <div class="activity-timeline-col">
+                                                            <div class={act.statusClass}></div>
+                                                            <template if:false={act.isLast}>
+                                                                <div class="activity-line"></div>
+                                                            </template>
+                                                        </div>
+                                                        <div class="activity-content">
+                                                            <div class="activity-date-row">
+                                                                <span class="activity-date">{act.dateFormatted}</span>
+                                                                <span class="activity-day">{act.dayLabel}</span>
+                                                            </div>
+                                                            <template if:true={act.isPresent}>
+                                                                <div class="activity-metrics">
+                                                                    <span class="activity-metric">
+                                                                        <strong>{act.visits}</strong> visits
+                                                                    </span>
+                                                                    <span class="activity-metric-divider"></span>
+                                                                    <span class="activity-metric">
+                                                                        <strong>{act.orders}</strong> orders
+                                                                    </span>
+                                                                    <span class="activity-metric-divider"></span>
+                                                                    <span class="activity-metric">
+                                                                        <strong>{act.collectionFormatted}</strong>
+                                                                    </span>
+                                                                    <span class="activity-metric-divider"></span>
+                                                                    <span class="activity-metric">
+                                                                        {act.hoursWorked}h
+                                                                    </span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <template if:false={hasRecentActivity}>
+                                            <div class="empty-state">
+                                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                </svg>
+                                                <p class="empty-text">No recent activity recorded</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- ═══════════ TAB 2: ATTENDANCE ═══════════ -->
+                <template if:true={isAttendanceTab}>
+                    <div class="tab-content">
+                        <!-- Month Navigator -->
+                        <div class="month-navigator">
+                            <button class="month-nav-btn" onclick={handlePrevMonth}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <h3 class="month-label">{calendarMonthLabel}</h3>
+                            <button class="month-nav-btn" onclick={handleNextMonth}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Calendar Grid -->
+                        <div class="calendar-wrapper">
+                            <div class="calendar-grid">
+                                <!-- Header Row -->
+                                <div class="cal-header-row">
+                                    <div class="cal-header-cell">Sun</div>
+                                    <div class="cal-header-cell">Mon</div>
+                                    <div class="cal-header-cell">Tue</div>
+                                    <div class="cal-header-cell">Wed</div>
+                                    <div class="cal-header-cell">Thu</div>
+                                    <div class="cal-header-cell">Fri</div>
+                                    <div class="cal-header-cell">Sat</div>
+                                </div>
+                                <!-- Week Rows -->
+                                <template for:each={calendarWeeks} for:item="week">
+                                    <div key={week.key} class="cal-week-row">
+                                        <template for:each={week.days} for:item="day">
+                                            <div key={day.key} class={day.cssClass}>
+                                                <template if:false={day.isEmpty}>
+                                                    <span class="cal-day-number">{day.day}</span>
+                                                    <template if:true={day.isPresent}>
+                                                        <span class="cal-status-icon cal-icon-present">
+                                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                                <path d="M13.485 1.929a.75.75 0 010 1.06l-7.07 7.072a.75.75 0 01-1.061 0L2.111 6.818a.75.75 0 011.06-1.06l2.683 2.682 6.57-6.571a.75.75 0 011.06 0z"></path>
+                                                            </svg>
+                                                        </span>
+                                                    </template>
+                                                    <template if:true={day.isAbsent}>
+                                                        <span class="cal-status-icon cal-icon-absent">
+                                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                                <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"></path>
+                                                            </svg>
+                                                        </span>
+                                                    </template>
+                                                    <template if:true={day.isLeave}>
+                                                        <span class="cal-status-icon cal-icon-leave">L</span>
+                                                    </template>
+                                                    <template if:true={day.isHoliday}>
+                                                        <span class="cal-status-icon cal-icon-holiday" title={day.holidayName}>H</span>
+                                                    </template>
+                                                    <template if:true={day.showHours}>
+                                                        <span class="cal-hours">{day.hours}</span>
+                                                    </template>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="cal-legend">
+                                <span class="legend-item"><span class="legend-dot legend-present"></span> Present</span>
+                                <span class="legend-item"><span class="legend-dot legend-absent"></span> Absent</span>
+                                <span class="legend-item"><span class="legend-dot legend-leave"></span> Leave</span>
+                                <span class="legend-item"><span class="legend-dot legend-holiday"></span> Holiday</span>
+                                <span class="legend-item"><span class="legend-dot legend-weekend"></span> Week Off</span>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Summary Cards -->
+                        <div class="attendance-summary-row">
+                            <div class="att-summary-card att-card-present">
+                                <span class="att-summary-value">{attendanceSummaryPresent}</span>
+                                <span class="att-summary-label">Present</span>
+                            </div>
+                            <div class="att-summary-card att-card-absent">
+                                <span class="att-summary-value">{attendanceSummaryAbsent}</span>
+                                <span class="att-summary-label">Absent</span>
+                            </div>
+                            <div class="att-summary-card att-card-leave">
+                                <span class="att-summary-value">{attendanceSummaryLeave}</span>
+                                <span class="att-summary-label">Leaves</span>
+                            </div>
+                            <div class="att-summary-card att-card-holiday">
+                                <span class="att-summary-value">{attendanceSummaryHoliday}</span>
+                                <span class="att-summary-label">Holidays</span>
+                            </div>
+                            <div class="att-summary-card att-card-hours">
+                                <span class="att-summary-value">{calendarAvgHours}h</span>
+                                <span class="att-summary-label">Avg Hours</span>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Progress Bar -->
+                        <div class="attendance-progress-section">
+                            <div class="att-progress-header">
+                                <span class="att-progress-label">Monthly Attendance</span>
+                                <span class="att-progress-pct">{calendarAttendancePercent}%</span>
+                            </div>
+                            <div class="att-progress-track">
+                                <div class="att-progress-fill" style={calendarAttendanceBarStyle}></div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- ═══════════ TAB 3: LEAVES ═══════════ -->
+                <template if:true={isLeavesTab}>
+                    <div class="tab-content">
+                        <!-- Leave Balance Cards with Rings -->
+                        <div class="leave-balance-row">
+                            <!-- CL -->
+                            <div class="leave-balance-card leave-card-cl">
+                                <div class="leave-ring-wrapper">
+                                    <svg class="leave-ring" viewBox="0 0 64 64">
+                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e5e5e5" stroke-width="4"></circle>
+                                        <circle cx="32" cy="32" r="28" fill="none"
+                                            stroke="#0176d3"
+                                            stroke-width="4"
+                                            stroke-dasharray={clRingDasharray}
+                                            stroke-linecap="round"
+                                            transform="rotate(-90 32 32)"></circle>
+                                    </svg>
+                                    <span class="leave-ring-value">{clBalance}</span>
+                                </div>
+                                <span class="leave-card-label">Casual Leave</span>
+                                <span class="leave-card-total">{clTotalDisplay}</span>
+                            </div>
+                            <!-- SL -->
+                            <div class="leave-balance-card leave-card-sl">
+                                <div class="leave-ring-wrapper">
+                                    <svg class="leave-ring" viewBox="0 0 64 64">
+                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e5e5e5" stroke-width="4"></circle>
+                                        <circle cx="32" cy="32" r="28" fill="none"
+                                            stroke="#2e844a"
+                                            stroke-width="4"
+                                            stroke-dasharray={slRingDasharray}
+                                            stroke-linecap="round"
+                                            transform="rotate(-90 32 32)"></circle>
+                                    </svg>
+                                    <span class="leave-ring-value">{slBalance}</span>
+                                </div>
+                                <span class="leave-card-label">Sick Leave</span>
+                                <span class="leave-card-total">{slTotalDisplay}</span>
+                            </div>
+                            <!-- EL -->
+                            <div class="leave-balance-card leave-card-el">
+                                <div class="leave-ring-wrapper">
+                                    <svg class="leave-ring" viewBox="0 0 64 64">
+                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e5e5e5" stroke-width="4"></circle>
+                                        <circle cx="32" cy="32" r="28" fill="none"
+                                            stroke="#9b59b6"
+                                            stroke-width="4"
+                                            stroke-dasharray={elRingDasharray}
+                                            stroke-linecap="round"
+                                            transform="rotate(-90 32 32)"></circle>
+                                    </svg>
+                                    <span class="leave-ring-value">{elBalance}</span>
+                                </div>
+                                <span class="leave-card-label">Earned Leave</span>
+                                <span class="leave-card-total">{elTotalDisplay}</span>
+                            </div>
+                            <!-- CO -->
+                            <div class="leave-balance-card leave-card-co">
+                                <div class="leave-ring-wrapper">
+                                    <svg class="leave-ring" viewBox="0 0 64 64">
+                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e5e5e5" stroke-width="4"></circle>
+                                        <circle cx="32" cy="32" r="28" fill="none"
+                                            stroke="#dd7a01"
+                                            stroke-width="4"
+                                            stroke-dasharray={coRingDasharray}
+                                            stroke-linecap="round"
+                                            transform="rotate(-90 32 32)"></circle>
+                                    </svg>
+                                    <span class="leave-ring-value">{coBalance}</span>
+                                </div>
+                                <span class="leave-card-label">Comp Off</span>
+                                <span class="leave-card-total">{coTotalDisplay}</span>
+                            </div>
+                        </div>
+
+                        <!-- Year Navigator -->
+                        <div class="year-navigator">
+                            <button class="month-nav-btn" onclick={handlePrevLeaveYear}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <h3 class="month-label">{leaveYear}</h3>
+                            <button class="month-nav-btn" onclick={handleNextLeaveYear}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Leave History Table -->
+                        <template if:true={hasLeaveHistory}>
+                            <div class="leave-table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date Range</th>
+                                            <th>Type</th>
+                                            <th>Days</th>
+                                            <th>Status</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={leaveHistory} for:item="leave">
+                                            <tr key={leave.key}>
+                                                <td class="leave-date-cell">{leave.dateRange}</td>
+                                                <td><span class={leave.typeBadgeClass}>{leave.Leave_Type__c}</span></td>
+                                                <td class="leave-days-cell">{leave.days}</td>
+                                                <td><span class={leave.statusBadgeClass}>{leave.Status__c}</span></td>
+                                                <td class="leave-reason-cell">{leave.reason}</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                        <template if:false={hasLeaveHistory}>
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <p class="empty-text">No leave records found for {leaveYear}</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ═══════════ TAB 4: BEATS & TERRITORY ═══════════ -->
+                <template if:true={isBeatsTab}>
+                    <div class="tab-content">
+                        <!-- Territory Info Card -->
+                        <template if:true={hasTerritory}>
+                            <div class="territory-card">
+                                <div class="territory-header">
+                                    <svg class="territory-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                        <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 7 8 11.7z"></path>
+                                    </svg>
+                                    <h3 class="territory-title">Territory Assignment</h3>
+                                </div>
+                                <div class="territory-details">
+                                    <div class="territory-item">
+                                        <span class="territory-label">Zone</span>
+                                        <span class="territory-value">{territoryZone}</span>
+                                    </div>
+                                    <div class="territory-divider"></div>
+                                    <div class="territory-item">
+                                        <span class="territory-label">Region</span>
+                                        <span class="territory-value">{territoryRegion}</span>
+                                    </div>
+                                    <div class="territory-divider"></div>
+                                    <div class="territory-item">
+                                        <span class="territory-label">Territory</span>
+                                        <span class="territory-value territory-value-bold">{territoryName}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Beat Cards -->
+                        <template if:true={hasBeats}>
+                            <div class="beats-header">
+                                <h3 class="beats-title">Assigned Beats</h3>
+                                <span class="beats-count">{totalBeatOutlets} total outlets</span>
+                            </div>
+                            <div class="beats-grid">
+                                <template for:each={beats} for:item="beat">
+                                    <div key={beat.key} class="beat-card">
+                                        <div class="beat-card-top">
+                                            <div class="beat-name-row">
+                                                <h4 class="beat-name">{beat.beatName}</h4>
+                                                <span class={beat.statusClass}>{beat.statusLabel}</span>
+                                            </div>
+                                            <template if:true={beat.beatCode}>
+                                                <span class="beat-code">{beat.beatCode}</span>
+                                            </template>
+                                            <template if:true={beat.territoryName}>
+                                                <span class="beat-territory">{beat.territoryName}</span>
+                                            </template>
+                                        </div>
+                                        <div class="beat-card-bottom">
+                                            <!-- Day of week indicators -->
+                                            <div class="beat-days-row">
+                                                <template for:each={beat.dayIndicators} for:item="dayInd">
+                                                    <div key={dayInd.key} class={dayInd.cssClass}>
+                                                        <span>{dayInd.label}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="beat-outlets">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="beat-outlet-icon">
+                                                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                </svg>
+                                                <span class="beat-outlet-count">{beat.outletCount} outlets</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasBeats}>
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                                </svg>
+                                <p class="empty-text">No beats assigned to this employee</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ═══════════ TAB 5: TEAM ═══════════ -->
+                <template if:true={isTeamTab}>
+                    <div class="tab-content">
+                        <template if:true={hasTeamMembers}>
+                            <!-- Team Summary -->
+                            <div class="team-summary-row">
+                                <div class="team-summary-card">
+                                    <span class="team-summary-value">{teamCount}</span>
+                                    <span class="team-summary-label">Team Members</span>
+                                </div>
+                                <div class="team-summary-card">
+                                    <span class="team-summary-value">{teamAvgAttendance}%</span>
+                                    <span class="team-summary-label">Avg Attendance</span>
+                                </div>
+                                <div class="team-summary-card">
+                                    <span class="team-summary-value">{teamTotalOrderValue}</span>
+                                    <span class="team-summary-label">Team Collection</span>
+                                </div>
+                            </div>
+
+                            <!-- Team Member Cards Grid -->
+                            <div class="team-grid">
+                                <template for:each={teamMembers} for:item="member">
+                                    <div key={member.key} class="team-card" data-id={member.empId} onclick={handleTeamMemberClick}>
+                                        <div class="team-card-header">
+                                            <div class="team-avatar">
+                                                <span>{member.initials}</span>
+                                            </div>
+                                            <div class="team-member-info">
+                                                <span class="team-member-name">{member.fullName}</span>
+                                                <span class="team-member-designation">{member.designation}</span>
+                                            </div>
+                                            <template if:true={member.department}>
+                                                <span class="team-dept-badge">{member.department}</span>
+                                            </template>
+                                        </div>
+                                        <div class="team-card-kpis">
+                                            <div class="team-kpi">
+                                                <span class="team-kpi-value">{member.attendancePercent}%</span>
+                                                <span class="team-kpi-label">Attendance</span>
+                                            </div>
+                                            <div class="team-kpi-divider"></div>
+                                            <div class="team-kpi">
+                                                <span class="team-kpi-value">{member.mtdOrders}</span>
+                                                <span class="team-kpi-label">MTD Orders</span>
+                                            </div>
+                                            <div class="team-kpi-divider"></div>
+                                            <div class="team-kpi">
+                                                <span class="team-kpi-value">{member.mtdCollectionFormatted}</span>
+                                                <span class="team-kpi-label">Collection</span>
+                                            </div>
+                                        </div>
+                                        <div class="team-card-action">
+                                            <span class="view-360-link">View 360 &rarr;</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasTeamMembers}>
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 010 7.75"></path>
+                                </svg>
+                                <p class="empty-text">No direct reports found</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+        </template>
+    </div>
+</template>

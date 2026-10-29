@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Applied_Distance_KM__c</fullName>
+    <description>Effective distance used for calculations. Uses manual override if provided, otherwise GPS distance.</description>
+    <externalId>false</externalId>
+    <formula>IF(NOT(ISBLANK(Manual_Distance_KM__c)), Manual_Distance_KM__c, GPS_Distance_KM__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Applied Distance KM</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

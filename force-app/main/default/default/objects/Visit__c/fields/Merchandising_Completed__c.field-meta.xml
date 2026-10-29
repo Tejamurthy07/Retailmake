@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Merchandising_Completed__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indicates whether merchandising activities were completed during this visit</description>
+    <label>Merchandising Completed</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

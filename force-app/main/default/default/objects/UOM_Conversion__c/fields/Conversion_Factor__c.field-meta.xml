@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Conversion_Factor__c</fullName>
+    <description>Multiply the From UOM quantity by this factor to get the To UOM quantity. E.g., 1 Case = 12 Pieces means factor = 12.</description>
+    <externalId>false</externalId>
+    <label>Conversion Factor</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>6</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

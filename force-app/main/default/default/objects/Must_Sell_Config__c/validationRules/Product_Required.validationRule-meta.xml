@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Product_Required</fullName>
+    <active>true</active>
+    <description>Product is required for Priority Sell Configuration.</description>
+    <errorConditionFormula>ISBLANK(Product_Ext__c)</errorConditionFormula>
+    <errorDisplayField>Product_Ext__c</errorDisplayField>
+    <errorMessage>Product is required for Priority Sell Configuration.</errorMessage>
+</ValidationRule>

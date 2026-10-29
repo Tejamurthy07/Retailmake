@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MT_Price_Lists</fullName>
+    <columns>NAME</columns>
+    <columns>Priority__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Customer__c</columns>
+    <columns>Category__c</columns>
+    <columns>Territory__c</columns>
+    <columns>Unit_Price__c</columns>
+    <columns>Price_Type__c</columns>
+    <columns>Region__c</columns>
+    <columns>Effective_From__c</columns>
+    <columns>Effective_To__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Channel__c</field>
+        <operation>equals</operation>
+        <value>MT</value>
+    </filters>
+    <filters>
+        <field>Is_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>MT Price Lists</label>
+</ListView>

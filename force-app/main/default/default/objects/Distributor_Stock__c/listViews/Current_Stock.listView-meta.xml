@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Stock</fullName>
+    <columns>NAME</columns>
+    <columns>Account__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Closing_Stock__c</columns>
+    <columns>Batch_No__c</columns>
+    <columns>Expiry_Date__c</columns>
+    <columns>Stock_Date__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Current__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Current Stock</label>
+</ListView>

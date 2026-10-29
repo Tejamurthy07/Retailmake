@@ -1,0 +1,171 @@
+<template>
+    <lightning-card title="UOM Conversion Manager" icon-name="standard:metrics">
+
+        <!-- Conversion Calculator Section -->
+        <div class="slds-m-around_medium">
+            <h2 class="slds-text-heading_small slds-m-bottom_small">Quick Converter</h2>
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_xx-small">
+                    <lightning-input
+                        type="number"
+                        label="Quantity"
+                        value={calcQuantity}
+                        onchange={handleCalcQuantityChange}
+                        step="0.01"
+                        min="0"
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_xx-small">
+                    <lightning-combobox
+                        label="From UOM"
+                        value={calcFromUOMId}
+                        options={uomOptions}
+                        onchange={handleCalcFromUOMChange}
+                        placeholder="Select From UOM"
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_xx-small">
+                    <lightning-combobox
+                        label="To UOM"
+                        value={calcToUOMId}
+                        options={uomOptions}
+                        onchange={handleCalcToUOMChange}
+                        placeholder="Select To UOM"
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_xx-small slds-grid slds-grid_vertical-align-end">
+                    <lightning-button
+                        label="Convert"
+                        variant="brand"
+                        onclick={handleConvert}
+                        disabled={isLoading}
+                        class="slds-m-bottom_xx-small"
+                    ></lightning-button>
+                </div>
+            </div>
+            <template if:true={hasResult}>
+                <div class="slds-box slds-theme_success slds-m-top_small slds-p-around_small">
+                    <p class="slds-text-heading_small">
+                        Result: <strong>{convertedResult}</strong>
+                    </p>
+                </div>
+            </template>
+        </div>
+
+        <hr class="slds-m-vertical_small" />
+
+        <!-- Conversion Rules Table -->
+        <div class="slds-m-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                <h2 class="slds-text-heading_small">Conversion Rules</h2>
+                <lightning-button
+                    label="New Conversion"
+                    variant="brand"
+                    icon-name="utility:add"
+                    onclick={handleNewConversion}
+                ></lightning-button>
+            </div>
+
+            <template if:true={hasConversions}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={conversions}
+                    columns={columns}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </template>
+            <template if:false={hasConversions}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <p class="slds-text-body_regular slds-text-color_weak">
+                        No conversion rules defined yet. Click "New Conversion" to get started.
+                    </p>
+                </div>
+            </template>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+    </lightning-card>
+
+    <!-- Conversion Modal -->
+    <template if:true={showConversionModal}>
+        <section role="dialog" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close" onclick={handleCloseModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium">{modalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
+                            <lightning-combobox
+                                label="From UOM"
+                                value={fromUOMId}
+                                options={uomOptions}
+                                onchange={handleFromUOMChange}
+                                required
+                                placeholder="Select From UOM"
+                            ></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
+                            <lightning-combobox
+                                label="To UOM"
+                                value={toUOMId}
+                                options={uomOptions}
+                                onchange={handleToUOMChange}
+                                required
+                                placeholder="Select To UOM"
+                            ></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
+                            <lightning-input
+                                type="number"
+                                label="Conversion Factor"
+                                value={conversionFactor}
+                                onchange={handleFactorChange}
+                                required
+                                step="0.000001"
+                                min="0.000001"
+                                message-when-range-underflow="Factor must be positive"
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
+                            <lightning-record-picker
+                                label="Product (optional)"
+                                placeholder="Search Products..."
+                                object-api-name="Product_Extension__c"
+                                value={productId}
+                                onchange={handleProductChange}
+                            ></lightning-record-picker>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-around_xx-small">
+                            <lightning-input
+                                type="checkbox"
+                                label="Active"
+                                checked={isConversionActive}
+                                onchange={handleActiveChange}
+                            ></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseModal}></lightning-button>
+                    <lightning-button
+                        label="Save"
+                        variant="brand"
+                        onclick={handleSaveConversion}
+                        disabled={isLoading}
+                        class="slds-m-left_x-small"
+                    ></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

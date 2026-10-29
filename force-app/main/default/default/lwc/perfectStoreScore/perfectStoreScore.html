@@ -1,0 +1,119 @@
+<template>
+    <lightning-card title="Perfect Store Score" icon-name="standard:reward">
+        <div slot="actions" class="pss-filters">
+            <lightning-combobox variant="label-hidden" name="survey" value={selectedSurveyId}
+                options={surveyOptions} onchange={handleSurveyChange} class="pss-filter-survey">
+            </lightning-combobox>
+            <lightning-input type="date" variant="label-hidden" value={startDate}
+                onchange={handleStartDate} class="pss-filter-date"></lightning-input>
+            <lightning-input type="date" variant="label-hidden" value={endDate}
+                onchange={handleEndDate} class="pss-filter-date"></lightning-input>
+            <lightning-button-icon icon-name="utility:refresh" onclick={handleRefresh}
+                alternative-text="Refresh" title="Refresh"></lightning-button-icon>
+        </div>
+
+        <div class="slds-p-horizontal_small slds-p-bottom_small pss-container">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-p-around_x-small">{errorMessage}</div>
+            </template>
+
+            <!-- KPI tiles -->
+            <div class="slds-grid slds-wrap slds-gutters_x-small pss-kpi-row">
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class={avgScoreClass}>
+                        <p class="pss-kpi__value">{avgScoreDisplay}%</p>
+                        <p class="pss-kpi__label">Average Score</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="pss-kpi pss-band_healthy">
+                        <p class="pss-kpi__value">{kpis.perfectStores}</p>
+                        <p class="pss-kpi__label">{thresholdLabel}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="pss-kpi">
+                        <p class="pss-kpi__value">{kpis.totalAudits}</p>
+                        <p class="pss-kpi__label">Audits Completed</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="pss-kpi">
+                        <p class="pss-kpi__value">{kpis.outletsAudited}</p>
+                        <p class="pss-kpi__label">Outlets Audited</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboards -->
+            <lightning-tabset variant="scoped" class="pss-tabs">
+                <lightning-tab label="By Outlet" value="outlet" onactive={handleTabActive}>
+                    <template if:true={hasOutletRows}>
+                        <template for:each={outletRows} for:item="row">
+                            <div key={row.id} class="pss-row">
+                                <span class={row.rankClass}>{row.rank}</span>
+                                <div class="pss-row-main">
+                                    <div class="pss-row-head">
+                                        <span class="pss-row-name">{row.name}</span>
+                                        <span class="pss-row-score">{row.scoreDisplay}%</span>
+                                    </div>
+                                    <div class="pss-row-sub">{row.territory} · {row.surveyCount} audit(s)</div>
+                                    <div class="pss-bar"><div class={row.barClass} style={row.barStyle}></div></div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasOutletRows}>
+                        <p class="pss-empty">No completed audits in this window.</p>
+                    </template>
+                </lightning-tab>
+
+                <lightning-tab label="By Territory / Team" value="territory" onactive={handleTabActive}>
+                    <template if:true={hasTerritoryRows}>
+                        <template for:each={territoryRows} for:item="row">
+                            <div key={row.id} class="pss-row">
+                                <span class={row.rankClass}>{row.rank}</span>
+                                <div class="pss-row-main">
+                                    <div class="pss-row-head">
+                                        <span class="pss-row-name">{row.name}</span>
+                                        <span class="pss-row-score">{row.scoreDisplay}%</span>
+                                    </div>
+                                    <div class="pss-row-sub">{row.surveyCount} audit(s)</div>
+                                    <div class="pss-bar"><div class={row.barClass} style={row.barStyle}></div></div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasTerritoryRows}>
+                        <p class="pss-empty">No completed audits in this window.</p>
+                    </template>
+                </lightning-tab>
+
+                <lightning-tab label="By Rep" value="rep" onactive={handleTabActive}>
+                    <template if:true={hasRepRows}>
+                        <template for:each={repRows} for:item="row">
+                            <div key={row.id} class="pss-row">
+                                <span class={row.rankClass}>{row.rank}</span>
+                                <div class="pss-row-main">
+                                    <div class="pss-row-head">
+                                        <span class="pss-row-name">{row.name}</span>
+                                        <span class="pss-row-score">{row.scoreDisplay}%</span>
+                                    </div>
+                                    <div class="pss-row-sub">{row.surveyCount} audit(s)</div>
+                                    <div class="pss-bar"><div class={row.barClass} style={row.barStyle}></div></div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasRepRows}>
+                        <p class="pss-empty">No completed audits in this window.</p>
+                    </template>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

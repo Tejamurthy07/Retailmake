@@ -1,0 +1,374 @@
+<template>
+    <lightning-card title="Product Catalog" icon-name="standard:product">
+        <div class="catalog-container">
+            <!-- ── Layout: Sidebar + Main ──────────────────────────────── -->
+            <div class="slds-grid slds-wrap">
+
+                <!-- ── Left Sidebar: Category Tree ─────────────────────── -->
+                <div class="slds-col sidebar-col">
+                    <div class="sidebar-panel">
+                        <div class="slds-p-around_small sidebar-header">
+                            <h2 class="slds-text-heading_small slds-m-bottom_x-small">Categories</h2>
+                            <template if:true={selectedCategoryId}>
+                                <lightning-button
+                                    label="Clear Filter"
+                                    variant="base"
+                                    icon-name="utility:close"
+                                    onclick={handleClearCategory}
+                                    class="clear-category-btn">
+                                </lightning-button>
+                            </template>
+                        </div>
+                        <template if:true={categoryTreeLoading}>
+                            <div class="slds-p-around_medium slds-align_absolute-center">
+                                <lightning-spinner alternative-text="Loading categories" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:false={categoryTreeLoading}>
+                            <template if:true={hasCategoryTree}>
+                                <div class="category-tree-wrapper">
+                                    <lightning-tree
+                                        items={treeItems}
+                                        onselect={handleCategorySelect}
+                                        header="">
+                                    </lightning-tree>
+                                </div>
+                            </template>
+                            <template if:false={hasCategoryTree}>
+                                <div class="slds-p-around_medium slds-text-color_weak">
+                                    No categories found.
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ── Main Content Area ───────────────────────────────── -->
+                <div class="slds-col main-col">
+
+                    <!-- ── Top Bar: Search + Toggle ────────────────────── -->
+                    <div class="slds-grid slds-wrap slds-gutters_x-small slds-p-around_small top-bar">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_5-of-12">
+                            <lightning-input
+                                type="search"
+                                label="Search Products"
+                                placeholder="Search by name or product code..."
+                                value={searchTerm}
+                                onchange={handleSearchChange}
+                                variant="label-hidden">
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-medium-size_3-of-12 slds-large-size_3-of-12 slds-grid slds-grid_vertical-align-center">
+                            <lightning-input
+                                type="checkbox"
+                                label="Active Only"
+                                checked={activeOnly}
+                                onchange={handleActiveToggle}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-medium-size_3-of-12 slds-large-size_4-of-12 slds-grid slds-grid_vertical-align-center slds-grid_align-end">
+                            <template if:true={hasProducts}>
+                                <span class="slds-text-body_small slds-text-color_weak result-count">
+                                    Showing {displayRangeStart}-{displayRangeEnd} of {totalCount} products
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- ── Active Category Filter Badge ────────────────── -->
+                    <template if:true={selectedCategoryName}>
+                        <div class="slds-p-horizontal_small slds-p-bottom_small">
+                            <span class="slds-badge slds-badge_inverse category-filter-badge">
+                                <lightning-icon icon-name="utility:filter" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Category: {selectedCategoryName}
+                                <button class="slds-button slds-button_icon slds-m-left_xx-small" onclick={handleClearCategory} title="Remove filter">
+                                    <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                                </button>
+                            </span>
+                        </div>
+                    </template>
+
+                    <!-- ── Loading Spinner ──────────────────────────────── -->
+                    <template if:true={isLoading}>
+                        <div class="slds-p-around_large slds-align_absolute-center loading-area">
+                            <lightning-spinner alternative-text="Loading products" size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <!-- ── Product Grid ────────────────────────────────── -->
+                    <template if:false={isLoading}>
+                        <template if:true={hasProducts}>
+                            <div class="slds-grid slds-wrap slds-gutters_x-small slds-p-horizontal_small product-grid">
+                                <template for:each={products} for:item="product">
+                                    <div key={product.productId}
+                                         class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-4 slds-p-bottom_xx-small">
+                                        <div class={product.cardClass}
+                                             data-product-id={product.productId}
+                                             onclick={handleProductClick}>
+                                            <!-- Card Header -->
+                                            <div class="slds-grid slds-grid_align-spread slds-p-bottom_xx-small">
+                                                <h3 class="slds-text-heading_small slds-truncate product-name" title={product.name}>
+                                                    {product.name}
+                                                </h3>
+                                                <template if:true={product.isActive}>
+                                                    <lightning-badge label="Active" class="badge-active"></lightning-badge>
+                                                </template>
+                                                <template if:false={product.isActive}>
+                                                    <lightning-badge label="Inactive" class="badge-inactive"></lightning-badge>
+                                                </template>
+                                            </div>
+
+                                            <!-- Product Image -->
+                                            <template if:true={product.imageUrl}>
+                                                <div class="product-image-wrapper">
+                                                    <img src={product.imageUrl} alt={product.name} class="product-image" loading="lazy"/>
+                                                </div>
+                                            </template>
+
+                                            <!-- Product Code -->
+                                            <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">
+                                                {product.productCode}
+                                            </p>
+
+                                            <!-- Category Badge -->
+                                            <template if:true={product.categoryName}>
+                                                <lightning-badge label={product.categoryName} class="slds-m-bottom_xx-small badge-category"></lightning-badge>
+                                            </template>
+
+                                            <!-- Details Row -->
+                                            <div class="slds-grid slds-wrap slds-m-top_xx-small product-details-row">
+                                                <template if:true={product.weight}>
+                                                    <div class="slds-col slds-size_1-of-2 detail-item">
+                                                        <span class="detail-label">Weight</span>
+                                                        <span class="detail-value">{product.weight} {product.weightUnit}</span>
+                                                    </div>
+                                                </template>
+                                                <template if:true={product.caseSize}>
+                                                    <div class="slds-col slds-size_1-of-2 detail-item">
+                                                        <span class="detail-label">Case Size</span>
+                                                        <span class="detail-value">{product.caseSize}</span>
+                                                    </div>
+                                                </template>
+                                                <template if:true={product.family}>
+                                                    <div class="slds-col slds-size_1-of-2 detail-item">
+                                                        <span class="detail-label">Family</span>
+                                                        <span class="detail-value">{product.family}</span>
+                                                    </div>
+                                                </template>
+                                                <template if:true={product.minOrderQty}>
+                                                    <div class="slds-col slds-size_1-of-2 detail-item">
+                                                        <span class="detail-label">MOQ</span>
+                                                        <span class="detail-value">{product.minOrderQty}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- ── Product Detail Modal ────────────────── -->
+                            <template if:true={selectedProductId}>
+                                <section class="slds-modal slds-fade-in-open slds-modal_large" role="dialog" aria-modal="true">
+                                    <div class="slds-modal__container">
+                                        <header class="slds-modal__header product-modal-header">
+                                            <lightning-button-icon
+                                                icon-name="utility:close"
+                                                alternative-text="Close"
+                                                onclick={handleCloseDetail}
+                                                variant="bare-inverse"
+                                                class="slds-modal__close"></lightning-button-icon>
+                                            <h2 class="slds-modal__title">Product Details</h2>
+                                        </header>
+                                        <div class="slds-modal__content slds-p-around_medium">
+                                            <template if:true={isDetailLoading}>
+                                                <div class="slds-p-around_large slds-align_absolute-center">
+                                                    <lightning-spinner alternative-text="Loading details" size="medium"></lightning-spinner>
+                                                </div>
+                                            </template>
+                                            <template if:false={isDetailLoading}>
+                                                <template if:true={productDetail}>
+                                                    <div class="slds-grid slds-wrap slds-gutters">
+                                                        <!-- Left: Image + Basic Info -->
+                                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_small">
+                                                            <template if:true={productDetail.imageUrl}>
+                                                                <div class="modal-product-image-wrapper">
+                                                                    <img src={productDetail.imageUrl} alt={productDetail.name} class="modal-product-image"/>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={productDetail.imageUrl}>
+                                                                <div class="modal-product-image-placeholder">
+                                                                    <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+                                                                </div>
+                                                            </template>
+                                                            <h2 class="modal-product-name">{productDetail.name}</h2>
+                                                            <template if:true={productDetail.skuCode}>
+                                                                <p class="modal-product-sku">{productDetail.skuCode}</p>
+                                                            </template>
+                                                            <template if:true={productDetail.brand}>
+                                                                <lightning-badge label={productDetail.brand} class="slds-m-top_xx-small slds-m-right_xx-small badge-brand"></lightning-badge>
+                                                            </template>
+                                                            <template if:true={productDetail.categoryName}>
+                                                                <lightning-badge label={productDetail.categoryName} class="slds-m-top_xx-small badge-category"></lightning-badge>
+                                                            </template>
+                                                            <template if:true={productDetail.mrp}>
+                                                                <div class="modal-price-block">
+                                                                    <span class="modal-price-label">MRP</span>
+                                                                    <span class="modal-price-value">&#8377;{productDetail.mrp}</span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+
+                                                        <!-- Right: Details + Pricing -->
+                                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-p-bottom_small">
+                                                            <h3 class="slds-text-title_caps slds-m-bottom_x-small">Product Information</h3>
+                                                            <div class="slds-grid slds-wrap detail-info-grid">
+                                                                <template if:true={productDetail.barcodeEAN}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">EAN</span>
+                                                                        <span class="info-value">{productDetail.barcodeEAN}</span>
+                                                                    </div>
+                                                                </template>
+                                                                <template if:true={productDetail.barcodeUPC}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">UPC</span>
+                                                                        <span class="info-value">{productDetail.barcodeUPC}</span>
+                                                                    </div>
+                                                                </template>
+                                                                <template if:true={productDetail.hsnCode}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">HSN Code</span>
+                                                                        <span class="info-value">{productDetail.hsnCode}</span>
+                                                                    </div>
+                                                                </template>
+                                                                <template if:true={productDetail.weight}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">Weight</span>
+                                                                        <span class="info-value">{productDetail.weight} {productDetail.weightUnit}</span>
+                                                                    </div>
+                                                                </template>
+                                                                <template if:true={productDetail.caseSize}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">Case Size</span>
+                                                                        <span class="info-value">{productDetail.caseSize}</span>
+                                                                    </div>
+                                                                </template>
+                                                                <template if:true={productDetail.minOrderQty}>
+                                                                    <div class="slds-col slds-size_1-of-2 info-item">
+                                                                        <span class="info-label">Min Order Qty</span>
+                                                                        <span class="info-value">{productDetail.minOrderQty}</span>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+
+                                                            <!-- Inventory Summary -->
+                                                            <h3 class="slds-text-title_caps slds-m-top_small slds-m-bottom_x-small">Inventory Summary</h3>
+                                                            <div class="slds-grid slds-wrap">
+                                                                <div class="slds-col slds-size_1-of-2 info-item">
+                                                                    <span class="info-label">Active Batches</span>
+                                                                    <span class="info-value">{productDetail.activeBatchCount}</span>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 info-item">
+                                                                    <span class="info-label">Distributor Stock</span>
+                                                                    <span class="info-value">{productDetail.totalDistributorStock}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Pricing Table -->
+                                                            <h3 class="slds-text-title_caps slds-m-top_small slds-m-bottom_x-small">Active Pricing</h3>
+                                                            <template if:true={hasPriceLists}>
+                                                                <div class="price-table-wrapper">
+                                                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped price-table">
+                                                                        <thead>
+                                                                            <tr class="slds-line-height_reset">
+                                                                                <th scope="col"><div class="slds-truncate" title="Type">Type</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Channel">Channel</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Customer">Customer</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Territory">Territory</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Unit Price">Unit Price</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Min Qty">Min Qty</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="Pricebook">Pricebook</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="From">From</div></th>
+                                                                                <th scope="col"><div class="slds-truncate" title="To">To</div></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <template for:each={productDetail.priceLists} for:item="price">
+                                                                                <tr key={price.Id}>
+                                                                                    <td><div class="slds-truncate">{price.Price_Type__c}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.Channel__c}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.customerName}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.territoryName}</div></td>
+                                                                                    <td><div class="slds-truncate price-value">{price.Unit_Price__c}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.Min_Qty__c}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.Name}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.Effective_From__c}</div></td>
+                                                                                    <td><div class="slds-truncate">{price.Effective_To__c}</div></td>
+                                                                                </tr>
+                                                                            </template>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={hasPriceLists}>
+                                                                <p class="slds-text-color_weak slds-p-around_small">No active pricing found for this product.</p>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </section>
+                                <div class="slds-backdrop slds-backdrop_open" onclick={handleCloseDetail}></div>
+                            </template>
+
+                            <!-- ── Pagination ──────────────────────────── -->
+                            <div class="slds-grid slds-grid_align-center slds-p-around_small pagination-bar">
+                                <lightning-button
+                                    label="Previous"
+                                    icon-name="utility:chevronleft"
+                                    onclick={handlePreviousPage}
+                                    disabled={isPreviousDisabled}
+                                    variant="neutral"
+                                    class="slds-m-right_x-small">
+                                </lightning-button>
+                                <template for:each={pageNumbers} for:item="page">
+                                    <lightning-button
+                                        key={page.number}
+                                        label={page.number}
+                                        variant={page.variant}
+                                        onclick={handlePageClick}
+                                        data-page={page.number}
+                                        class="slds-m-horizontal_xx-small page-btn">
+                                    </lightning-button>
+                                </template>
+                                <lightning-button
+                                    label="Next"
+                                    icon-name="utility:chevronright"
+                                    icon-position="right"
+                                    onclick={handleNextPage}
+                                    disabled={isNextDisabled}
+                                    variant="neutral"
+                                    class="slds-m-left_x-small">
+                                </lightning-button>
+                            </div>
+                        </template>
+
+                        <!-- ── Empty State ─────────────────────────────── -->
+                        <template if:false={hasProducts}>
+                            <div class="slds-illustration slds-illustration_small slds-p-around_large empty-state">
+                                <div class="slds-text-longform">
+                                    <h3 class="slds-text-heading_medium">No Products Found</h3>
+                                    <p class="slds-text-body_regular slds-text-color_weak">
+                                        Try adjusting your search criteria or category filter.
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

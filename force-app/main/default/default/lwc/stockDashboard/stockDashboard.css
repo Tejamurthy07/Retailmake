@@ -1,0 +1,174 @@
+/* ═══════════════════════════════════════════════════════════
+   Stock Dashboard - KPI Cards
+   ═══════════════════════════════════════════════════════════ */
+
+.kpi-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d8dde6;
+    background-color: #ffffff;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    min-height: 5rem;
+    cursor: default;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.kpi-card_default {
+    border-left: 4px solid #0176d3;
+}
+
+.kpi-card_warning {
+    border-left: 4px solid #fe9339;
+    background-color: #fff8f0;
+}
+
+.kpi-card_danger {
+    border-left: 4px solid #ea001e;
+    background-color: #fff0f0;
+}
+
+.kpi-card__icon {
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.kpi-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.kpi-card__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #181818;
+}
+
+.kpi-card__label {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.125rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Stock Level Color Indicators
+   ═══════════════════════════════════════════════════════════ */
+
+.stock-level_healthy {
+    color: #2e844a;
+    font-weight: 600;
+}
+
+.stock-level_warning {
+    color: #fe9339;
+    font-weight: 600;
+}
+
+.stock-level_danger {
+    color: #ea001e;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Shelf Life Progress Bar
+   ═══════════════════════════════════════════════════════════ */
+
+.shelf-life-bar {
+    width: 60px;
+    height: 8px;
+    background-color: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.shelf-life-bar__fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.shelf-life-bar__fill_healthy {
+    background-color: #2e844a;
+}
+
+.shelf-life-bar__fill_warning {
+    background-color: #fe9339;
+}
+
+.shelf-life-bar__fill_danger {
+    background-color: #ea001e;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Table Container
+   ═══════════════════════════════════════════════════════════ */
+
+.table-container {
+    overflow-x: auto;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+}
+
+.table-container table {
+    min-width: 900px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Dashboard Layout & Spacing
+   ═══════════════════════════════════════════════════════════ */
+
+:host {
+    display: block;
+}
+
+/* Tab content spacing */
+lightning-tab {
+    padding-top: 0.5rem;
+}
+
+/* Badge overrides */
+lightning-badge {
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .kpi-card__value {
+        font-size: 1.25rem;
+    }
+
+    .kpi-card__label {
+        font-size: 0.6875rem;
+    }
+
+    .kpi-card {
+        padding: 0.5rem 0.75rem;
+        min-height: 4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-card__value {
+        font-size: 1.1rem;
+    }
+
+    .kpi-card {
+        padding: 0.5rem;
+        min-height: 3.5rem;
+    }
+
+    .kpi-card__icon {
+        margin-right: 0.5rem;
+    }
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Requires_Credit_Approval__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Set when a submitted order exceeds the outlet credit limit and must be routed for approval instead of auto-approving. Gates the OMS_SalesOrder_AutoApproval flow and is matched by the Sales Order credit Approval_Rule__c.</description>
+    <label>Requires Credit Approval</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

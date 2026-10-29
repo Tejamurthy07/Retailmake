@@ -1,0 +1,15 @@
+:host {
+    display: block;
+}
+
+.slds-box.slds-theme_success {
+    background-color: #04844b;
+    color: #ffffff;
+    border-radius: 0.25rem;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #d8dde6;
+    margin: 0 1rem;
+}

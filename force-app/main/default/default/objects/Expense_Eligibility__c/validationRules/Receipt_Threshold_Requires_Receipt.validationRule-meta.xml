@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Receipt_Threshold_Requires_Receipt</fullName>
+    <active>true</active>
+    <description>Receipt Threshold can only be set when Receipt Required is checked.</description>
+    <errorConditionFormula>AND(
+    NOT(Receipt_Required__c),
+    NOT(ISBLANK(Receipt_Threshold__c)),
+    Receipt_Threshold__c &gt; 0
+)</errorConditionFormula>
+    <errorDisplayField>Receipt_Threshold__c</errorDisplayField>
+    <errorMessage>Receipt Threshold can only be set when Receipt Required is checked.</errorMessage>
+</ValidationRule>

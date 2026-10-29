@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Supplier_Account__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>For P2 indents: the upstream account the indent is placed ON (the Super Stockist that fulfils from its own stock). Null for P1 indents, which are fulfilled from a company Source Warehouse.</description>
+    <label>Supplier Account</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Supplier Indents</relationshipLabel>
+    <relationshipName>Supplier_Indents</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

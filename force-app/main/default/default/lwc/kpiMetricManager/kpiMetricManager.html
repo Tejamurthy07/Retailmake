@@ -1,0 +1,216 @@
+<template>
+    <div class="kmm-container">
+
+        <!-- Header -->
+        <div class="kmm-header">
+            <div class="kmm-header-left">
+                <lightning-icon icon-name="custom:custom25" size="medium"></lightning-icon>
+                <div>
+                    <h1 class="kmm-title">KPI Metric Manager</h1>
+                    <p class="kmm-subtitle">Define metrics for the Dynamic KPI Dashboard — no API names needed.</p>
+                </div>
+            </div>
+            <lightning-button label="New Metric" icon-name="utility:add"
+                variant="brand" onclick={handleNew}></lightning-button>
+        </div>
+
+        <!-- Metrics Table -->
+        <div class="kmm-card">
+            <template if:true={isLoading}>
+                <div class="kmm-spinner">
+                    <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+            <template if:false={isLoading}>
+                <template if:true={hasMetrics}>
+                    <table class="kmm-table">
+                        <thead>
+                            <tr>
+                                <th class="kmm-th-status"></th>
+                                <th>Metric Name</th>
+                                <th>Key</th>
+                                <th>Category</th>
+                                <th>Source Object</th>
+                                <th>Aggregation</th>
+                                <th>Format</th>
+                                <th>Forecast</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={metrics} for:item="m">
+                                <tr key={m.Id} class={m.rowClass}>
+                                    <td>
+                                        <span class={m.statusClass} title={m.statusLabel}></span>
+                                    </td>
+                                    <td>
+                                        <div class="kmm-name-cell">
+                                            <template if:true={m.Icon__c}>
+                                                <lightning-icon icon-name={m.Icon__c} size="xx-small"></lightning-icon>
+                                            </template>
+                                            <strong>{m.Label__c}</strong>
+                                        </div>
+                                    </td>
+                                    <td class="kmm-mono">{m.Metric_Key__c}</td>
+                                    <td><span class="kmm-badge">{m.Category__c}</span></td>
+                                    <td class="kmm-mono">{m.Source_Object__c}</td>
+                                    <td>{m.Aggregation__c}<template if:true={m.Aggregate_Field__c}> ({m.Aggregate_Field__c})</template></td>
+                                    <td>{m.Format__c}</td>
+                                    <td>
+                                        <template if:true={m.Allow_Forecast__c}>
+                                            <lightning-icon icon-name="utility:check" size="xx-small" variant="success"></lightning-icon>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <lightning-button-group>
+                                            <lightning-button-icon icon-name="utility:edit" variant="border-filled"
+                                                alternative-text="Edit" data-id={m.Id}
+                                                onclick={handleEdit}></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                                alternative-text="Delete" data-id={m.Id}
+                                                onclick={handleDelete}></lightning-button-icon>
+                                        </lightning-button-group>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+                <template if:false={hasMetrics}>
+                    <div class="kmm-empty">
+                        <lightning-icon icon-name="utility:chart" size="large"></lightning-icon>
+                        <p>No KPI metrics defined yet. Click <strong>New Metric</strong> to create one.</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+
+        <!-- Create / Edit Modal -->
+        <template if:true={showForm}>
+            <section class="slds-modal slds-fade-in-open kmm-modal">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close" variant="bare-inverse"
+                            class="slds-modal__close" onclick={handleCloseForm}></lightning-button-icon>
+                        <h2 class="slds-modal__title">{formTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content kmm-form-body">
+
+                        <!-- Row 1: Name + Key -->
+                        <div class="kmm-form-row">
+                            <lightning-input label="Metric Name" value={form.Name}
+                                data-field="Name" onchange={handleFormChange} required></lightning-input>
+                            <lightning-input label="Metric Key" value={form.Metric_Key__c}
+                                data-field="Metric_Key__c" onchange={handleFormChange} required
+                                field-level-help="Unique identifier (e.g. total_revenue). Auto-generated from name if left empty."></lightning-input>
+                        </div>
+
+                        <!-- Row 2: Label + Category -->
+                        <div class="kmm-form-row">
+                            <lightning-input label="Display Label" value={form.Label__c}
+                                data-field="Label__c" onchange={handleFormChange} required
+                                field-level-help="Label shown on KPI cards and charts."></lightning-input>
+                            <lightning-combobox label="Category" value={form.Category__c}
+                                data-field="Category__c" options={categoryOptions}
+                                onchange={handleFormChange} required></lightning-combobox>
+                        </div>
+
+                        <!-- Row 3: Source Object -->
+                        <div class="kmm-form-row">
+                            <lightning-combobox label="Source Object" value={form.Source_Object__c}
+                                data-field="Source_Object__c" options={objectOptions}
+                                onchange={handleObjectChange} required
+                                field-level-help="Which object should be queried to compute this metric."></lightning-combobox>
+                            <lightning-combobox label="Aggregation" value={form.Aggregation__c}
+                                data-field="Aggregation__c" options={aggregationOptions}
+                                onchange={handleFormChange} required></lightning-combobox>
+                        </div>
+
+                        <!-- Row 4: Fields (dynamic based on object) -->
+                        <div class="kmm-form-row">
+                            <lightning-combobox label="Date Field" value={form.Date_Field__c}
+                                data-field="Date_Field__c" options={dateFieldOptions}
+                                onchange={handleFormChange} required disabled={noObjectSelected}
+                                field-level-help="Date/DateTime field used for period filtering."></lightning-combobox>
+                            <lightning-combobox label="Aggregate Field" value={form.Aggregate_Field__c}
+                                data-field="Aggregate_Field__c" options={numberFieldOptions}
+                                onchange={handleFormChange} disabled={aggregateFieldDisabled}
+                                field-level-help="Numeric field to SUM/AVG/MIN/MAX. Not needed for COUNT."></lightning-combobox>
+                        </div>
+
+                        <!-- Row 5: User Field + Format -->
+                        <div class="kmm-form-row">
+                            <lightning-combobox label="User/Owner Field" value={form.User_Field__c}
+                                data-field="User_Field__c" options={userFieldOptions}
+                                onchange={handleFormChange} disabled={noObjectSelected}
+                                field-level-help="Lookup to User for scope filtering (Self/Team/Org)."></lightning-combobox>
+                            <lightning-combobox label="Display Format" value={form.Format__c}
+                                data-field="Format__c" options={formatOptions}
+                                onchange={handleFormChange} required></lightning-combobox>
+                        </div>
+
+                        <!-- Row 6: Icon + Color -->
+                        <div class="kmm-form-row">
+                            <lightning-input label="Icon (SLDS)" value={form.Icon__c}
+                                data-field="Icon__c" onchange={handleFormChange}
+                                placeholder="e.g. utility:money"
+                                field-level-help="SLDS icon name for the KPI card."></lightning-input>
+                            <lightning-input label="Card Color" value={form.Color__c}
+                                data-field="Color__c" onchange={handleFormChange}
+                                placeholder="#0176d3"
+                                field-level-help="Hex color for the KPI card accent."></lightning-input>
+                        </div>
+
+                        <!-- Filters Section -->
+                        <template if:true={hasObjectSelected}>
+                            <div class="kmm-section-divider">
+                                <h3 class="kmm-section-title">Filters ({filterCount})</h3>
+                                <p class="kmm-section-hint">Add conditions that are always applied when this metric runs.</p>
+                            </div>
+                            <c-tam-filter-builder
+                                fields-metadata={fieldsMetadata}
+                                value={filters}
+                                onfilterchange={handleFilterChange}></c-tam-filter-builder>
+
+                            <template if:true={hasFilters}>
+                                <div class="kmm-form-row slds-m-top_small">
+                                    <lightning-input label="Filter Logic (e.g. 1 AND (2 OR 3))"
+                                        value={form.Filter_Logic__c}
+                                        onchange={handleFilterLogicChange}
+                                        field-level-help="Custom logic expression. If blank, all filters are joined with AND."></lightning-input>
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- Row 7: Default Filter (advanced/raw SOQL) -->
+                        <lightning-textarea label="Advanced: Raw SOQL Filter (optional)" value={form.Default_Filter__c}
+                            data-field="Default_Filter__c" onchange={handleFormChange}
+                            field-level-help="Additional raw SOQL WHERE snippet applied alongside the filters above. Example: Status__c = 'Approved'. Do NOT include WHERE keyword."></lightning-textarea>
+
+                        <!-- Row 8: Description -->
+                        <lightning-textarea label="Description" value={form.Description__c}
+                            data-field="Description__c" onchange={handleFormChange}></lightning-textarea>
+
+                        <!-- Row 9: Toggles -->
+                        <div class="kmm-form-row kmm-toggle-row">
+                            <lightning-input type="checkbox" label="Is Active" checked={form.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleCheckboxChange}></lightning-input>
+                            <lightning-input type="checkbox" label="Allow Forecast" checked={form.Allow_Forecast__c}
+                                data-field="Allow_Forecast__c" onchange={handleCheckboxChange}></lightning-input>
+                            <lightning-input type="number" label="Sort Order" value={form.Sort_Order__c}
+                                data-field="Sort_Order__c" onchange={handleFormChange}
+                                step="1" min="0"></lightning-input>
+                        </div>
+
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" variant="neutral" onclick={handleCloseForm}></lightning-button>
+                        <lightning-button label={saveButtonLabel} variant="brand"
+                            onclick={handleSave} disabled={isSaving}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+</template>

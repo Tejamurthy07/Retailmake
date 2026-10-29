@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Territory_Required_On_Submit</fullName>
+    <active>true</active>
+    <description>Requires Territory to be populated when a Sales Order is submitted or beyond. Territory is critical for pricing resolution, must-sell validation, and reporting.</description>
+    <errorConditionFormula>AND(
+    ISBLANK(Territory__c),
+    NOT(ISPICKVAL(Status__c, &quot;Draft&quot;)),
+    NOT(ISPICKVAL(Status__c, &quot;Cancelled&quot;))
+)</errorConditionFormula>
+    <errorDisplayField>Territory__c</errorDisplayField>
+    <errorMessage>Territory is required before submitting the order. Please select a Territory.</errorMessage>
+</ValidationRule>

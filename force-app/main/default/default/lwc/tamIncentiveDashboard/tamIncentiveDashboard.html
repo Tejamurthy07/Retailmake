@@ -1,0 +1,299 @@
+<template>
+    <div class="idb-container">
+
+        <!-- ═══════ LIST VIEW ═══════ -->
+        <template if:true={isListView}>
+            <div class="idb-header">
+                <div class="idb-header-left">
+                    <lightning-icon icon-name="standard:reward" size="medium"></lightning-icon>
+                    <h1>Incentive Dashboard</h1>
+                </div>
+                <div class="idb-header-right">
+                    <lightning-button label="Annual Bonus" variant="neutral" icon-name="utility:ribbon"
+                        onclick={handleRunAnnualBonus} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Run Calculation" variant="brand" icon-name="utility:refresh"
+                        onclick={handleRunCalculation} class="slds-m-right_small"></lightning-button>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="idb-controls">
+                <div class="idb-control-item">
+                    <lightning-combobox label="Period" value={selectedPeriod}
+                        options={periodOptions} onchange={handlePeriodChange}></lightning-combobox>
+                </div>
+                <div class="idb-control-item">
+                    <lightning-combobox label="Target Criteria" value={selectedCriteria}
+                        options={criteriaOptions} onchange={handleCriteriaFilter}
+                        placeholder="All Criteria"></lightning-combobox>
+                </div>
+                <div class="idb-control-item">
+                    <lightning-combobox label="Profile" value={selectedProfile}
+                        options={profileOptions} onchange={handleProfileFilter}
+                        placeholder="All Profiles"></lightning-combobox>
+                </div>
+                <div class="idb-control-item">
+                    <lightning-combobox label="Territory" value={selectedTerritory}
+                        options={territoryOptions} onchange={handleTerritoryFilter}
+                        placeholder="All Territories"></lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Status Filter Pills -->
+            <div class="idb-status-pills">
+                <template for:each={statusFilters} for:item="sf">
+                    <span key={sf.value} class={sf.pillClass} data-value={sf.value}
+                        onclick={handleStatusFilter}>{sf.label}
+                        <template if:true={sf.count}>
+                            <span class="idb-pill-count">{sf.count}</span>
+                        </template>
+                    </span>
+                </template>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="idb-stats-bar">
+                <div class="idb-stat idb-stat-calc">
+                    <span class="idb-stat-value">{summaryCalcAmt}</span>
+                    <span class="idb-stat-label">Calculated</span>
+                    <span class="idb-stat-count">{summaryCalculated} records</span>
+                </div>
+                <div class="idb-stat idb-stat-pending">
+                    <span class="idb-stat-value">{summaryPendingCount}</span>
+                    <span class="idb-stat-label">Pending Approval</span>
+                </div>
+                <div class="idb-stat idb-stat-approved">
+                    <span class="idb-stat-value">{summaryApprovedAmt}</span>
+                    <span class="idb-stat-label">Approved</span>
+                    <span class="idb-stat-count">{summaryApproved} records</span>
+                </div>
+                <div class="idb-stat idb-stat-paid">
+                    <span class="idb-stat-value">{summaryPaidAmt}</span>
+                    <span class="idb-stat-label">Paid</span>
+                    <span class="idb-stat-count">{summaryPaid} records</span>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <template if:true={hasSelectedItems}>
+                <div class="idb-bulk-bar">
+                    <span class="idb-bulk-count">{selectedCount} selected</span>
+                    <lightning-button label="Submit for Approval" variant="brand" icon-name="utility:approval"
+                        onclick={handleBulkSubmit} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Approve" variant="success" icon-name="utility:check"
+                        onclick={handleBulkApprove} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Reject" variant="destructive-text" icon-name="utility:close"
+                        onclick={handleBulkReject} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Mark Paid" variant="neutral" icon-name="utility:money"
+                        onclick={handleBulkPaid} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Clear" variant="base"
+                        onclick={handleClearSelection}></lightning-button>
+                </div>
+            </template>
+
+            <!-- Table -->
+            <template if:true={hasIncentives}>
+                <div class="idb-table-wrapper">
+                    <table class="idb-table">
+                        <thead>
+                            <tr>
+                                <th class="idb-th-check">
+                                    <lightning-input type="checkbox" checked={allSelected}
+                                        onchange={handleSelectAll} variant="label-hidden"
+                                        label="Select All"></lightning-input>
+                                </th>
+                                <th>Salesperson</th>
+                                <th>Criteria</th>
+                                <th>Achievement %</th>
+                                <th>Slab</th>
+                                <th>Calculated</th>
+                                <th>Final</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={filteredIncentives} for:item="inc">
+                                <tr key={inc.Id} class="idb-row" data-id={inc.Id} onclick={handleRowClick}>
+                                    <td class="idb-td-check" onclick={stopPropagation}>
+                                        <lightning-input type="checkbox" checked={inc.selected}
+                                            data-id={inc.Id} onchange={handleSelectItem}
+                                            variant="label-hidden" label="Select"></lightning-input>
+                                    </td>
+                                    <td class="idb-name-cell">{inc.salespersonName}</td>
+                                    <td><span class="idb-badge">{inc.criteriaName}</span></td>
+                                    <td>
+                                        <span class={inc.percentClass}>{inc.achievementPercent}%</span>
+                                    </td>
+                                    <td>{inc.slabName}</td>
+                                    <td>{inc.calculatedAmount}</td>
+                                    <td><strong>{inc.finalAmount}</strong></td>
+                                    <td><span class={inc.statusClass}>{inc.Status__c}</span></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template if:false={hasIncentives}>
+                <template if:false={isLoading}>
+                    <div class="idb-empty">
+                        <lightning-icon icon-name="standard:empty" size="large"></lightning-icon>
+                        <h2>No Incentives Found</h2>
+                        <p>Run a calculation to generate incentive records for the selected period.</p>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <!-- ═══════ DETAIL VIEW ═══════ -->
+        <template if:true={isDetailView}>
+            <div class="idb-detail-header">
+                <lightning-button-icon icon-name="utility:back" variant="bare"
+                    onclick={handleBackToList} class="slds-m-right_small"></lightning-button-icon>
+                <div class="idb-detail-title">
+                    <h1>{detail.Name}</h1>
+                    <span class={detailStatusClass}>{detail.Status__c}</span>
+                </div>
+                <div class="idb-detail-actions">
+                    <template if:true={canSubmit}>
+                        <lightning-button label="Submit for Approval" variant="brand"
+                            onclick={handleDetailSubmit} class="slds-m-right_small"></lightning-button>
+                    </template>
+                    <template if:true={canApprove}>
+                        <lightning-button label="Approve" variant="success"
+                            onclick={handleDetailApprove} class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Reject" variant="destructive-text"
+                            onclick={handleDetailReject} class="slds-m-right_small"></lightning-button>
+                    </template>
+                    <template if:true={canMarkPaid}>
+                        <lightning-button label="Mark Paid" variant="neutral" icon-name="utility:money"
+                            onclick={handleDetailPaid}></lightning-button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <!-- Left: Info -->
+                <div class="slds-col slds-size_2-of-3">
+                    <section class="idb-card">
+                        <div class="idb-card-header">Incentive Information</div>
+                        <div class="idb-card-body">
+                            <div class="idb-detail-grid">
+                                <div class="idb-detail-field">
+                                    <span class="idb-detail-label">Salesperson</span>
+                                    <span class="idb-detail-value">{detail.Salesperson__r.Name}</span>
+                                </div>
+                                <div class="idb-detail-field">
+                                    <span class="idb-detail-label">Target Criteria</span>
+                                    <span class="idb-detail-value">{detail.Target_Criteria__r.Name}</span>
+                                </div>
+                                <div class="idb-detail-field">
+                                    <span class="idb-detail-label">Period</span>
+                                    <span class="idb-detail-value">{detail.Target_Period__r.Name}</span>
+                                </div>
+                                <div class="idb-detail-field">
+                                    <span class="idb-detail-label">Slab Matched</span>
+                                    <span class="idb-detail-value">{detailSlabName}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <template if:true={detailHasApproval}>
+                        <section class="idb-card">
+                            <div class="idb-card-header">Approval &amp; Payment</div>
+                            <div class="idb-card-body">
+                                <div class="idb-detail-grid">
+                                    <div class="idb-detail-field">
+                                        <span class="idb-detail-label">Approved By</span>
+                                        <span class="idb-detail-value">{detailApprovedBy}</span>
+                                    </div>
+                                    <div class="idb-detail-field">
+                                        <span class="idb-detail-label">Approval Date</span>
+                                        <span class="idb-detail-value">{detail.Approval_Date__c}</span>
+                                    </div>
+                                    <div class="idb-detail-field">
+                                        <span class="idb-detail-label">Payment Date</span>
+                                        <span class="idb-detail-value">{detail.Payment_Date__c}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </template>
+                </div>
+
+                <!-- Right: Calculation Breakdown -->
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="idb-calc-sticky">
+                        <section class="idb-card idb-calc-card">
+                            <div class="idb-card-header">Calculation Breakdown</div>
+                            <div class="idb-card-body">
+                                <div class="idb-calc-row">
+                                    <span>Target Value</span>
+                                    <strong>{detail.Base_Amount__c}</strong>
+                                </div>
+                                <div class="idb-calc-row">
+                                    <span>Achievement %</span>
+                                    <strong>{detail.Achievement_Percent__c}%</strong>
+                                </div>
+                                <div class="idb-calc-divider"></div>
+                                <div class="idb-calc-row">
+                                    <span>Slab Range</span>
+                                    <span>{detailSlabRange}</span>
+                                </div>
+                                <div class="idb-calc-row">
+                                    <span>Payout Rule</span>
+                                    <span>{detailPayoutRule}</span>
+                                </div>
+                                <div class="idb-calc-row">
+                                    <span>Multiplier</span>
+                                    <strong>{detail.Multiplier__c}x</strong>
+                                </div>
+                                <div class="idb-calc-divider"></div>
+                                <div class="idb-calc-row idb-calc-total">
+                                    <span>Calculated Amount</span>
+                                    <strong>{detail.Calculated_Amount__c}</strong>
+                                </div>
+                                <template if:true={detail.Final_Amount__c}>
+                                    <div class="idb-calc-row idb-calc-final">
+                                        <span>Final Amount</span>
+                                        <strong>{detail.Final_Amount__c}</strong>
+                                    </div>
+                                </template>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Payment Date Modal -->
+        <template if:true={showPaymentModal}>
+            <section class="slds-modal slds-fade-in-open slds-modal_small" role="dialog">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-modal__title">Mark as Paid</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input type="date" label="Payment Date" value={paymentDate}
+                            onchange={handlePaymentDateChange} required></lightning-input>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closePaymentModal}
+                            class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Confirm Payment" variant="brand"
+                            onclick={confirmPayment}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+
+    <template if:true={isLoading}>
+        <div class="idb-spinner-backdrop">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+</template>

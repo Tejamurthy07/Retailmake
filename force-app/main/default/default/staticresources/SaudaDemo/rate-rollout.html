@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rate Rollout · Gem Edible CRM</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .role-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: var(--green-050); border: 1px solid var(--green-100);
+      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px;
+    }
+    .role-bar .who { font-weight: 700; color: var(--green-900); display: flex; align-items: center; gap: 8px; }
+    .role-bar select { max-width: 200px; }
+    .role-bar .role-hint { font-size: 12.5px; color: var(--ink-500); }
+    .mini-chain { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .mini-chain .node {
+      font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+      background: #eef1f0; color: var(--ink-300); border: 1px solid var(--line);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .mini-chain .node.done { background: var(--green-100); color: var(--green-700); border-color: var(--green-500); }
+    .mini-chain .node.current { background: var(--gold-100); color: var(--gold-600); border-color: var(--gold-500); }
+    .mini-chain .node.reject { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+    .mini-chain .arr { color: var(--ink-300); font-size: 12px; }
+    .panel-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .fav-star { color: var(--gold-500); }
+  </style>
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <div class="breadcrumb">Home / Rate Rollout</div>
+        <h1>Rate Creation &amp; Rollout</h1>
+        <div class="sub">Rates flow down the hierarchy with approvals: SRM → NSM → Zonal Head → Sales Team, then sales start doing saudas.</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="newBtn"><span class="ico">＋</span> New Rate Rollout</button>
+      </div>
+    </div>
+
+    <!-- process explainer -->
+    <div class="card">
+      <div class="card-head"><h2>🔁 Rollout Process</h2></div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="step done"><div class="bubble">🧑‍💼</div><div class="lbl">SRM</div><div class="desc">Creates rate (top level)</div></div>
+          <div class="step done"><div class="bubble">👔</div><div class="lbl">NSM</div><div class="desc">Rolls out + premium/disc.</div></div>
+          <div class="step done"><div class="bubble">🧭</div><div class="lbl">Zonal Head</div><div class="desc">Rolls out to sales team</div></div>
+          <div class="step done"><div class="bubble">🧑‍🌾</div><div class="lbl">Sales Team</div><div class="desc">Receives rate by region</div></div>
+          <div class="step current"><div class="bubble">🤝</div><div class="lbl">Sauda</div><div class="desc">Order / sale done</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- role switcher -->
+    <div class="role-bar">
+      <span class="who">👤 Acting as</span>
+      <select id="actingRole"></select>
+      <span class="role-hint" id="roleHint"></span>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search" id="search" placeholder="🔍 Search rate rollouts…" />
+      <select id="statusFilter" style="max-width:200px">
+        <option value="">All statuses</option>
+        <option>Draft</option>
+        <option>Pending NSM</option>
+        <option>Pending Zonal Head</option>
+        <option>Rolled Out</option>
+        <option>Rejected</option>
+      </select>
+      <span class="spacer"></span>
+    </div>
+
+    <div class="card">
+      <div class="line-table-wrap">
+        <table class="data-table stack" id="rolloutTable">
+          <thead>
+            <tr>
+              <th>Rate ID</th>
+              <th>Title</th>
+              <th>Region</th>
+              <th>Effective</th>
+              <th>Rollout Progress</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty" style="display:none">
+        <div class="big">🏷️</div><div>No rate rollouts match your filter.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- modal host -->
+  <div class="modal-backdrop" id="modalBackdrop"><div class="modal wide" id="modal"></div></div>
+
+  <script src="data.js"></script>
+  <script>
+    mountTopbar("rollout");
+
+    const roleSel = document.getElementById("actingRole");
+    HIERARCHY.forEach(r => roleSel.add(new Option(r, r)));
+    roleSel.value = getActingRole();
+
+    const roleHints = {
+      "SRM": "Create rates and submit them for rollout. Revise/resubmit rejected rates.",
+      "NSM": "Approve & roll out pending rates to Zonal Heads. Add premium / discount rules.",
+      "Zonal Head": "Approve & roll out to the Sales Team. Add premium / discount rules.",
+      "Sales Team": "Receive rolled-out rates by region and start selling via saudas."
+    };
+    function refreshRoleHint() { document.getElementById("roleHint").textContent = roleHints[getActingRole()]; }
+
+    const ROLE_IDX = { "SRM": 0, "NSM": 1, "Zonal Head": 2, "Sales Team": 3 };
+    const rowsEl = document.getElementById("rows");
+    const emptyEl = document.getElementById("emptyState");
+    const searchEl = document.getElementById("search");
+    const statusEl = document.getElementById("statusFilter");
+    const backdrop = document.getElementById("modalBackdrop");
+    const modal = document.getElementById("modal");
+
+    /* ---------- progress helpers ---------- */
+    function progressState(r) {
+      // returns {done:Set, current:idx, rejectIdx:idx|null}
+      if (r.status === "Rejected") {
+        const rej = (r.approvals || []).find(a => a.action === "Rejected");
+        const idx = rej ? ROLE_IDX[rej.role] : 1;
+        const done = new Set(); for (let i = 0; i < idx; i++) done.add(i);
+        return { done, current: -1, rejectIdx: idx };
+      }
+      const map = {
+        "Draft":              { done: [], current: 0 },
+        "Pending NSM":        { done: [0], current: 1 },
+        "Pending Zonal Head": { done: [0, 1], current: 2 },
+        "Rolled Out":         { done: [0, 1, 2, 3], current: -1 },
+      }[r.status] || { done: [], current: 0 };
+      return { done: new Set(map.done), current: map.current, rejectIdx: null };
+    }
+    function miniChain(r) {
+      const st = progressState(r);
+      return `<div class="mini-chain">` + HIERARCHY.map((role, i) => {
+        let cls = "";
+        if (st.rejectIdx === i) cls = "reject";
+        else if (st.done.has(i)) cls = "done";
+        else if (st.current === i) cls = "current";
+        const tick = st.done.has(i) ? "✓ " : (st.rejectIdx === i ? "✕ " : "");
+        return `<span class="node ${cls}">${tick}${role}</span>` +
+               (i < HIERARCHY.length - 1 ? `<span class="arr">→</span>` : "");
+      }).join("") + `</div>`;
+    }
+
+    /* ---------- list ---------- */
+    function render() {
+      refreshRoleHint();
+      const q = searchEl.value.trim().toLowerCase();
+      const sf = statusEl.value;
+      const acting = getActingRole();
+      document.getElementById("newBtn").style.display = (acting === "SRM") ? "" : "none";
+
+      const list = loadRollouts().filter(r => {
+        if (sf && r.status !== sf) return false;
+        if (!q) return true;
+        return [r.id, r.title, r.region].join(" ").toLowerCase().includes(q);
+      });
+
+      if (!list.length) { rowsEl.innerHTML = ""; emptyEl.style.display = "block"; return; }
+      emptyEl.style.display = "none";
+
+      rowsEl.innerHTML = list.map(r => {
+        const canAct = rolloutApprover(r) === acting;
+        let actionBtn = `<button class="btn btn-light btn-sm" onclick="openDetail('${r.id}')">Open</button>`;
+        if (canAct) actionBtn = `<button class="btn btn-primary btn-sm" onclick="openDetail('${r.id}')">Review →</button>`;
+        else if (r.status === "Rolled Out" && acting === "Sales Team")
+          actionBtn = `<a class="btn btn-gold btn-sm" href="sauda-create.html">Start Sauda</a>`;
+        return `
+        <tr>
+          <td data-label="Rate ID"><span class="sauda-no">${r.id}</span></td>
+          <td data-label="Title">${r.title}</td>
+          <td data-label="Region">${r.region || "—"}</td>
+          <td data-label="Effective">${fmtDate(r.effectiveDate)}</td>
+          <td data-label="Rollout Progress">${miniChain(r)}</td>
+          <td data-label="Status">${rolloutBadge(r.status)}${canAct ? ' <span class="pill">action needed</span>' : ''}</td>
+          <td data-label="">${actionBtn}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    /* ---------- modal infra ---------- */
+    function closeModal() { backdrop.classList.remove("open"); modal.innerHTML = ""; }
+    backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+    window.closeModal = closeModal;
+
+    /* ---------- detail / review ---------- */
+    window.openDetail = function (id) {
+      const r = getRollout(id);
+      if (!r) return;
+      const acting = getActingRole();
+      const canApprove = rolloutApprover(r) === acting;            // NSM or Zonal Head at the right stage
+      const canEditAdj = canApprove;                                // only the current approver adds premium/disc.
+      const canSubmit  = (r.status === "Draft" && acting === "SRM");
+      const canResubmit = (r.status === "Rejected" && acting === "SRM");
+
+      const st = progressState(r);
+      const stepHtml = HIERARCHY.map((role, i) => {
+        let cls = "";
+        if (st.rejectIdx === i) cls = "reject";
+        else if (st.done.has(i)) cls = "done";
+        else if (st.current === i) cls = "current";
+        const ic = ["🧑‍💼","👔","🧭","🧑‍🌾"][i];
+        return `<div class="step ${cls === 'done' ? 'done' : cls === 'current' ? 'current' : ''}">
+          <div class="bubble">${st.rejectIdx === i ? "✕" : ic}</div>
+          <div class="lbl">${role}</div></div>`;
+      }).join("");
+
+      const linesHtml = (r.lines || []).map(l => `
+        <tr>
+          <td data-label="Product">${productName(l.product)}</td>
+          <td data-label="Base Rate" class="cell-num">${inr(l.baseRate)}</td>
+          <td data-label="Revised Rate" class="cell-num">${inr(l.revisedRate)}</td>
+          <td data-label="Change" class="cell-num" style="color:${l.revisedRate >= l.baseRate ? 'var(--danger)' : 'var(--green-700)'}">
+            ${l.revisedRate === l.baseRate ? "—" : (l.revisedRate > l.baseRate ? "▲ " : "▼ ") + inr(Math.abs(l.revisedRate - l.baseRate))}</td>
+        </tr>`).join("");
+
+      const adjHtml = (r.adjustments || []).length ? (r.adjustments.map((a, i) => `
+        <tr>
+          <td data-label="Dimension">${a.dimension}</td>
+          <td data-label="Target">${a.target}</td>
+          <td data-label="Type"><span class="pill ${a.kind === 'Discount' ? '' : 'ex'}">${a.kind}</span></td>
+          <td data-label="Amount" class="cell-num">${a.amountType === '%' ? a.value + '%' : inr(a.value)}</td>
+          <td data-label="Favourite">${a.favourite ? '<span class="fav-star">★ Favourite</span>' : '—'}</td>
+          <td data-label="Added By">${a.addedBy || '—'}</td>
+        </tr>`).join("")) : `<tr><td colspan="6" style="text-align:center;color:var(--ink-300)">No premium / discount rules yet.</td></tr>`;
+
+      const timelineHtml = (r.approvals || []).slice().reverse().map(a => `
+        <li><div class="t-title">${a.action} <span class="pill">${a.role}</span></div>
+            <div class="t-meta">${a.ts}</div>
+            ${a.note ? `<div class="t-note">${a.note}</div>` : ""}</li>`).join("");
+
+      let footBtns = `<button class="btn btn-light" onclick="closeModal()">Close</button>`;
+      if (canSubmit)  footBtns += `<button class="btn btn-primary" onclick="submitRollout('${r.id}')">Submit for Rollout</button>`;
+      if (canResubmit) footBtns += `<button class="btn btn-primary" onclick="submitRollout('${r.id}')">Revise &amp; Resubmit</button>`;
+      if (canApprove) footBtns += `<button class="btn btn-danger" onclick="rejectRollout('${r.id}')">Reject</button>
+                                    <button class="btn btn-primary" onclick="approveRollout('${r.id}')">Approve &amp; Roll Out</button>`;
+
+      modal.innerHTML = `
+        <div class="m-head"><h3>${r.id} · ${r.title}</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <div class="panel-box"><div class="flow" style="margin:0">${stepHtml}</div></div>
+
+          <div class="summary-grid" style="margin-bottom:14px">
+            <div class="item"><div class="k">Region</div><div class="v">${r.region || "—"}</div></div>
+            <div class="item"><div class="k">Effective Date</div><div class="v">${fmtDate(r.effectiveDate)}</div></div>
+            <div class="item"><div class="k">Status</div><div class="v">${rolloutBadge(r.status)}</div></div>
+            <div class="item"><div class="k">Awaiting</div><div class="v">${rolloutApprover(r) || "—"}</div></div>
+          </div>
+
+          <h4 style="margin:6px 0">Rate Lines</h4>
+          <div class="line-table-wrap"><table class="line-table stack" style="min-width:520px">
+            <thead><tr><th>Product</th><th class="cell-num">Base Rate</th><th class="cell-num">Revised Rate</th><th class="cell-num">Change</th></tr></thead>
+            <tbody>${linesHtml}</tbody></table></div>
+
+          <h4 style="margin:16px 0 6px">Premium / Discount Rules</h4>
+          <div class="line-table-wrap"><table class="line-table stack" style="min-width:620px">
+            <thead><tr><th>Dimension</th><th>Target</th><th>Type</th><th class="cell-num">Amount</th><th>Favourite</th><th>Added By</th></tr></thead>
+            <tbody id="adjBody">${adjHtml}</tbody></table></div>
+          ${canEditAdj ? `<button class="btn btn-gold btn-sm" style="margin-top:8px" onclick="showAddAdj('${r.id}')"><span class="ico">＋</span> Add Premium / Discount</button>
+            <div id="addAdjBox"></div>` : ``}
+
+          <h4 style="margin:16px 0 6px">Approval Timeline</h4>
+          <ul class="timeline">${timelineHtml}</ul>
+        </div>
+        <div class="m-foot">${footBtns}</div>`;
+      backdrop.classList.add("open");
+    };
+
+    /* ---------- add adjustment ---------- */
+    window.showAddAdj = function (id) {
+      const box = document.getElementById("addAdjBox");
+      const dimOpts = DIMENSIONS.map(d => `<option>${d}</option>`).join("");
+      box.innerHTML = `
+        <div class="panel-box" style="margin-top:10px">
+          <div class="grid cols-2">
+            <div class="field"><label>Dimension</label><select id="adjDim">${dimOpts}</select></div>
+            <div class="field"><label>Target</label><select id="adjTarget"></select></div>
+            <div class="field"><label>Type</label><select id="adjKind"><option>Discount</option><option>Premium</option></select></div>
+            <div class="field"><label>Amount</label>
+              <div style="display:flex;gap:6px">
+                <select id="adjAmtType" style="max-width:70px"><option>%</option><option>₹</option></select>
+                <input type="number" id="adjVal" min="0" step="0.01" placeholder="0" />
+              </div>
+            </div>
+            <div class="field span-2"><label style="font-weight:500"><input type="checkbox" id="adjFav" /> Mark as favourite rule (quick re-use)</label></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button class="btn btn-light btn-sm" onclick="document.getElementById('addAdjBox').innerHTML=''">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="addAdj('${id}')">Add Rule</button>
+          </div>
+        </div>`;
+      const dim = document.getElementById("adjDim");
+      const tgt = document.getElementById("adjTarget");
+      function fillTargets() {
+        const map = {
+          "State": STATES, "Persona": PERSONAS,
+          "Customer": PARTIES, "Product Category": CATEGORIES,
+          "Product Type": PRODUCT_TYPES, "Particular Product": PRODUCTS.map(p => p.name)
+        };
+        tgt.innerHTML = (map[dim.value] || []).map(x => `<option>${x}</option>`).join("");
+      }
+      dim.addEventListener("change", fillTargets); fillTargets();
+    };
+    window.addAdj = function (id) {
+      const r = getRollout(id);
+      const val = Number(document.getElementById("adjVal").value);
+      if (!val || val <= 0) { toast("Enter an amount.", "warn"); return; }
+      r.adjustments = r.adjustments || [];
+      r.adjustments.push({
+        dimension: document.getElementById("adjDim").value,
+        target: document.getElementById("adjTarget").value,
+        kind: document.getElementById("adjKind").value,
+        amountType: document.getElementById("adjAmtType").value,
+        value: val,
+        favourite: document.getElementById("adjFav").checked,
+        addedBy: getActingRole()
+      });
+      upsertRollout(r);
+      toast("Premium / discount rule added.", "success");
+      openDetail(id);
+    };
+
+    /* ---------- approval actions ---------- */
+    function pushApproval(r, action, note) {
+      r.approvals = r.approvals || [];
+      r.approvals.push({ role: getActingRole(), action, ts: nowStamp(), note: note || "" });
+    }
+    window.submitRollout = function (id) {
+      const r = getRollout(id); r.status = "Pending NSM"; pushApproval(r, "Submitted for Rollout", "");
+      upsertRollout(r); toast("Submitted — awaiting NSM.", "success"); closeModal(); render();
+    };
+    window.approveRollout = function (id) {
+      const r = getRollout(id);
+      if (r.status === "Pending NSM") { r.status = "Pending Zonal Head"; }
+      else if (r.status === "Pending Zonal Head") { r.status = "Rolled Out"; }
+      pushApproval(r, "Approved & Rolled Out", "");
+      upsertRollout(r);
+      toast(r.status === "Rolled Out" ? "Rolled out to Sales Team." : "Rolled out — awaiting Zonal Head.", "success");
+      closeModal(); render();
+    };
+    window.rejectRollout = function (id) {
+      const note = prompt("Reason for rejection (optional):") || "";
+      const r = getRollout(id); r.status = "Rejected"; pushApproval(r, "Rejected", note);
+      upsertRollout(r); toast("Rate rollout rejected.", "danger"); closeModal(); render();
+    };
+
+    /* ---------- new rollout (SRM) ---------- */
+    document.getElementById("newBtn").addEventListener("click", () => {
+      const prodRows = PRODUCTS.slice(0, 6).map(p => `
+        <tr>
+          <td data-label=""><label style="font-weight:500"><input type="checkbox" class="np-sel" data-code="${p.code}" data-rate="${p.rate}" /> ${p.name}</label></td>
+          <td data-label="Base Rate" class="cell-num">${inr(p.rate)}</td>
+          <td data-label="Revised Rate"><input type="number" class="np-rev" data-code="${p.code}" min="0" step="0.01" placeholder="${p.rate}" /></td>
+        </tr>`).join("");
+      modal.innerHTML = `
+        <div class="m-head"><h3>＋ New Rate Rollout</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <div class="grid cols-2">
+            <div class="field"><label>Title <span class="req">*</span></label><input type="text" id="npTitle" placeholder="e.g. Daily Oil Rate — South Zone" /></div>
+            <div class="field"><label>Region</label><input type="text" id="npRegion" placeholder="e.g. South Zone" /></div>
+            <div class="field"><label>Effective Date</label><input type="date" id="npDate" value="${todayISO()}" /></div>
+          </div>
+          <h4 style="margin:14px 0 6px">Select products &amp; set revised rates</h4>
+          <div class="line-table-wrap"><table class="line-table stack" style="min-width:480px">
+            <thead><tr><th>Product</th><th class="cell-num">Base Rate</th><th class="cell-num">Revised Rate</th></tr></thead>
+            <tbody>${prodRows}</tbody></table></div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-light" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-light" onclick="createRollout('Draft')">Save Draft</button>
+          <button class="btn btn-primary" onclick="createRollout('Pending NSM')">Submit for Rollout</button>
+        </div>`;
+      backdrop.classList.add("open");
+    });
+    window.createRollout = function (status) {
+      const title = document.getElementById("npTitle").value.trim();
+      if (!title) { toast("Enter a title.", "warn"); return; }
+      const lines = [];
+      modal.querySelectorAll(".np-sel:checked").forEach(cb => {
+        const code = cb.dataset.code;
+        const base = Number(cb.dataset.rate);
+        const rev = Number(modal.querySelector(`.np-rev[data-code="${code}"]`).value) || base;
+        lines.push({ product: code, baseRate: base, revisedRate: rev });
+      });
+      if (!lines.length) { toast("Select at least one product.", "warn"); return; }
+      const id = nextRolloutId();
+      const r = {
+        id, title,
+        region: document.getElementById("npRegion").value.trim(),
+        effectiveDate: document.getElementById("npDate").value || todayISO(),
+        status, lines, adjustments: [],
+        approvals: [{ role: "SRM", action: "Created", ts: nowStamp(), note: "" }]
+      };
+      if (status === "Pending NSM") r.approvals.push({ role: "SRM", action: "Submitted for Rollout", ts: nowStamp(), note: "" });
+      upsertRollout(r);
+      toast(`Rate rollout ${id} ${status === "Draft" ? "saved as draft" : "submitted"}.`, "success");
+      closeModal(); render();
+    };
+
+    /* ---------- wiring ---------- */
+    roleSel.addEventListener("change", () => { setActingRole(roleSel.value); render(); });
+    searchEl.addEventListener("input", render);
+    statusEl.addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>

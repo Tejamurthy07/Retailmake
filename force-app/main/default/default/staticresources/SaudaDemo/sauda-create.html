@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Sauda · Gem Edible CRM</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <div class="breadcrumb"><a href="sauda-list.html">Sauda</a> / New</div>
+        <h1 id="title">Create Sauda</h1>
+        <div class="sub">An agreement with a customer for a defined product &amp; quantity, at a defined price, for a defined period, from a defined location and delivery type.</div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-light" href="sauda-list.html">Cancel</a>
+        <button class="btn btn-light" id="saveDraftBtn"><span class="ico">🖫</span> Save as Draft</button>
+        <button class="btn btn-primary" id="saveActiveBtn"><span class="ico">✓</span> Save &amp; Activate</button>
+      </div>
+    </div>
+
+    <!-- ===================== Sauda header ===================== -->
+    <div class="card">
+      <div class="card-head"><h2>📄 Sauda Details</h2>
+        <span class="right"><span class="pill" id="saudaNoPill">SAU-…</span></span>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div class="field">
+            <label>Sauda No.</label>
+            <input type="text" id="saudaNo" readonly />
+            <span class="hint">Auto-generated</span>
+          </div>
+          <div class="field">
+            <label>Party / Customer <span class="req">*</span></label>
+            <select id="party"></select>
+          </div>
+          <div class="field">
+            <label>Broker</label>
+            <select id="broker"></select>
+          </div>
+
+          <div class="field">
+            <label>Sauda Date <span class="req">*</span></label>
+            <input type="date" id="saudaDate" />
+          </div>
+          <div class="field">
+            <label>Effective From <span class="req">*</span></label>
+            <input type="date" id="effFrom" />
+          </div>
+          <div class="field">
+            <label>Effective To <span class="req">*</span></label>
+            <input type="date" id="effTo" />
+            <span class="hint" id="validityHint"></span>
+          </div>
+
+          <div class="field">
+            <label>Delivery Type <span class="req">*</span></label>
+            <select id="deliveryType"></select>
+            <span class="hint">FOR = delivered to buyer · Ex = buyer lifts goods</span>
+          </div>
+          <div class="field">
+            <label>From Location <span class="req">*</span></label>
+            <select id="location"></select>
+          </div>
+          <div class="field">
+            <label>Payment Terms</label>
+            <select id="paymentTerms"></select>
+          </div>
+
+          <div class="field span-3">
+            <label>Remarks</label>
+            <textarea id="remarks" placeholder="Optional notes — rate basis, crush season, special conditions…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== Line items ===================== -->
+    <div class="card">
+      <div class="card-head"><h2>🛒 Sauda Line Items</h2>
+        <span class="right">
+          <button class="btn btn-gold btn-sm" id="addLineBtn"><span class="ico">＋</span> Add Line</button>
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="line-table-wrap">
+          <table class="line-table stack" id="lineTable">
+            <thead>
+              <tr>
+                <th style="width:34px">#</th>
+                <th style="min-width:220px">Product <span class="req">*</span></th>
+                <th style="width:90px">Qty <span class="req">*</span></th>
+                <th style="width:120px">UOM</th>
+                <th style="width:110px">Buy Price</th>
+                <th style="width:110px">Sell Price</th>
+                <th style="width:120px" class="cell-num">Margin / Unit</th>
+                <th style="width:140px" class="cell-num">Line Value</th>
+                <th style="width:130px">Eff. From</th>
+                <th style="width:130px">Eff. To</th>
+                <th style="width:34px"></th>
+              </tr>
+            </thead>
+            <tbody id="lineRows"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6" style="text-align:right" data-label="">Totals</td>
+                <td class="cell-num muted-margin" id="totMargin" data-label="Total Margin">₹0</td>
+                <td class="cell-num" id="totValue" data-label="Sauda Value">₹0</td>
+                <td colspan="3" class="cell-hide-mobile"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="note-line" style="margin-top:10px">
+          Sauda value is computed on the agreed <strong>sell price</strong>. Margin/unit = sell − buy. Line dates default to the sauda validity but can be overridden per product.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    mountTopbar("create");
+
+    /* ---------- populate selects ---------- */
+    const elParty = document.getElementById("party");
+    const elBroker = document.getElementById("broker");
+    const elDeliv = document.getElementById("deliveryType");
+    const elLoc = document.getElementById("location");
+    const elPay = document.getElementById("paymentTerms");
+
+    PARTIES.forEach(p => elParty.add(new Option(p, p)));
+    BROKERS.forEach(b => elBroker.add(new Option(b, b)));
+    DELIVERY_TYPES.forEach(d => elDeliv.add(new Option(d === "FOR" ? "FOR (delivered)" : "Ex (buyer lifts)", d)));
+    LOCATIONS.forEach(l => elLoc.add(new Option(`${l.name} (${l.type})`, l.id)));
+    PAYMENT_TERMS.forEach(t => elPay.add(new Option(t, t)));
+
+    /* ---------- header defaults ---------- */
+    const newId = nextSaudaId();
+    document.getElementById("saudaNo").value = newId;
+    document.getElementById("saudaNoPill").textContent = newId;
+    document.getElementById("saudaDate").value = todayISO();
+    document.getElementById("effFrom").value = todayISO();
+    const def = new Date(); def.setMonth(def.getMonth() + 2);
+    document.getElementById("effTo").value = def.toISOString().slice(0, 10);
+
+    const elEffFrom = document.getElementById("effFrom");
+    const elEffTo = document.getElementById("effTo");
+    const validityHint = document.getElementById("validityHint");
+    function updateValidityHint() {
+      const d = daysBetween(elEffFrom.value, elEffTo.value);
+      validityHint.textContent = (elEffFrom.value && elEffTo.value && !isNaN(d))
+        ? `Validity: ${d} day(s)` + (d < 0 ? " ⚠ end is before start" : "")
+        : "";
+    }
+    elEffFrom.addEventListener("change", () => { syncLineDates(); updateValidityHint(); });
+    elEffTo.addEventListener("change", () => { syncLineDates(); updateValidityHint(); });
+    updateValidityHint();
+
+    /* ---------- line items ---------- */
+    const lineRows = document.getElementById("lineRows");
+
+    function productOptions(selected) {
+      return PRODUCTS.map(p =>
+        `<option value="${p.code}" data-rate="${p.rate}" data-uom="${p.uom}" ${p.code === selected ? "selected" : ""}>${p.name}</option>`
+      ).join("");
+    }
+    function uomOptions(selected) {
+      return UOMS.map(u => `<option ${u === selected ? "selected" : ""}>${u}</option>`).join("");
+    }
+
+    function addLine(data = {}) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rownum" data-label="Line"></td>
+        <td data-label="Product">
+          <select class="f-product">
+            <option value="">— Select product —</option>
+            ${productOptions(data.product)}
+          </select>
+        </td>
+        <td data-label="Qty"><input type="number" class="f-qty" min="0" step="1" value="${data.qty ?? ""}" /></td>
+        <td data-label="UOM"><select class="f-uom">${uomOptions(data.uom)}</select></td>
+        <td data-label="Buy Price"><input type="number" class="f-buy" min="0" step="0.01" value="${data.buyPrice ?? ""}" /></td>
+        <td data-label="Sell Price"><input type="number" class="f-sell" min="0" step="0.01" value="${data.sellPrice ?? ""}" /></td>
+        <td data-label="Margin / Unit" class="cell-num f-margin muted-margin">—</td>
+        <td data-label="Line Value" class="cell-num f-linetotal">—</td>
+        <td data-label="Eff. From"><input type="date" class="f-from" value="${data.effFrom ?? elEffFrom.value}" /></td>
+        <td data-label="Eff. To"><input type="date" class="f-to" value="${data.effTo ?? elEffTo.value}" /></td>
+        <td data-label=""><button class="row-del" title="Remove line">✕ <span class="del-lbl">Remove line</span></button></td>
+      `;
+      lineRows.appendChild(tr);
+
+      const prod = tr.querySelector(".f-product");
+      const qty = tr.querySelector(".f-qty");
+      const uom = tr.querySelector(".f-uom");
+      const buy = tr.querySelector(".f-buy");
+      const sell = tr.querySelector(".f-sell");
+
+      prod.addEventListener("change", () => {
+        const opt = prod.selectedOptions[0];
+        if (opt && opt.dataset.rate) {
+          // prefill suggested sell price and UOM from master
+          if (!sell.value) sell.value = opt.dataset.rate;
+          if (!buy.value)  buy.value = Math.round(opt.dataset.rate * 0.92);
+          uom.value = opt.dataset.uom;
+        }
+        recalc();
+      });
+      [qty, buy, sell].forEach(i => i.addEventListener("input", recalc));
+      tr.querySelector(".row-del").addEventListener("click", () => {
+        tr.remove(); recalc();
+        if (!lineRows.children.length) addLine();
+      });
+
+      recalc();
+    }
+
+    function syncLineDates() {
+      // push header validity to any line whose dates are empty
+      lineRows.querySelectorAll("tr").forEach(tr => {
+        const f = tr.querySelector(".f-from"), t = tr.querySelector(".f-to");
+        if (!f.value) f.value = elEffFrom.value;
+        if (!t.value) t.value = elEffTo.value;
+      });
+    }
+
+    function recalc() {
+      let totVal = 0, totMargin = 0;
+      lineRows.querySelectorAll("tr").forEach((tr, i) => {
+        tr.querySelector(".rownum").textContent = i + 1;
+        const qty = Number(tr.querySelector(".f-qty").value) || 0;
+        const buy = Number(tr.querySelector(".f-buy").value) || 0;
+        const sell = Number(tr.querySelector(".f-sell").value) || 0;
+        const lineTotal = qty * sell;
+        const marginUnit = sell - buy;
+        totVal += lineTotal;
+        totMargin += qty * marginUnit;
+        const mEl = tr.querySelector(".f-margin");
+        mEl.textContent = (buy || sell) ? inr(marginUnit) : "—";
+        mEl.style.color = marginUnit < 0 ? "var(--danger)" : "var(--green-700)";
+        tr.querySelector(".f-linetotal").textContent = lineTotal ? inr(lineTotal) : "—";
+      });
+      document.getElementById("totValue").textContent = inr(totVal);
+      document.getElementById("totMargin").textContent = inr(totMargin);
+    }
+
+    document.getElementById("addLineBtn").addEventListener("click", () => addLine());
+    addLine(); // start with one empty line
+
+    /* ---------- collect & validate ---------- */
+    function collect() {
+      const lines = [];
+      let ok = true;
+      lineRows.querySelectorAll("tr").forEach(tr => {
+        const product = tr.querySelector(".f-product").value;
+        const qty = tr.querySelector(".f-qty").value;
+        if (!product && !qty) return; // skip blank line
+        if (!product || !qty) ok = false;
+        lines.push({
+          product,
+          qty: Number(qty) || 0,
+          uom: tr.querySelector(".f-uom").value,
+          buyPrice: Number(tr.querySelector(".f-buy").value) || 0,
+          sellPrice: Number(tr.querySelector(".f-sell").value) || 0,
+          effFrom: tr.querySelector(".f-from").value,
+          effTo: tr.querySelector(".f-to").value,
+        });
+      });
+      return { lines, ok };
+    }
+
+    function validate(lines, lineOk) {
+      if (!document.getElementById("party").value) { toast("Select a party / customer.", "warn"); return false; }
+      if (!document.getElementById("effFrom").value || !document.getElementById("effTo").value) {
+        toast("Effective From and To are required.", "warn"); return false;
+      }
+      if (daysBetween(elEffFrom.value, elEffTo.value) < 0) {
+        toast("Effective To cannot be before Effective From.", "warn"); return false;
+      }
+      if (!lines.length) { toast("Add at least one line item.", "warn"); return false; }
+      if (!lineOk) { toast("Each line needs a product and quantity.", "warn"); return false; }
+      return true;
+    }
+
+    function save(status) {
+      const { lines, ok } = collect();
+      if (!validate(lines, ok)) return;
+      const sauda = {
+        id: newId,
+        party: document.getElementById("party").value,
+        broker: document.getElementById("broker").value,
+        saudaDate: document.getElementById("saudaDate").value,
+        effectiveFrom: document.getElementById("effFrom").value,
+        effectiveTo: document.getElementById("effTo").value,
+        deliveryType: document.getElementById("deliveryType").value,
+        location: document.getElementById("location").value,
+        paymentTerms: document.getElementById("paymentTerms").value,
+        remarks: document.getElementById("remarks").value,
+        status,
+        lines,
+        history: [
+          { ts: nowStamp(), action: "Created", by: "Demo User", note: `Sauda created with ${lines.length} line item(s).` },
+          ...(status === "Active" ? [{ ts: nowStamp(), action: "Activated", by: "Demo User", note: "Status set to Active." }] : []),
+        ],
+        indent: { stage: 0 },
+      };
+      upsertSauda(sauda);
+      toast(`Sauda ${newId} saved (${status}).`, "success");
+      setTimeout(() => location.href = `sauda-detail.html?id=${encodeURIComponent(newId)}`, 600);
+    }
+
+    document.getElementById("saveDraftBtn").addEventListener("click", () => save("Draft"));
+    document.getElementById("saveActiveBtn").addEventListener("click", () => save("Active"));
+  </script>
+</body>
+</html>

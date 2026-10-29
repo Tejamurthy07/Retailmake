@@ -1,0 +1,11 @@
+<aura:component implements="force:lightningQuickAction,force:hasRecordId" 
+                controller="CollectionReceiptMobileController" access="global">
+    <aura:attribute name="recordId" type="Id" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <div class="slds-p-around_medium slds-align_absolute-center" 
+         style="min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <lightning:spinner alternativeText="Generating Receipt..." size="medium" />
+        <p class="slds-text-body_regular slds-p-top_large" style="margin-top:48px;">Generating Receipt…</p>
+    </div>
+</aura:component>

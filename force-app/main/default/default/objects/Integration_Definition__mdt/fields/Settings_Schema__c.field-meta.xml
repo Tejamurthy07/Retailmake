@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Settings_Schema__c</fullName>
+    <description>JSON array describing the non-secret settings fields to render, e.g. [{&quot;key&quot;:&quot;senderId&quot;,&quot;label&quot;:&quot;Sender ID&quot;,&quot;type&quot;:&quot;text&quot;,&quot;required&quot;:true}].</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Settings Schema</label>
+    <length>32768</length>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

@@ -1,0 +1,428 @@
+<template>
+    <div class="ism-container">
+
+        <!-- ═══════ LIST VIEW ═══════ -->
+        <template if:true={isListView}>
+            <div class="ism-header">
+                <div class="ism-header-left">
+                    <lightning-icon icon-name="standard:reward" size="medium"></lightning-icon>
+                    <h1>Incentive Slab Manager</h1>
+                </div>
+                <lightning-button label="New Slab" variant="brand" icon-name="utility:add"
+                    onclick={handleNewSlab}></lightning-button>
+            </div>
+
+            <!-- Stats -->
+            <div class="ism-stats-bar">
+                <div class="ism-stat">
+                    <span class="ism-stat-value">{totalCount}</span>
+                    <span class="ism-stat-label">Total</span>
+                </div>
+                <div class="ism-stat">
+                    <span class="ism-stat-value ism-stat-active">{activeCount}</span>
+                    <span class="ism-stat-label">Active</span>
+                </div>
+                <div class="ism-stat">
+                    <span class="ism-stat-value ism-stat-inactive">{inactiveCount}</span>
+                    <span class="ism-stat-label">Inactive</span>
+                </div>
+            </div>
+
+            <!-- Search Filters -->
+            <div class="ism-filters">
+                <div class="ism-filter-item">
+                    <lightning-combobox label="Target Criteria" value={filterCriteria}
+                        options={criteriaOptions} onchange={handleFilterCriteria}
+                        placeholder="All Criteria" variant="label-stacked"></lightning-combobox>
+                </div>
+                <div class="ism-filter-item">
+                    <lightning-combobox label="Profile" value={filterProfile}
+                        options={profileOptions} onchange={handleFilterProfile}
+                        placeholder="All Profiles" variant="label-stacked"></lightning-combobox>
+                </div>
+                <div class="ism-filter-item">
+                    <lightning-combobox label="Territory" value={filterTerritory}
+                        options={territoryOptions} onchange={handleFilterTerritory}
+                        placeholder="All Territories" variant="label-stacked"></lightning-combobox>
+                </div>
+                <div class="ism-filter-item">
+                    <lightning-combobox label="Payout Type" value={filterPayoutType}
+                        options={payoutTypeFilterOptions} onchange={handleFilterPayoutType}
+                        placeholder="All Types" variant="label-stacked"></lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <template if:true={hasSelectedItems}>
+                <div class="ism-bulk-bar">
+                    <span class="ism-bulk-count">{selectedCount} selected</span>
+                    <lightning-button label="Activate" variant="brand" onclick={handleBulkActivate}
+                        class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Deactivate" variant="neutral" onclick={handleBulkDeactivate}
+                        class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Delete" variant="destructive" onclick={handleBulkDelete}></lightning-button>
+                    <lightning-button label="Clear" variant="base" onclick={handleClearSelection}
+                        class="slds-m-left_medium"></lightning-button>
+                </div>
+            </template>
+
+            <!-- Table -->
+            <template if:true={hasFilteredSlabs}>
+                <div class="ism-table-wrapper">
+                    <table class="ism-table">
+                        <thead>
+                            <tr>
+                                <th class="ism-th-check">
+                                    <lightning-input type="checkbox" checked={allSelected}
+                                        onchange={handleSelectAll} variant="label-hidden" label="All"></lightning-input>
+                                </th>
+                                <th>Slab Name</th>
+                                <th>Criteria</th>
+                                <th>Profile</th>
+                                <th>Territory</th>
+                                <th>Range</th>
+                                <th>Payout</th>
+                                <th>Multiplier</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={displaySlabs} for:item="s">
+                                <tr key={s.Id} class="ism-row" data-id={s.Id} onclick={handleRowClick}>
+                                    <td class="ism-td-check" onclick={stopPropagation}>
+                                        <lightning-input type="checkbox" checked={s.selected}
+                                            data-id={s.Id} onchange={handleSelectItem}
+                                            variant="label-hidden" label="Select"></lightning-input>
+                                    </td>
+                                    <td class="ism-name-cell">{s.Name}</td>
+                                    <td>
+                                        <template if:true={s.criteriaName}>
+                                            <span class="ism-badge">{s.criteriaName}</span>
+                                        </template>
+                                        <template if:false={s.criteriaName}>
+                                            <span class="ism-badge-universal">Universal</span>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <template if:true={s.profileDisplay}>
+                                            <span class="ism-badge-profile">{s.profileDisplay}</span>
+                                        </template>
+                                        <template if:false={s.profileDisplay}>
+                                            <span class="ism-badge-universal">All</span>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <template if:true={s.territoryDisplay}>
+                                            <span class="ism-badge-territory">{s.territoryDisplay}</span>
+                                        </template>
+                                        <template if:false={s.territoryDisplay}>
+                                            <span class="ism-badge-universal">All</span>
+                                        </template>
+                                    </td>
+                                    <td>{s.rangeDisplay}</td>
+                                    <td>{s.payoutDisplay}</td>
+                                    <td>{s.Multiplier__c}x</td>
+                                    <td>
+                                        <template if:true={s.Is_Active__c}>
+                                            <span class="ism-status-active">Active</span>
+                                        </template>
+                                        <template if:false={s.Is_Active__c}>
+                                            <span class="ism-status-inactive">Inactive</span>
+                                        </template>
+                                    </td>
+                                    <td class="ism-actions" onclick={stopPropagation}>
+                                        <template if:true={s.Is_Active__c}>
+                                            <lightning-button-icon icon-name="utility:toggle_on" variant="brand"
+                                                data-id={s.Id} onclick={handleToggleActive}
+                                                class="slds-m-right_xx-small"></lightning-button-icon>
+                                        </template>
+                                        <template if:false={s.Is_Active__c}>
+                                            <lightning-button-icon icon-name="utility:toggle_off" variant="border-filled"
+                                                data-id={s.Id} onclick={handleToggleActive}
+                                                class="slds-m-right_xx-small"></lightning-button-icon>
+                                        </template>
+                                        <lightning-button-icon icon-name="utility:edit" variant="border-filled"
+                                            data-id={s.Id} onclick={handleEdit}
+                                            class="slds-m-right_xx-small"></lightning-button-icon>
+                                        <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                            data-id={s.Id} onclick={handleDelete}></lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template if:false={hasFilteredSlabs}>
+                <template if:false={isLoading}>
+                    <div class="ism-empty">
+                        <lightning-icon icon-name="standard:empty" size="large"></lightning-icon>
+                        <template if:true={hasSlabs}>
+                            <h2>No Slabs Match Filters</h2>
+                            <p>Try adjusting the filter criteria above.</p>
+                        </template>
+                        <template if:false={hasSlabs}>
+                            <h2>No Incentive Slabs Found</h2>
+                            <p>Create slab tiers to define how achievement percentages map to incentive payouts.</p>
+                            <lightning-button label="Create Slab" variant="brand" onclick={handleNewSlab}
+                                class="slds-m-top_medium"></lightning-button>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <!-- ═══════ DETAIL VIEW ═══════ -->
+        <template if:true={isDetailView}>
+            <div class="ism-detail-header">
+                <lightning-button-icon icon-name="utility:back" variant="bare"
+                    onclick={handleBackToList} class="slds-m-right_small"></lightning-button-icon>
+                <div class="ism-detail-title">
+                    <h1>{detail.Name}</h1>
+                    <template if:true={detail.Is_Active__c}>
+                        <span class="ism-status-active slds-m-left_small">Active</span>
+                    </template>
+                    <template if:false={detail.Is_Active__c}>
+                        <span class="ism-status-inactive slds-m-left_small">Inactive</span>
+                    </template>
+                </div>
+                <div class="ism-detail-actions">
+                    <lightning-button label="Clone" variant="neutral" icon-name="utility:copy"
+                        onclick={handleClone} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Edit" variant="neutral" icon-name="utility:edit"
+                        onclick={handleEditFromDetail} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Delete" variant="destructive-text" icon-name="utility:delete"
+                        onclick={handleDeleteFromDetail}></lightning-button>
+                </div>
+            </div>
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_2-of-3">
+                    <section class="ism-card">
+                        <div class="ism-card-header">Slab Configuration</div>
+                        <div class="ism-card-body">
+                            <div class="ism-detail-grid">
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Target Criteria</span>
+                                    <span class="ism-detail-value">{detailCriteriaName}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Profile</span>
+                                    <span class="ism-detail-value">{detailProfileName}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Territory</span>
+                                    <span class="ism-detail-value">{detailTerritoryName}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Achievement Range</span>
+                                    <span class="ism-detail-value">{detail.Min_Percent__c}% — {detail.Max_Percent__c}%</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Payout Type</span>
+                                    <span class="ism-detail-value">{detail.Payout_Type__c}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Payout Value</span>
+                                    <span class="ism-detail-value">{detail.Payout_Value__c}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Multiplier</span>
+                                    <span class="ism-detail-value">{detail.Multiplier__c}x</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Sort Order</span>
+                                    <span class="ism-detail-value">{detail.Sort_Order__c}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Effective From</span>
+                                    <span class="ism-detail-value">{detail.Effective_From__c}</span>
+                                </div>
+                                <div class="ism-detail-field">
+                                    <span class="ism-detail-label">Effective To</span>
+                                    <span class="ism-detail-value">{detail.Effective_To__c}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <section class="ism-card ism-calc-card">
+                        <div class="ism-card-header">Payout Example</div>
+                        <div class="ism-card-body">
+                            <p class="ism-help-text">Example calculation:</p>
+                            <div class="ism-example-row">
+                                <span>Base</span>
+                                <strong>{detailExampleBase}</strong>
+                            </div>
+                            <div class="ism-example-row">
+                                <span>Payout Rule</span>
+                                <span>{detailPayoutRule}</span>
+                            </div>
+                            <div class="ism-example-row">
+                                <span>Multiplier</span>
+                                <strong>{detail.Multiplier__c}x</strong>
+                            </div>
+                            <div class="ism-example-divider"></div>
+                            <div class="ism-example-row ism-example-total">
+                                <span>Payout</span>
+                                <strong>{detailExamplePayout}</strong>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </template>
+
+        <!-- ═══════ FORM VIEW ═══════ -->
+        <template if:true={isFormView}>
+            <div class="ism-form-header">
+                <lightning-button-icon icon-name="utility:back" variant="bare"
+                    onclick={handleBackToList} class="slds-m-right_small"></lightning-button-icon>
+                <h1>{formTitle}</h1>
+            </div>
+
+            <section class="ism-card">
+                <div class="ism-card-header">Slab Details</div>
+                <div class="ism-card-body">
+                    <div class="ism-form-grid">
+                        <lightning-input label="Slab Name" value={form.Name}
+                            data-field="Name" onchange={handleFormInput} required></lightning-input>
+
+                        <!-- Searchable Target Criteria -->
+                        <div class="ism-search-box">
+                            <lightning-input type="text" label="Target Criteria"
+                                placeholder="Search criteria... (leave empty for Universal)"
+                                value={searchCriteria} onchange={handleSearchCriteria}
+                                onfocus={handleSearchCriteriaFocus}></lightning-input>
+                            <template if:true={showCriteriaDropdown}>
+                                <div class="ism-search-dropdown">
+                                    <div class="ism-search-option ism-search-universal"
+                                        onclick={handleSelectCriteria} data-value="" data-label="">
+                                        -- Universal (All Criteria) --
+                                    </div>
+                                    <template for:each={filteredCriteriaSearch} for:item="opt">
+                                        <div key={opt.value} class="ism-search-option"
+                                            onclick={handleSelectCriteria}
+                                            data-value={opt.value} data-label={opt.label}>
+                                            {opt.label}
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Searchable Profile -->
+                        <div class="ism-search-box">
+                            <lightning-input type="text" label="Profile"
+                                placeholder="Search profiles... (leave empty for Universal)"
+                                value={searchProfile} onchange={handleSearchProfile}
+                                onfocus={handleSearchProfileFocus}></lightning-input>
+                            <template if:true={showProfileDropdown}>
+                                <div class="ism-search-dropdown">
+                                    <div class="ism-search-option ism-search-universal"
+                                        onclick={handleSelectProfile} data-value="" data-label="">
+                                        -- Universal (All Profiles) --
+                                    </div>
+                                    <template for:each={filteredProfileSearch} for:item="opt">
+                                        <div key={opt.value} class="ism-search-option"
+                                            onclick={handleSelectProfile}
+                                            data-value={opt.value} data-label={opt.label}>
+                                            {opt.label}
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Searchable Territory -->
+                        <div class="ism-search-box">
+                            <lightning-input type="text" label="Territory"
+                                placeholder="Search territories... (leave empty for Universal)"
+                                value={searchTerritory} onchange={handleSearchTerritory}
+                                onfocus={handleSearchTerritoryFocus}></lightning-input>
+                            <template if:true={showTerritoryDropdown}>
+                                <div class="ism-search-dropdown">
+                                    <div class="ism-search-option ism-search-universal"
+                                        onclick={handleSelectTerritory} data-value="" data-label="">
+                                        -- Universal (All Territories) --
+                                    </div>
+                                    <template for:each={filteredTerritorySearch} for:item="opt">
+                                        <div key={opt.value} class="ism-search-option"
+                                            onclick={handleSelectTerritory}
+                                            data-value={opt.value} data-label={opt.label}>
+                                            {opt.label}
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <lightning-input type="number" label="Min Achievement %" value={form.Min_Percent__c}
+                            data-field="Min_Percent__c" onchange={handleFormInput} required
+                            step="0.01" min="0"></lightning-input>
+                        <lightning-input type="number" label="Max Achievement %" value={form.Max_Percent__c}
+                            data-field="Max_Percent__c" onchange={handleFormInput} required
+                            step="0.01" min="0"></lightning-input>
+                        <lightning-combobox label="Payout Type" value={form.Payout_Type__c}
+                            options={payoutTypeOptions} data-field="Payout_Type__c"
+                            onchange={handleFormInput} required></lightning-combobox>
+                        <lightning-input type="number" label="Payout Value" value={form.Payout_Value__c}
+                            data-field="Payout_Value__c" onchange={handleFormInput} required
+                            step="0.01" min="0"></lightning-input>
+                        <lightning-input type="number" label="Multiplier" value={form.Multiplier__c}
+                            data-field="Multiplier__c" onchange={handleFormInput}
+                            step="0.01" min="0"></lightning-input>
+                        <lightning-input type="number" label="Sort Order" value={form.Sort_Order__c}
+                            data-field="Sort_Order__c" onchange={handleFormInput}></lightning-input>
+                        <lightning-input type="date" label="Effective From" value={form.Effective_From__c}
+                            data-field="Effective_From__c" onchange={handleFormInput}></lightning-input>
+                        <lightning-input type="date" label="Effective To" value={form.Effective_To__c}
+                            data-field="Effective_To__c" onchange={handleFormInput}></lightning-input>
+                    </div>
+                    <div class="slds-m-top_medium">
+                        <lightning-textarea label="Description" value={form.Description__c}
+                            data-field="Description__c" onchange={handleFormInput}></lightning-textarea>
+                    </div>
+                </div>
+            </section>
+
+            <div class="ism-footer">
+                <lightning-button label="Cancel" variant="neutral" onclick={handleBackToList}></lightning-button>
+                <div>
+                    <lightning-button label="Save" variant="brand" icon-name="utility:save"
+                        onclick={handleSave} disabled={isSaveDisabled}></lightning-button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Delete Confirmation -->
+        <template if:true={showDeleteConfirm}>
+            <section class="slds-modal slds-fade-in-open slds-modal_small" role="dialog">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-modal__title">Delete Slab</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <p>Are you sure you want to delete <strong>{deleteTargetName}</strong>?</p>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={handleCancelDelete}
+                            class="slds-m-right_small"></lightning-button>
+                        <lightning-button label="Delete" variant="destructive"
+                            onclick={handleConfirmDelete}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+
+    <template if:true={isLoading}>
+        <div class="ism-spinner-backdrop">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+</template>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Employee 360 View</masterLabel>
+    <description>Premium Employee 360 Dashboard - comprehensive view of employee details, KPIs, attendance, leaves, beats, and team.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__Tab</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage">
+            <property name="employeeId" type="String" label="Employee ID" description="The ID of the Employee__c record to display in the 360 view." />
+        </targetConfig>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Employee__c</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

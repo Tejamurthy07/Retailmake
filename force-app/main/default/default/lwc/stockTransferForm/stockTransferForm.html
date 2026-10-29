@@ -1,0 +1,183 @@
+<template>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="large" class="slds-is-fixed"></lightning-spinner>
+    </template>
+
+    <div class="dms-card">
+        <div class="dms-card__head">
+            <h2 class="dms-card__title">Stock Transfers</h2>
+            <div>
+                <template if:true={isListView}>
+                    <lightning-button label="New Transfer" variant="brand" icon-name="utility:add" onclick={handleNewTransfer}></lightning-button>
+                </template>
+                <template if:false={isListView}>
+                    <lightning-button label="Back to List" variant="neutral" icon-name="utility:back" onclick={handleBackToList}></lightning-button>
+                </template>
+            </div>
+        </div>
+
+        <div class="dms-card__body">
+            <template if:true={errorMessage}>
+                <div class="dms-banner dms-banner_error" role="alert">{errorMessage}</div>
+            </template>
+
+            <!-- LIST VIEW -->
+            <template if:true={isListView}>
+                <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-combobox name="filterWarehouse" label="Warehouse" value={filterWarehouseId} options={filterWarehouseOptions} onchange={handleFilterWarehouseChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-combobox name="filterStatus" label="Status" value={filterStatus} options={statusFilterOptions} onchange={handleFilterStatusChange}></lightning-combobox>
+                    </div>
+                </div>
+
+                <template if:true={hasTransfers}>
+                    <div class="dms-tbl dms-tbl_list">
+                        <div class="dms-thead">
+                            <span>Transfer #</span><span>Source</span><span>Destination</span>
+                            <span>Date</span><span>Status</span><span>Requested By</span><span>Action</span>
+                        </div>
+                        <template for:each={transfers} for:item="row">
+                            <div key={row.id} class="dms-trow">
+                                <span class="dms-strong" data-label="Transfer #">{row.name}</span>
+                                <span data-label="Source">{row.sourceName}</span>
+                                <span data-label="Destination">{row.destName}</span>
+                                <span class="dms-muted" data-label="Date">{row.transferDate}</span>
+                                <span data-label="Status"><c-dms-status-badge label={row.status}></c-dms-status-badge></span>
+                                <span class="dms-muted" data-label="Requested By">{row.requestedBy}</span>
+                                <span data-label="Action">
+                                    <lightning-button-icon icon-name="utility:preview" alternative-text="View" data-id={row.id} onclick={handleViewTransfer} variant="bare" size="small"></lightning-button-icon>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasTransfers}>
+                    <p class="dms-empty">No stock transfers found.</p>
+                </template>
+            </template>
+
+            <!-- CREATE VIEW -->
+            <template if:true={isCreateView}>
+                <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-combobox name="sourceWarehouse" label="Source Warehouse" required placeholder="Select source warehouse" value={sourceWarehouseId} options={warehouseOptions} onchange={handleSourceWarehouseChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-combobox name="destWarehouse" label="Destination Warehouse" required placeholder="Select destination warehouse" value={destinationWarehouseId} options={warehouseOptions} onchange={handleDestWarehouseChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-input type="date" label="Transfer Date" value={transferDate} onchange={handleTransferDateChange}></lightning-input>
+                    </div>
+                </div>
+
+                <lightning-textarea label="Notes" value={transferNotes} onchange={handleTransferNotesChange} class="slds-m-bottom_small"></lightning-textarea>
+
+                <p class="dms-step">Line Items</p>
+                <template if:true={noSourceProducts}>
+                    <p class="dms-hint">The selected source warehouse has no available stock to transfer — choose a different source warehouse.</p>
+                </template>
+                <template if:true={hasLineItems}>
+                    <template for:each={lineItems} for:item="line">
+                        <div key={line.key} class="slds-grid slds-gutters_x-small slds-wrap dms-linebox">
+                            <div class="slds-col slds-size_5-of-12">
+                                <lightning-combobox name="lineProduct" label="Product" placeholder="Select a product" value={line.productId} options={productOptions} data-key={line.key} onchange={handleLineProductChange}></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_3-of-12">
+                                <lightning-input type="number" label="Quantity" value={line.requestedQty} min="1" data-key={line.key} onchange={handleLineQtyChange}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_vertical-align-end">
+                                <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" data-key={line.key} onclick={handleRemoveLine} variant="bare" size="medium"></lightning-button-icon>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <lightning-button label="Add Line Item" variant="brand-outline" icon-name="utility:add" onclick={handleAddLine} class="slds-m-bottom_medium"></lightning-button>
+
+                <div class="slds-grid slds-grid_align-end dms-actions">
+                    <lightning-button label="Cancel" variant="neutral" onclick={handleCancelCreate} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Create Transfer" variant="brand" onclick={handleSaveTransfer}></lightning-button>
+                </div>
+            </template>
+
+            <!-- DETAIL VIEW -->
+            <template if:true={isDetailView}>
+                <template if:true={detailTransfer}>
+                    <div class="dms-kpis">
+                        <div><span class="dms-kpi__label">Transfer #</span><span class="dms-kpi__val">{detailTransfer.name}</span></div>
+                        <div><span class="dms-kpi__label">Status</span><span class="dms-kpi__val"><c-dms-status-badge label={detailTransfer.status}></c-dms-status-badge></span></div>
+                        <div><span class="dms-kpi__label">Source</span><span class="dms-kpi__val">{detailTransfer.sourceName}</span></div>
+                        <div><span class="dms-kpi__label">Destination</span><span class="dms-kpi__val">{detailTransfer.destName}</span></div>
+                        <div><span class="dms-kpi__label">Transfer Date</span><span class="dms-kpi__val">{detailTransfer.transferDate}</span></div>
+                        <div><span class="dms-kpi__label">Requested By</span><span class="dms-kpi__val">{detailTransfer.requestedBy}</span></div>
+                    </div>
+
+                    <div class="dms-tbl dms-tbl_detail">
+                        <div class="dms-thead">
+                            <span>Line #</span><span>Product</span><span>Code</span>
+                            <span class="dms-num">Requested</span><span class="dms-num">Approved</span>
+                            <span class="dms-num">Received</span><span class="dms-num">Short</span>
+                            <span class="dms-num">Available</span>
+                        </div>
+                        <template for:each={detailLineItems} for:item="line">
+                            <div key={line.id} class="dms-trow">
+                                <span data-label="Line #">{line.name}</span>
+                                <span class="dms-strong" data-label="Product">{line.productName}</span>
+                                <span class="dms-muted" data-label="Code">{line.productCode}</span>
+                                <span class="dms-num" data-label="Requested">{line.requestedQty}</span>
+                                <span class="dms-num" data-label="Approved">{line.approvedQty}</span>
+                                <span class="dms-num" data-label="Received">{line.receivedQty}</span>
+                                <span class="dms-num" data-label="Short">{line.shortQty}</span>
+                                <span class="dms-num" data-label="Available">{line.availableStock}</span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="slds-grid slds-grid_align-end dms-actions">
+                        <template if:true={canSubmit}>
+                            <lightning-button label="Submit for Approval" variant="brand" onclick={handleSubmitTransfer} class="slds-m-right_small"></lightning-button>
+                        </template>
+                        <template if:true={canApprove}>
+                            <lightning-button label="Approve Transfer" variant="brand" onclick={handleApproveTransfer} class="slds-m-right_small"></lightning-button>
+                        </template>
+                        <template if:true={canReceive}>
+                            <lightning-button label="Receive Transfer" variant="brand" onclick={handleOpenReceiveModal}></lightning-button>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+
+    <!-- Receive Modal -->
+    <template if:true={showReceiveModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Receive Transfer</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="slds-m-bottom_small">Enter the received quantities for each line item:</p>
+                    <template for:each={receiveLineItems} for:item="line">
+                        <div key={line.id} class="slds-grid slds-gutters_small slds-m-bottom_x-small">
+                            <div class="slds-col slds-size_6-of-12">
+                                <p class="slds-text-body_regular"><strong>{line.productName}</strong></p>
+                                <p class="slds-text-body_small">Approved Qty: {line.approvedQty}</p>
+                            </div>
+                            <div class="slds-col slds-size_6-of-12">
+                                <lightning-input type="number" label="Received Qty" value={line.receivedQty} min="0" data-id={line.id} onchange={handleReceiveQtyChange}></lightning-input>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseReceiveModal} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Confirm Receipt" variant="brand" onclick={handleConfirmReceive}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

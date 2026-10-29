@@ -1,0 +1,24 @@
+<template>
+    <div class="col-chart">
+        <template lwc:if={title}>
+            <p class="col-chart__title">{title}</p>
+        </template>
+        <div class="col-chart__plot">
+            <div class="col-chart__yaxis">
+                <template for:each={ticks} for:item="tick">
+                    <span key={tick} class="col-chart__ytick">{tick}</span>
+                </template>
+            </div>
+            <div class="col-chart__bars">
+                <template for:each={columns} for:item="col">
+                    <div key={col.key} class="col-chart__col">
+                        <div class="col-chart__track">
+                            <div class="col-chart__bar" style={col.style}></div>
+                        </div>
+                        <span class="col-chart__label">{col.label}</span>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

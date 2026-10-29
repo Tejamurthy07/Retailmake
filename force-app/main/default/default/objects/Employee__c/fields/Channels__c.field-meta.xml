@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Channels__c</fullName>
+    <description>Trade channels this employee is authorized to sell in. Empty means authorized for all channels.</description>
+    <label>Channels</label>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>GT</fullName>
+                <default>false</default>
+                <label>GT</label>
+            </value>
+            <value>
+                <fullName>MT</fullName>
+                <default>false</default>
+                <label>MT</label>
+            </value>
+            <value>
+                <fullName>E-Commerce</fullName>
+                <default>false</default>
+                <label>E-Commerce</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>3</visibleLines>
+</CustomField>

@@ -1,0 +1,391 @@
+<template>
+    <div class="dms-invoices">
+        <!-- Sub-tabs -->
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button key={tab.id} class={tab.class} data-tab={tab.id} onclick={handleTab} type="button">
+                    {tab.label}
+                </button>
+            </template>
+        </div>
+
+        <div class="dms-body">
+            <!-- ====================== Primary ====================== -->
+            <template lwc:if={isPrimary}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">List:</span>
+                            <lightning-combobox variant="label-hidden" value={grnFilter} options={grnOptions} onchange={handleGrnFilter}></lightning-combobox>
+                        </div>
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">Date:</span>
+                            <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDateFilter}></lightning-combobox>
+                        </div>
+                    </div>
+                    <!-- Grouped so the toolbar keeps two flex children: the
+                         space-between layout spreads every direct child, which
+                         is what left a lone middle button floating. -->
+                    <div class="dms-toolbar__actions">
+                        <!-- Demo helper. Hidden unless the DMS-015 toggle is on,
+                             which ships off: a distributor able to raise their own
+                             inbound dispatch could create stock from nothing. -->
+                        <template if:true={demoTools}>
+                            <!-- Internal users have no distributor of their own, so
+                                 they must say who the dispatch is for. -->
+                            <template if:true={needsDistributor}>
+                                <lightning-combobox class="dms-mockdist" variant="label-hidden"
+                                    placeholder="Dispatch to..." value={mockDistributorId}
+                                    options={distributorOptions}
+                                    onchange={handleMockDistributor}></lightning-combobox>
+                            </template>
+                            <button class="dms-btn dms-btn_outline" type="button"
+                                onclick={handleMockDispatch} disabled={mockDisabled}
+                                title="Demo only — raises and dispatches a mock primary order, which then appears in Awaiting GRN">
+                                <template if:true={mockBusy}>Generating...</template>
+                                <template if:false={mockBusy}>Generate Mock Dispatch</template>
+                            </button>
+                        </template>
+                        <span class="dms-readonly">
+                            <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            Read-only — synced from ERP
+                        </span>
+                    </div>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={primarySummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-tbl dms-tbl_primary">
+                    <div class="dms-thead">
+                        <span>Invoice No.</span><span>Date</span><span>Supplier</span>
+                        <span>Order Ref</span><span class="dms-num">Amount</span>
+                        <span>GRN Status</span><span>Action</span>
+                    </div>
+                    <template for:each={primaryInvoices} for:item="i">
+                        <div key={i.key} class="dms-trow">
+                            <span class="dms-link" data-label="Invoice No." data-id={i.key} onclick={view}>{i.id}</span>
+                            <span data-label="Date">{i.date}</span>
+                            <span data-label="Supplier">{i.supplier}</span>
+                            <span class="dms-muted" data-label="Order Ref">{i.orderRef}</span>
+                            <span class="dms-num dms-strong" data-label="Amount">{i.amountLabel}</span>
+                            <span data-label="GRN Status">
+                                <span class={i.grnClass}>
+                                    <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <template lwc:if={i.grnDone}>
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </template>
+                                        <template lwc:else>
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <polyline points="12 8 12 12 15 14"></polyline>
+                                        </template>
+                                    </svg>
+                                    {i.grnLabel}
+                                </span>
+                            </span>
+                            <span class="dms-action" data-label="Action" data-id={i.key} onclick={view}>
+                                <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                View
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ===================== Secondary ===================== -->
+            <template lwc:if={isSecondary}>
+                <div class="dms-toolbar">
+                    <div class="dms-filters">
+                        <div class="dms-filter">
+                            <span class="dms-filter__label">Date:</span>
+                            <lightning-combobox variant="label-hidden" value={dateFilter} options={dateOptions} onchange={handleDateFilter}></lightning-combobox>
+                        </div>
+                    </div>
+                    <button class="dms-btn" type="button" onclick={openWizard}>
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Invoice
+                    </button>
+                </div>
+
+                <div class="dms-chips">
+                    <template for:each={secondarySummary} for:item="c">
+                        <div key={c.id} class="dms-chip">
+                            <span class="dms-chip__label">{c.label}</span>
+                            <span class={c.cls}>{c.value}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="dms-tbl dms-tbl_secondary">
+                    <div class="dms-thead">
+                        <span>Invoice ID</span><span>Date</span><span>Customer</span>
+                        <span>Type</span><span>Order Ref</span>
+                        <span class="dms-num">Amount</span><span>E-Invoice</span><span>Action</span>
+                    </div>
+                    <template for:each={secondaryInvoices} for:item="i">
+                        <div key={i.key} class="dms-trow">
+                            <span class="dms-link" data-label="Invoice ID" data-id={i.key} onclick={view}>{i.id}</span>
+                            <span data-label="Date">{i.date}</span>
+                            <span class="dms-strong" data-label="Customer">{i.customer}</span>
+                            <span data-label="Type">
+                                <c-dms-status-badge label={i.type} theme={i.typeTheme}></c-dms-status-badge>
+                            </span>
+                            <span class="dms-muted" data-label="Order Ref">{i.orderRef}</span>
+                            <span class="dms-num dms-strong" data-label="Amount">{i.amountLabel}</span>
+                            <span data-label="E-Invoice">
+                                <template lwc:if={i.canGenEInv}>
+                                    <button class="dms-linkbtn" data-id={i.key} onclick={genEInvoice} type="button">Generate</button>
+                                </template>
+                                <template lwc:else>
+                                    <span class={i.eInvClass}>{i.eInvStatus}</span>
+                                </template>
+                            </span>
+                            <span class="dms-action" data-label="Action" data-id={i.key} onclick={openPdf}>
+                                <svg class="dms-ic dms-ic_sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                PDF
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- ===================== Create Invoice wizard ===================== -->
+        <template lwc:if={wizardOpen}>
+            <div class="dms-modal__overlay" onclick={closeWizard}></div>
+            <div class="dms-wizard" role="dialog">
+                <header class="dms-wizard__head">
+                    <div class="dms-wizard__title">
+                        <h2>Create Invoice</h2>
+                        <div class="dms-steps">
+                            <template for:each={stepDots} for:item="d">
+                                <span key={d.n} class={d.class}>{d.n}</span>
+                            </template>
+                            <span class="dms-steps__label">{stepLabel}</span>
+                        </div>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closeWizard} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-wizard__body">
+                    <template lwc:if={wizardError}>
+                        <div class="dms-wizard__error">{wizardError}</div>
+                    </template>
+                    <!-- Step 1: Select Customer -->
+                    <template lwc:if={isStep1}>
+                        <p class="dms-wizard__label">Customer Type</p>
+                        <div class="dms-segs">
+                            <template for:each={custTypeButtons} for:item="b">
+                                <button key={b.type} class={b.class} data-type={b.type} onclick={setCustType} type="button">
+                                    {b.type}
+                                </button>
+                            </template>
+                        </div>
+                        <p class="dms-wizard__label">Select Customer</p>
+                        <div class="dms-custlist">
+                            <template for:each={customerList} for:item="c">
+                                <button key={c.name} class={c.class} data-name={c.name} onclick={selectCustomer} type="button">
+                                    <span class="dms-custrow__name">{c.name}</span>
+                                    <c-dms-status-badge label={c.type} theme={c.typeTheme}></c-dms-status-badge>
+                                </button>
+                            </template>
+                            <template lwc:if={hasCustomers}></template>
+                            <template lwc:else>
+                                <p class="dms-custlist__empty">{emptyCustomerMsg}</p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Step 2: Select Sales Orders -->
+                    <template lwc:if={isStep2}>
+                        <div class="dms-wizard__subhead">
+                            <span class="dms-wizard__cust">{selectedCustomer}</span>
+                            <span class="dms-wizard__count">{selectedCountLabel}</span>
+                        </div>
+                        <template lwc:if={ordersLoading}>
+                            <p class="dms-custlist__empty">Loading sales orders…</p>
+                        </template>
+                        <template lwc:elseif={hasOrders}>
+                            <div class="dms-ordlist">
+                                <template for:each={orderList} for:item="o">
+                                    <button key={o.key} class={o.rowClass} data-id={o.id} onclick={toggleOrder} type="button">
+                                        <span class={o.boxClass}>
+                                            <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </span>
+                                        <span class="dms-ordrow__main">
+                                            <span class="dms-ordrow__id">{o.name}</span>
+                                            <span class="dms-ordrow__meta">{o.dateLabel} · {o.countLabel}</span>
+                                            <span class="dms-ordrow__prods">{o.productsLabel}</span>
+                                        </span>
+                                        <span class="dms-ordrow__amt">{o.amountLabel}</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <p class="dms-custlist__empty">No open sales orders for this customer. Orders are booked by field reps in Visit Manager; already-invoiced orders won't appear here.</p>
+                        </template>
+                    </template>
+
+                    <!-- Step 3: Review & Save -->
+                    <template lwc:if={isStep3}>
+                        <div class="dms-review__orders">
+                            <span class="dms-review__ordhead">{selectedOrdersHeading}</span>
+                            <span class="dms-review__ordrefs">{selectedOrdersLabel}</span>
+                        </div>
+                        <p class="dms-review__hint">
+                            Amounts mirror the sales order (price, scheme discount, GST). Reduce an invoice qty and the line reprices automatically.
+                        </p>
+                        <div class="dms-tbl dms-tbl_review">
+                            <div class="dms-thead">
+                                <span>Product</span><span class="dms-num">Ord</span>
+                                <span>Inv Qty</span><span class="dms-num">Rate</span>
+                                <span class="dms-num">Disc</span><span class="dms-num">GST</span>
+                                <span class="dms-num">Amount</span>
+                            </div>
+                            <template for:each={reviewRows} for:item="r">
+                                <div key={r.key} class="dms-trow">
+                                    <span class="dms-strong" data-label="Product">{r.name}</span>
+                                    <span class="dms-num" data-label="Ord">{r.ordered}</span>
+                                    <span data-label="Inv Qty">
+                                        <input class="dms-qtyinput" type="number" min="0" max={r.ordered} value={r.qty} data-id={r.productId} onchange={handleQty} />
+                                    </span>
+                                    <span class="dms-num dms-muted" data-label="Rate">{r.rateLabel}</span>
+                                    <span class="dms-num dms-muted" data-label="Disc">{r.discLabel}</span>
+                                    <span class="dms-num dms-muted" data-label="GST">{r.taxLabel}</span>
+                                    <span class="dms-num dms-strong" data-label="Amount">{r.amountLabel}</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="dms-invbreak">
+                            <div class="dms-invbreak__row"><span>Subtotal</span><span>{subtotalLabel}</span></div>
+                            <template lwc:if={hasPreviewDiscount}>
+                                <div class="dms-invbreak__row dms-invbreak__row_disc"><span>Scheme discount</span><span>{discountLabel}</span></div>
+                            </template>
+                            <div class="dms-invbreak__row"><span>GST</span><span>{taxLabel}</span></div>
+                            <template lwc:if={hasPreviewFree}>
+                                <div class="dms-invbreak__row dms-invbreak__row_free"><span>Free goods</span><span>{freeGoodsLabel}</span></div>
+                            </template>
+                            <div class="dms-invbreak__row dms-invbreak__row_total"><span>Invoice Total</span><span>{invoiceTotalLabel}</span></div>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-wizard__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={backStep}>
+                        ‹ <template lwc:if={isStep1}>Cancel</template><template lwc:else>Back</template>
+                    </button>
+                    <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
+                        <template lwc:if={isStep3}>Generate Invoice</template>
+                        <template lwc:else>Next ›</template>
+                    </button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- Invoice generated confirmation -->
+        <template lwc:if={showSuccess}>
+            <div class="dms-modal__overlay"></div>
+            <div class="dms-modal" role="dialog">
+                <div class="dms-modal__check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="dms-modal__title">Invoice Generated</h2>
+                <p class="dms-modal__summary">{successSummary}</p>
+                <button class="dms-btn dms-modal__done" type="button" onclick={handleDone}>Done</button>
+            </div>
+        </template>
+
+        <!-- Line-item detail flyout (View / PDF) -->
+        <template lwc:if={detail}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{detail.number}</h2>
+                        <p class="dms-flyout__sub">{detail.party}</p>
+                    </div>
+                    <button class="dms-cart__close" type="button" onclick={closeDetail} title="Close">✕</button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Invoice Total</span><span class="dms-flyout__val">{detail.amount}</span></div>
+                </div>
+
+                <p class="dms-flyout__section">E-Invoice</p>
+                <div class="dms-einvbox">
+                    <template lwc:if={einvMsg}>
+                        <p class={einvMsgClass}>{einvMsg}</p>
+                    </template>
+                    <template lwc:if={einvGenerated}>
+                        <div class="dms-einv-grid">
+                            <div><span class="dms-flyout__lbl">Status</span><span class={einvPillClass}>{einv.status}</span></div>
+                            <div><span class="dms-flyout__lbl">Ack No</span><span>{einv.ackNo}</span></div>
+                            <div style="grid-column: 1 / -1;"><span class="dms-flyout__lbl">IRN</span><span class="dms-mono dms-break">{einv.irn}</span></div>
+                            <div><span class="dms-flyout__lbl">Ack Date</span><span><lightning-formatted-date-time value={einv.ackDate}></lightning-formatted-date-time></span></div>
+                            <template lwc:if={einvHasEway}>
+                                <div><span class="dms-flyout__lbl">E-Way Bill</span><span>{einv.ewbNo}</span></div>
+                                <div><span class="dms-flyout__lbl">Valid Until</span><span><lightning-formatted-date-time value={einv.ewbValidUntil}></lightning-formatted-date-time></span></div>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <p class="dms-muted dms-einv-none">No e-invoice registered for this invoice.</p>
+                        <template lwc:if={detailCanGen}>
+                            <button class="dms-btn" data-id={detail.key} onclick={genEInvoice} type="button" disabled={einvBusy}>Generate E-Invoice</button>
+                        </template>
+                    </template>
+                </div>
+
+                <p class="dms-flyout__section">Line Items</p>
+                <template lwc:if={hasDetailLines}>
+                    <div class="dms-tbl dms-tbl_lines">
+                        <div class="dms-thead">
+                            <span>Product</span><span>Batch</span><span class="dms-num">Qty</span>
+                            <span class="dms-num">Rate</span><span class="dms-num">Amount</span>
+                        </div>
+                        <template for:each={detailLines} for:item="l">
+                            <div key={l.Id} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">{l.productName}</span>
+                                <span class="dms-muted" data-label="Batch">{l.Batch_No__c}</span>
+                                <span class="dms-num" data-label="Qty">{l.Quantity__c}</span>
+                                <span class="dms-num" data-label="Rate">{l.rate}</span>
+                                <span class="dms-num dms-strong" data-label="Amount">{l.amount}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <p class="dms-empty">No line items.</p>
+                </template>
+            </aside>
+        </template>
+    </div>
+</template>

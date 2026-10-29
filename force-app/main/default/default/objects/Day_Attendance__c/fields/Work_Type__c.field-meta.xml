@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Work_Type__c</fullName>
+    <description>Nature of the field work for the day</description>
+    <label>Work Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Joint Work</fullName>
+                <default>false</default>
+                <label>Joint Work</label>
+            </value>
+            <value>
+                <fullName>DB Search</fullName>
+                <default>false</default>
+                <label>DB Search</label>
+            </value>
+            <value>
+                <fullName>Outlet Search</fullName>
+                <default>false</default>
+                <label>Outlet Search</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

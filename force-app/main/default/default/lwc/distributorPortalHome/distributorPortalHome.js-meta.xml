@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <masterLabel>Distributor Portal Home</masterLabel>
+    <description>Distributor self-service home: outstanding, credit, on-hand stock, open indents, near-expiry, and current inventory. Scoped to the logged-in distributor.</description>
+</LightningComponentBundle>

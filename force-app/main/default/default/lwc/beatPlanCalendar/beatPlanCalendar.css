@@ -1,0 +1,806 @@
+/* Beat Plan Calendar Styles */
+:host {
+    --brand-primary: #0176d3;
+    --success-color: #2e844a;
+    --warning-color: #dd7a01;
+    --error-color: #ea001e;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+    --sunday-bg: #fff5f5;
+}
+
+/* Controls */
+.controls-row {
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.calendar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #181818;
+    min-width: 220px;
+    text-align: center;
+}
+
+/* PJP Status Badges */
+.pjp-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pjp-draft {
+    background: #f3f3f3;
+    color: #706e6b;
+}
+
+.pjp-pending {
+    background: #fff8e1;
+    color: #dd7a01;
+}
+
+.pjp-approved {
+    background: #e6f7e9;
+    color: #2e844a;
+}
+
+.pjp-active {
+    background: #e8f4fd;
+    color: #0176d3;
+}
+
+.pjp-rejected {
+    background: #fce4e4;
+    color: #ea001e;
+}
+
+/* Summary Panel */
+.summary-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-label {
+    display: block;
+    font-size: 10px;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    margin-top: 2px;
+}
+
+/* Week View Calendar Grid */
+.week-grid {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.day-headers {
+    background: #fafbfc;
+}
+
+.day-header {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.day-header:last-child {
+    border-right: none;
+}
+
+.today-header {
+    background: #e8f4fd;
+    border-bottom-color: var(--brand-primary);
+}
+
+.sunday-header {
+    background: var(--sunday-bg);
+}
+
+.day-name {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #706e6b;
+    letter-spacing: 0.5px;
+}
+
+.day-date {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+    margin-top: 2px;
+}
+
+.day-content-row {
+    min-height: 200px;
+}
+
+.day-cell {
+    flex: 1;
+    padding: 8px;
+    border-right: 1px solid var(--border-color);
+    min-height: 200px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    position: relative;
+}
+
+.day-cell:last-child {
+    border-right: none;
+}
+
+.day-cell:hover {
+    background: #f0f7ff;
+}
+
+.today-cell {
+    background: #f0f7ff;
+}
+
+.sunday-cell {
+    background: var(--sunday-bg);
+}
+
+.beat-chip {
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    color: #ffffff;
+    font-size: 12px;
+    transition: transform 0.15s ease;
+}
+
+.beat-chip:hover {
+    transform: scale(1.02);
+}
+
+.beat-name {
+    display: block;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.beat-outlet-count {
+    display: block;
+    font-size: 10px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+.empty-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+}
+
+.day-visit-count {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+}
+
+.visit-count-badge {
+    background: #eef4ff;
+    color: var(--brand-primary);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Month View */
+.month-grid {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.month-headers {
+    background: #fafbfc;
+}
+
+.month-header-cell {
+    /* flex: 1 1 0 + min-width: 0 matches .month-cell below so every
+       column gets exactly 1/7th width; without matching basis the
+       header row can drift from the body row when content differs. */
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #706e6b;
+    letter-spacing: 0.5px;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.month-header-cell:last-child {
+    border-right: none;
+}
+
+.month-week-row {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.month-week-row:last-child {
+    border-bottom: none;
+}
+
+.month-cell {
+    flex: 1 1 0;
+    /* min-width: 0 lets flex: 1 honour the 1/7th share even when the
+       beat chips inside have intrinsic content wider than the cell.
+       Without it, long beat names like 'Admin Beat - Delhi Central'
+       push the cell wider than its share and break column alignment
+       with the weekday header row above. */
+    min-width: 0;
+    min-height: 90px;
+    padding: 4px 6px;
+    border-right: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    overflow: hidden;
+}
+
+.month-cell:last-child {
+    border-right: none;
+}
+
+.month-cell:hover {
+    background: #f0f7ff;
+}
+
+.month-cell.other-month {
+    background: #fafbfc;
+    opacity: 0.5;
+}
+
+.date-number {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+    margin-bottom: 4px;
+}
+
+.today-date {
+    background: var(--brand-primary);
+    color: #ffffff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-beat-chip {
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-bottom: 2px;
+    color: #ffffff;
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Same flex-shrink fix as .month-cell — without min-width:0 the
+       chip refuses to compress below the width of its longest child,
+       so a single cell's chip can push the whole row wider than the
+       parent and misalign with the weekday header. */
+    min-width: 0;
+    overflow: hidden;
+}
+
+.month-beat-name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* flex child needs min-width:0 so ellipsis actually kicks in. */
+    min-width: 0;
+    flex: 1 1 0;
+}
+
+.month-beat-count {
+    font-size: 9px;
+    opacity: 0.85;
+    margin-left: 4px;
+    flex-shrink: 0;
+}
+
+/* No Plan State */
+.no-plan-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #706e6b;
+}
+
+.no-plan-icon {
+    color: #c9c7c5;
+}
+
+/* Stat Value Variants */
+.stat-primary {
+    color: var(--brand-primary);
+}
+
+.stat-success {
+    color: var(--success-color);
+}
+
+/* Remove Beat Button */
+.remove-beat-btn {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+/* Selected Day Panel */
+.selected-day-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.assigned-beat-item,
+.available-beat-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: all 0.15s ease;
+}
+
+.available-beat-item {
+    cursor: pointer;
+}
+
+.available-beat-item:hover {
+    border-color: var(--brand-primary);
+    background: #f0f7ff;
+}
+
+.beat-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.beat-detail-name {
+    font-weight: 600;
+    font-size: 13px;
+    flex: 1;
+}
+
+.beat-detail-count {
+    font-size: 12px;
+    color: #706e6b;
+    margin-left: 8px;
+}
+
+.add-beat-icon {
+    margin-left: 8px;
+}
+
+/* Executive Picker */
+.executive-picker-row {
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 10px 16px;
+}
+
+.executive-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #706e6b;
+}
+
+.executive-picker-field {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.remove-beat-plan-btn {
+    color: #c23934;
+    margin-left: 2px;
+}
+
+/* Generate Plan Modal */
+.generate-info-text {
+    font-size: 13px;
+    color: #706e6b;
+    font-weight: 600;
+    padding: 8px 12px;
+    background: #eef4ff;
+    border-radius: 6px;
+}
+
+.slds-modal__content {
+    overflow: visible;
+}
+
+/* ====================================================
+   VIEW TOGGLE — Desktop vs Mobile
+   ==================================================== */
+.bpc-view-toggle-mobile {
+    display: none;
+}
+
+/* ====================================================
+   MOBILE CARD VIEW
+   ==================================================== */
+.bpc-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bpc-day-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.bpc-day-card:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.bpc-day-card-today {
+    border-color: #3b82f6;
+    border-width: 2px;
+    background: #f0f7ff;
+}
+
+.bpc-day-card-sunday {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.bpc-day-card-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+    flex-shrink: 0;
+}
+
+.bpc-day-card-date {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.bpc-day-card-today .bpc-day-card-date {
+    color: #2563eb;
+}
+
+.bpc-day-card-sunday .bpc-day-card-date {
+    color: #dc2626;
+}
+
+.bpc-day-card-dow {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bpc-day-card-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.bpc-card-beat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+}
+
+.bpc-card-beat-name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.bpc-card-beat-count {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.9;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.bpc-day-card-visits {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 44px;
+    background: #f1f5f9;
+    padding: 6px 8px;
+    border-radius: 8px;
+}
+
+.bpc-visits-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e40af;
+    line-height: 1;
+}
+
+.bpc-visits-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bpc-card-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Responsive */
+/* ====================================================
+   RESPONSIVE — Mobile layout
+   ==================================================== */
+@media (max-width: 768px) {
+    /* ── Top action buttons (slot="actions") ── */
+    lightning-card [slot="actions"] .slds-grid {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    lightning-card [slot="actions"] lightning-button {
+        --sds-c-button-font-size: 12px;
+    }
+
+    /* ── Executive picker ── */
+    .executive-picker-row .slds-grid {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .executive-picker-field {
+        width: 100%;
+        flex-basis: 100% !important;
+    }
+
+    /* ── Controls row (nav + view toggle) ── */
+    .controls-row {
+        padding: 8px 10px;
+    }
+
+    .controls-row > .slds-grid {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .calendar-title {
+        font-size: 16px;
+        min-width: auto;
+    }
+
+    /* ── Summary stats: 2-column ── */
+    .summary-panel {
+        padding: 8px !important;
+    }
+
+    .summary-panel .slds-grid {
+        flex-wrap: wrap;
+    }
+
+    .summary-panel .slds-col {
+        flex-basis: 48% !important;
+        max-width: 48% !important;
+    }
+
+    .stat-card {
+        margin-bottom: 8px;
+        padding: 10px !important;
+    }
+
+    .stat-value { font-size: 22px !important; }
+    .stat-label { font-size: 10px !important; }
+
+    /* ── View toggle: show Cards/Calendar, hide Week/Month ── */
+    .bpc-view-toggle-desktop {
+        display: none !important;
+    }
+
+    .bpc-view-toggle-mobile {
+        display: block !important;
+    }
+
+    /* ── Week view: synced horizontal scroll ── */
+    .week-grid {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .day-headers {
+        flex-wrap: nowrap;
+        min-width: max-content;
+    }
+
+    .day-content-row {
+        flex-wrap: nowrap;
+        min-width: max-content;
+    }
+
+    .day-header {
+        min-width: 140px;
+        width: 140px;
+        flex: none;
+        font-size: 11px;
+        padding: 6px 4px;
+    }
+
+    .day-cell {
+        min-width: 140px;
+        width: 140px;
+        flex: none;
+        min-height: 150px;
+        padding: 6px;
+    }
+
+    .beat-chip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    /* ── Month view: compact cells ── */
+    .month-grid {
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .month-header-cell {
+        padding: 6px 2px;
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+
+    .month-cell {
+        min-height: 50px;
+        padding: 2px 1px;
+    }
+
+    .date-number {
+        font-size: 11px;
+        margin-bottom: 1px;
+    }
+
+    .today-date {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .month-beat-chip {
+        font-size: 7px;
+        padding: 1px 2px;
+        margin-bottom: 1px;
+        border-radius: 2px;
+    }
+
+    .month-beat-name {
+        max-width: 28px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .month-beat-count {
+        font-size: 7px;
+    }
+
+    /* ── Selected day detail panel ── */
+    .selected-day-panel {
+        padding: 12px;
+    }
+
+    .selected-day-panel > .slds-grid {
+        flex-direction: column !important;
+    }
+
+    .selected-day-panel > .slds-grid > .slds-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-basis: 100% !important;
+    }
+
+    /* Assigned beats: first column */
+    .selected-day-panel > .slds-grid > .slds-col:first-child {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .assigned-beat-item,
+    .available-beat-item {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .beat-detail-name {
+        font-size: 13px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .beat-detail-count {
+        font-size: 11px;
+    }
+
+    .remove-beat-btn,
+    .remove-beat-plan-btn {
+        margin-left: 4px !important;
+    }
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Original_Beat__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Stores the original beat before a beat switch occurred during the day.</description>
+    <label>Original Beat</label>
+    <referenceTo>Beat__c</referenceTo>
+    <relationshipLabel>Original Beat Visits</relationshipLabel>
+    <relationshipName>Original_Beat_Visits</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

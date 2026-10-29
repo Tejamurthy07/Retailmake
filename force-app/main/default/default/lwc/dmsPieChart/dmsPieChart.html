@@ -1,0 +1,16 @@
+<template>
+    <div class="pie">
+        <template lwc:if={title}>
+            <p class="pie__title">{title}</p>
+        </template>
+        <div class="pie__circle" style={pieStyle}></div>
+        <ul class="pie__legend">
+            <template for:each={legend} for:item="item">
+                <li key={item.key} class="pie__legend-item">
+                    <span class="pie__dot" style={item.dotStyle}></span>
+                    <span class="pie__legend-label">{item.label}</span>
+                </li>
+            </template>
+        </ul>
+    </div>
+</template>

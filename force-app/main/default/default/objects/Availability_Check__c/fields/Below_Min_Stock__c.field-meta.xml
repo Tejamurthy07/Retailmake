@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Below_Min_Stock__c</fullName>
+    <description>True when the observed shelf stock is below the minimum threshold.</description>
+    <formula>AND(NOT(ISBLANK(Observed_Stock__c)), NOT(ISBLANK(Min_Qty_Snapshot__c)), Observed_Stock__c &lt; Min_Qty_Snapshot__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Below Min Stock</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

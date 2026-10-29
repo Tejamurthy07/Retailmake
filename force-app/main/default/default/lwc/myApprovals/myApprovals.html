@@ -1,0 +1,114 @@
+<template>
+    <div class="ma-header">
+        <div class="ma-header-left">
+            <lightning-icon icon-name="standard:approval" size="small"></lightning-icon>
+            <div class="ma-header-text">
+                <h1 class="ma-title">My Approvals</h1>
+                <span class="ma-sub">Items waiting for your decision</span>
+            </div>
+        </div>
+        <div class="ma-counter">
+            <span class="ma-counter-num">{totalCount}</span>
+            <span class="ma-counter-lbl">pending</span>
+        </div>
+    </div>
+
+    <div class="ma-toolbar">
+        <div class="ma-search">
+            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+            <input type="search" class="ma-search-input"
+                placeholder="Search by record, submitter..."
+                value={searchTerm} oninput={handleSearch}/>
+        </div>
+    </div>
+
+    <nav class="ma-filter-bar">
+        <template for:each={objectFilters} for:item="p">
+            <button key={p.key} class={p.cssClass} data-key={p.key} onclick={handleFilter}>
+                <span class={p.dotClass}></span>
+                <span>{p.label}</span>
+                <span class="ma-pill-count">{p.count}</span>
+            </button>
+        </template>
+    </nav>
+
+    <div class="ma-content">
+        <template if:true={hasItems}>
+            <div class="ma-list">
+                <template for:each={filteredItems} for:item="i">
+                    <div key={i.stepId} class="ma-row">
+                        <div class="ma-row-level">
+                            <span class="ma-level-badge">{i.levelBadge}</span>
+                        </div>
+                        <div class="ma-row-main">
+                            <div class="ma-row-top">
+                                <a class="ma-row-name" data-id={i.recordId} onclick={handleOpenRecord}>
+                                    {i.recordName}
+                                </a>
+                                <span class="ma-row-object">{i.objectType}</span>
+                            </div>
+                            <div class="ma-row-sub">
+                                Submitted by <strong>{i.submittedBy}</strong>
+                                <template if:true={i.submittedDate}>
+                                    ·
+                                    <lightning-formatted-date-time value={i.submittedDate}
+                                        year="numeric" month="short" day="2-digit"
+                                        hour="2-digit" minute="2-digit">
+                                    </lightning-formatted-date-time>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="ma-row-actions">
+                            <button class="ma-btn ma-btn-approve" data-id={i.stepId} onclick={handleApproveClick}>
+                                <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                                <span>Approve</span>
+                            </button>
+                            <button class="ma-btn ma-btn-reject" data-id={i.stepId} onclick={handleRejectClick}>
+                                <lightning-icon icon-name="utility:close" size="xx-small" variant="inverse"></lightning-icon>
+                                <span>Reject</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={hasItems}>
+            <div class="ma-empty">
+                <lightning-icon icon-name="utility:check" size="large"></lightning-icon>
+                <p>You're all caught up.</p>
+                <span class="ma-empty-sub">Nothing waiting for your approval.</span>
+            </div>
+        </template>
+    </div>
+
+    <template if:true={showModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header ma-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{modalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea label="Comments" value={modalComments}
+                        onchange={handleCommentsChange} required={isRejectMode}
+                        placeholder="Optional comments...">
+                    </lightning-textarea>
+                    <template if:true={isRejectMode}>
+                        <p class="ma-modal-hint">Comments are required when rejecting.</p>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand"
+                        onclick={handleModalConfirm} disabled={confirmDisabled}>
+                        <template if:true={isProcessing}>Processing...</template>
+                        <template if:false={isProcessing}>Confirm</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

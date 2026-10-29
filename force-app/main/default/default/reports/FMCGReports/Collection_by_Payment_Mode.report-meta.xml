@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Collection__c.Account__c</field>
+    </columns>
+    <columns>
+        <field>Collection__c.Collection_Date__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Collection__c.Amount__c</field>
+    </columns>
+    <columns>
+        <field>Collection__c.Receipt_Number__c</field>
+    </columns>
+    <columns>
+        <field>Collection__c.Status__c</field>
+    </columns>
+    <description>Collections grouped by payment mode (Cash, Cheque, UPI, NEFT) and salesperson</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Collection__c.Payment_Mode__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Collection__c.Salesperson__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Collection by Payment Mode</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntity$Collection__c</reportType>
+    <scope>user</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Collection__c.Cheque_Date__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

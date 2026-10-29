@@ -1,0 +1,74 @@
+<template>
+    <lightning-card title="Reward Wallet" icon-name="custom:custom19">
+        <div slot="actions">
+            <lightning-button-icon
+                icon-name="utility:refresh"
+                alternative-text="Refresh"
+                title="Refresh"
+                onclick={handleRefresh}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-p-around_medium">
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <!-- Balance hero -->
+            <div class="lw-hero">
+                <div class="lw-hero-points">
+                    <span class="lw-hero-points-value">{balanceFormatted}</span>
+                    <span class="lw-hero-points-label">points</span>
+                </div>
+                <div class="lw-hero-cash">Redeemable value: {cashValueFormatted}</div>
+            </div>
+
+            <!-- Ledger -->
+            <div class="slds-m-top_medium">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Recent activity</h3>
+
+                <template if:false={hasLedger}>
+                    <div class="lw-empty">
+                        No transactions yet. The customer will see points here once
+                        a delivered order earns or redeems them.
+                    </div>
+                </template>
+
+                <template if:true={hasLedger}>
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th><div class="slds-truncate">Type</div></th>
+                                <th><div class="slds-truncate">Points</div></th>
+                                <th><div class="slds-truncate">Balance</div></th>
+                                <th><div class="slds-truncate">Date</div></th>
+                                <th><div class="slds-truncate">Reference</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={ledger} for:item="row">
+                                <tr key={row.id}>
+                                    <td>
+                                        <span class={row.typeClass}>{row.type}</span>
+                                    </td>
+                                    <td>
+                                        <span class={row.pointsClass}>{row.pointsDisplay}</span>
+                                    </td>
+                                    <td>{row.balanceDisplay}</td>
+                                    <td>
+                                        <lightning-formatted-date-time
+                                            value={row.date}
+                                            year="numeric" month="short" day="2-digit">
+                                        </lightning-formatted-date-time>
+                                    </td>
+                                    <td><div class="slds-truncate">{row.reference}</div></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Approval_Status__c</fullName>
+    <description>Per-line-item approval status for granular approval workflow</description>
+    <label>Approval Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Not Submitted</fullName>
+                <default>true</default>
+                <label>Not Submitted</label>
+            </value>
+            <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
+            <value>
+                <fullName>L1 Approved</fullName>
+                <default>false</default>
+                <label>L1 Approved</label>
+            </value>
+            <value>
+                <fullName>L2 Approved</fullName>
+                <default>false</default>
+                <label>L2 Approved</label>
+            </value>
+            <value>
+                <fullName>Finance Approved</fullName>
+                <default>false</default>
+                <label>Finance Approved</label>
+            </value>
+            <value>
+                <fullName>Rejected</fullName>
+                <default>false</default>
+                <label>Rejected</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

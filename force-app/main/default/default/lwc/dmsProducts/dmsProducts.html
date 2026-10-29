@@ -1,0 +1,234 @@
+<template>
+    <div class="wrap">
+        <div class="subnav">
+            <button class={prodCss} onclick={showProducts}>Product Catalogue</button>
+            <button class={schemeCss} onclick={showSchemes}>Schemes &amp; Offers</button>
+        </div>
+
+        <template if:true={error}>
+            <div class="err">{error}</div>
+        </template>
+
+        <!-- Product Catalogue -->
+        <template if:true={isProducts}>
+            <div class="catalog">
+                <!-- Category rail -->
+                <aside class="rail">
+                    <p class="rail-title">Categories</p>
+                    <template for:each={railItems} for:item="c">
+                        <button key={c.value} class={c.css} data-value={c.value} onclick={pickCategory}>
+                            <span class="rail-label">{c.label}</span>
+                            <span class="rail-count">{c.count}</span>
+                        </button>
+                    </template>
+                </aside>
+
+                <!-- Main column -->
+                <div class="catalog-main">
+                    <div class="filters">
+                        <lightning-combobox variant="label-hidden" label="Brand" options={brandOptions}
+                            value={brand} onchange={handleBrand} class="brand-filter"></lightning-combobox>
+                        <lightning-input type="search" variant="label-hidden" placeholder="Search SKU, product or brand..."
+                            onchange={handleSearch} class="search-box"></lightning-input>
+                        <span class="count">{count} products</span>
+                        <div class="vtoggle-group">
+                            <button class={gridBtnCss} onclick={showGrid} title="Grid view">
+                                <lightning-icon icon-name="utility:apps" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class={tableBtnCss} onclick={showTable} title="Table view">
+                                <lightning-icon icon-name="utility:table" size="xx-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <template if:false={hasRows}>
+                        <p class="empty">No products match your filters.</p>
+                    </template>
+
+                    <!-- Grid (card) view -->
+                    <template if:true={isGrid}>
+                        <div class="grid">
+                            <template for:each={rows} for:item="p">
+                                <article key={p.id} class="card" data-id={p.id} onclick={handleCardClick}>
+                                    <div class="card-media">
+                                        <template if:true={p.hasImage}>
+                                            <img src={p.imageUrl} alt={p.name} class="card-img" loading="lazy"/>
+                                        </template>
+                                        <template if:false={p.hasImage}>
+                                            <div class="card-noimg">{p.initials}</div>
+                                        </template>
+                                        <span class={p.stockCss}>{p.stockStatus}</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-brand">{p.brand}</p>
+                                        <p class="card-name" title={p.name}>{p.name}</p>
+                                        <p class="card-sku">{p.sku}</p>
+                                        <div class="card-meta">
+                                            <template if:true={p.category}>
+                                                <span class="tag">{p.category}</span>
+                                            </template>
+                                            <template if:true={p.packSize}>
+                                                <span class="tag tag_plain">{p.packSize}</span>
+                                            </template>
+                                        </div>
+                                        <div class="card-foot">
+                                            <div>
+                                                <span class="price-lbl">MRP</span>
+                                                <span class="price-val">&#8377;<lightning-formatted-number value={p.mrp} maximum-fraction-digits="2"></lightning-formatted-number></span>
+                                            </div>
+                                            <div class="card-onhand">
+                                                <span class="price-lbl">On Hand</span>
+                                                <span class="onhand-val">{p.onHand}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Table view -->
+                    <template if:true={isTable}>
+                        <lightning-datatable key-field="id" data={rows} columns={columns}
+                            hide-checkbox-column="true" onrowaction={handleRowAction}>
+                        </lightning-datatable>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Detail flyout -->
+            <template if:true={selectedProduct}>
+                <section class="flyout" role="dialog">
+                    <div class="flyout-panel">
+                        <div class="flyout-head">
+                            <div>
+                                <p class="flyout-title">{selectedProduct.name}</p>
+                                <p class="flyout-sub">{selectedProduct.sku} &middot; {selectedProduct.brand}</p>
+                            </div>
+                            <lightning-button-icon icon-name="utility:close" variant="bare"
+                                alternative-text="Close" onclick={closeDetail}></lightning-button-icon>
+                        </div>
+
+                        <div class="flyout-media">
+                            <template if:true={selectedProduct.hasImage}>
+                                <img src={selectedProduct.imageUrl} alt={selectedProduct.name} class="flyout-img"/>
+                            </template>
+                            <template if:false={selectedProduct.hasImage}>
+                                <div class="flyout-noimg">{selectedProduct.initials}</div>
+                            </template>
+                            <span class={selectedProduct.stockCss}>{selectedProduct.stockStatus}</span>
+                        </div>
+
+                        <div class="flyout-grid">
+                            <div><span class="fl-label">Category</span><span class="fl-val">{selectedProduct.category}</span></div>
+                            <div><span class="fl-label">Pack</span><span class="fl-val">{selectedProduct.packSize}</span></div>
+                            <div><span class="fl-label">MRP</span><span class="fl-val">{selectedProduct.mrp}</span></div>
+                            <div><span class="fl-label">Price/Unit</span><span class="fl-val">{selectedProduct.unitPrice}</span></div>
+                            <div><span class="fl-label">GST</span><span class="fl-val">{selectedProduct.gstText}</span></div>
+                            <div><span class="fl-label">Units/Case</span><span class="fl-val">{selectedProduct.caseSize}</span></div>
+                            <div><span class="fl-label">Dist. Price/Case</span><span class="fl-val">{selectedProduct.distPriceCase}</span></div>
+                            <div><span class="fl-label">On Hand</span><span class="fl-val">{selectedProduct.onHand}</span></div>
+                            <div><span class="fl-label">HSN/SAC</span><span class="fl-val">{selectedProduct.hsnCode}</span></div>
+                            <div><span class="fl-label">EAN</span><span class="fl-val">{selectedProduct.ean}</span></div>
+                            <div><span class="fl-label">Min Order Qty</span><span class="fl-val">{selectedProduct.minOrderQty}</span></div>
+                        </div>
+
+                        <p class="flyout-section">Stock by Batch</p>
+                        <template if:true={hasBatches}>
+                            <lightning-datatable key-field="Id" data={batches} columns={batchColumns}
+                                hide-checkbox-column="true"></lightning-datatable>
+                        </template>
+                        <template if:false={hasBatches}>
+                            <p class="empty">No stock on hand for this product.</p>
+                        </template>
+                    </div>
+                    <div class="flyout-backdrop" onclick={closeDetail}></div>
+                </section>
+            </template>
+        </template>
+
+        <!-- Schemes & Offers -->
+        <template if:true={isSchemes}>
+            <template if:true={schemeData}>
+                <!-- Stats dashboard -->
+                <div class="stats-row">
+                    <template for:each={schemeStatCards} for:item="stat">
+                        <div key={stat.key} class={stat.cls} data-key={stat.key} onclick={handleSchemeStat}>
+                            <span class="stat-value">{stat.value}</span>
+                            <span class="stat-label">{stat.label}</span>
+                        </div>
+                    </template>
+                    <div class="stat-card stat-budget">
+                        <span class="stat-value">{activeBudgetText}</span>
+                        <span class="stat-label">Active Budget</span>
+                    </div>
+                </div>
+
+                <!-- Scheme list -->
+                <template if:true={hasVisibleSchemes}>
+                    <div class="scheme-list">
+                        <template for:each={visibleSchemes} for:item="s">
+                            <div key={s.id} class="scheme-row">
+                                <div class="scheme-row-badge" style={s.categoryStyle}>{s.categoryShort}</div>
+                                <div class="scheme-row-info">
+                                    <div class="scheme-row-top">
+                                        <span class="scheme-row-name">{s.name}</span>
+                                        <span class={s.badgeCss}>{s.status}</span>
+                                    </div>
+                                    <div class="scheme-row-meta">
+                                        <template if:true={s.code}>
+                                            <span class="meta-item">
+                                                <lightning-icon icon-name="utility:identity" size="xx-small"></lightning-icon>
+                                                {s.code}
+                                            </span>
+                                        </template>
+                                        <span class="meta-item">
+                                            <lightning-icon icon-name="utility:date_input" size="xx-small"></lightning-icon>
+                                            <lightning-formatted-date-time value={s.startDate}></lightning-formatted-date-time>
+                                            &nbsp;–&nbsp;
+                                            <lightning-formatted-date-time value={s.endDate}></lightning-formatted-date-time>
+                                        </span>
+                                        <span class="meta-item">
+                                            <lightning-icon icon-name="utility:socialshare" size="xx-small"></lightning-icon>
+                                            {s.channel}
+                                        </span>
+                                        <template if:true={s.priorityText}>
+                                            <span class="meta-item">
+                                                <lightning-icon icon-name="utility:priority" size="xx-small"></lightning-icon>
+                                                {s.priorityText}
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="scheme-row-bottom">
+                                        <template if:true={s.benefitSummary}>
+                                            <span class="benefit-text">{s.benefitSummary}</span>
+                                        </template>
+                                        <template if:true={s.triggerSummary}>
+                                            <span class="trigger-text">{s.triggerSummary}</span>
+                                        </template>
+                                        <template if:true={s.hasProducts}>
+                                            <span class="product-badges">
+                                                <template for:each={s.products} for:item="prod">
+                                                    <span key={prod} class="product-tag">{prod}</span>
+                                                </template>
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <template if:true={s.description}>
+                                        <p class="scheme-desc">{s.description}</p>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasVisibleSchemes}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:promotions" size="large"></lightning-icon>
+                        <p>No schemes found for this filter.</p>
+                    </div>
+                </template>
+            </template>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Manufacturing_Date_Not_Future</fullName>
+    <active>true</active>
+    <description>Ensures the Manufacturing Date is not set to a future date.</description>
+    <errorConditionFormula>Manufacturing_Date__c &gt; TODAY()</errorConditionFormula>
+    <errorDisplayField>Manufacturing_Date__c</errorDisplayField>
+    <errorMessage>Manufacturing Date cannot be a future date.</errorMessage>
+</ValidationRule>

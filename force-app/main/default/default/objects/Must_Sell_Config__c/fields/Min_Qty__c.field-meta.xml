@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Min_Qty__c</fullName>
+    <defaultValue>1</defaultValue>
+    <description>Minimum quantity required for Priority Sell products. If the product is in the order but below this qty, order submission is blocked.</description>
+    <externalId>false</externalId>
+    <label>Minimum Quantity</label>
+    <precision>10</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

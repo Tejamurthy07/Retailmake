@@ -1,0 +1,598 @@
+<template>
+    <div class="employee-manager-container">
+        <!-- Header -->
+        <div class="manager-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <h1 class="slds-text-heading_medium header-title">
+                        <lightning-icon icon-name="standard:employee_organization" size="small" class="slds-m-right_x-small"></lightning-icon>
+                        Employee Manager
+                        <template if:true={hasSelectedEmployee}>
+                            <span class="header-separator">/</span>
+                            <span class="header-employee-name">{selectedEmployeeName}</span>
+                        </template>
+                    </h1>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                        Manage field sales employees, teams, and leave balances
+                    </p>
+                </div>
+                <div class="slds-col slds-no-flex">
+                    <lightning-button variant="brand" label="New Employee" icon-name="utility:add"
+                        onclick={handleNewEmployee}></lightning-button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-grid slds-gutters_small slds-p-horizontal_medium slds-p-bottom_medium">
+            <!-- ═══ LEFT PANEL (40%): Employee List ═══ -->
+            <div class="slds-col slds-size_5-of-12">
+                <div class="panel employee-list-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Employees</h2>
+                        <span class="panel-count">{employeeCountLabel}</span>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="filter-bar">
+                        <div class="search-row">
+                            <lightning-input type="search" label="Search Employees"
+                                placeholder="Search by name, code, or email..."
+                                value={searchTerm}
+                                onchange={handleSearchChange}
+                                variant="label-hidden"></lightning-input>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-field">
+                                <lightning-combobox label="Department" value={filterDepartment}
+                                    options={departmentFilterOptions}
+                                    onchange={handleDepartmentFilter}
+                                    variant="label-hidden"
+                                    placeholder="All Departments"></lightning-combobox>
+                            </div>
+                            <div class="filter-field">
+                                <lightning-combobox label="Designation" value={filterDesignation}
+                                    options={designationFilterOptions}
+                                    onchange={handleDesignationFilter}
+                                    variant="label-hidden"
+                                    placeholder="All Designations"></lightning-combobox>
+                            </div>
+                            <div class="filter-toggle">
+                                <lightning-input type="toggle" label="Active"
+                                    checked={filterActiveOnly}
+                                    onchange={handleActiveToggle}
+                                    variant="label-hidden"
+                                    message-toggle-active="Active"
+                                    message-toggle-inactive="All"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employee List -->
+                    <div class="panel-body employee-list-body">
+                        <template if:true={hasEmployees}>
+                            <template for:each={employees} for:item="emp">
+                                <div class={emp.rowClass} key={emp.Id} data-id={emp.Id}
+                                    onclick={handleSelectEmployee}>
+                                    <div class="employee-row-content">
+                                        <div class={emp.avatarClass}>
+                                            <span class="avatar-initials">{emp.initials}</span>
+                                        </div>
+                                        <div class="employee-row-info">
+                                            <div class="employee-row-main">
+                                                <span class="employee-row-name">{emp.fullName}</span>
+                                                <span class="employee-row-code">{emp.Employee_Code__c}</span>
+                                            </div>
+                                            <div class="employee-row-meta">
+                                                <span class="meta-designation">{emp.designationDisplay}</span>
+                                                <span class="meta-department-badge">{emp.departmentDisplay}</span>
+                                                <span class={emp.statusClass}>{emp.statusLabel}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasEmployees}>
+                            <div class="empty-state">
+                                <lightning-icon icon-name="utility:people" size="large" class="empty-icon"></lightning-icon>
+                                <template if:true={searchTerm}>
+                                    <p class="slds-m-top_small">No employees match your search.</p>
+                                </template>
+                                <template if:false={searchTerm}>
+                                    <p class="slds-m-top_small">No employees found. Add your first employee.</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Pagination -->
+                    <template if:true={showPagination}>
+                        <div class="pagination-bar">
+                            <lightning-button-icon icon-name="utility:chevronleft"
+                                alternative-text="Previous" variant="bare"
+                                disabled={isPrevDisabled}
+                                onclick={handlePrevPage}
+                                class="pagination-btn"></lightning-button-icon>
+                            <span class="pagination-label">{paginationLabel}</span>
+                            <lightning-button-icon icon-name="utility:chevronright"
+                                alternative-text="Next" variant="bare"
+                                disabled={isNextDisabled}
+                                onclick={handleNextPage}
+                                class="pagination-btn"></lightning-button-icon>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ═══ RIGHT PANEL (60%): Employee Detail ═══ -->
+            <div class="slds-col slds-size_7-of-12">
+                <template if:true={hasSelectedEmployee}>
+                    <!-- Profile Card Header -->
+                    <div class="panel profile-card">
+                        <div class="profile-header">
+                            <div class="profile-header-left">
+                                <div class="avatar-circle avatar-circle-lg avatar-gradient-profile">
+                                    <span class="avatar-initials avatar-initials-lg">{selectedEmployeeInitials}</span>
+                                </div>
+                                <div class="profile-header-info">
+                                    <h2 class="profile-name">{selectedEmployeeName}</h2>
+                                    <p class="profile-designation">{selectedEmployeeDesignation}</p>
+                                    <div class="profile-badges">
+                                        <span class="meta-department-badge">{selectedEmployeeDepartment}</span>
+                                        <span class={selectedEmployeeStatusClass}>{selectedEmployeeStatusLabel}</span>
+                                        <span class="employee-code-badge">{selectedEmployeeCode}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats Row -->
+                        <div class="quick-stats-row">
+                            <div class="quick-stat">
+                                <span class="quick-stat-value">{clBalance}</span>
+                                <span class="quick-stat-label">CL Balance</span>
+                            </div>
+                            <div class="quick-stat-divider"></div>
+                            <div class="quick-stat">
+                                <span class="quick-stat-value">{directReportsCount}</span>
+                                <span class="quick-stat-label">Direct Reports</span>
+                            </div>
+                            <div class="quick-stat-divider"></div>
+                            <div class="quick-stat">
+                                <span class="quick-stat-value quick-stat-text">{selectedEmployeeTerritoryName}</span>
+                                <span class="quick-stat-label">Territory</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Interface -->
+                    <div class="panel tab-panel slds-m-top_small">
+                        <div class="tab-bar">
+                            <button class={detailsTabClass} data-tab="details" onclick={handleTabClick}>
+                                <lightning-icon icon-name="utility:user" size="xx-small" class="tab-icon"></lightning-icon>
+                                Details
+                            </button>
+                            <button class={teamTabClass} data-tab="team" onclick={handleTabClick}>
+                                <lightning-icon icon-name="utility:groups" size="xx-small" class="tab-icon"></lightning-icon>
+                                Team
+                            </button>
+                            <button class={hierarchyTabClass} data-tab="hierarchy" onclick={handleTabClick}>
+                                <lightning-icon icon-name="utility:hierarchy" size="xx-small" class="tab-icon"></lightning-icon>
+                                Hierarchy
+                            </button>
+                            <button class={leaveTabClass} data-tab="leave" onclick={handleTabClick}>
+                                <lightning-icon icon-name="utility:date_time" size="xx-small" class="tab-icon"></lightning-icon>
+                                Leave Balances
+                            </button>
+                        </div>
+
+                        <!-- Details Tab -->
+                        <template if:true={isDetailsTab}>
+                            <div class="tab-content">
+                                <div class="detail-section">
+                                    <h3 class="detail-section-title">Personal Information</h3>
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">First Name</span>
+                                            <span class="detail-value">{selectedEmployee.First_Name__c}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Last Name</span>
+                                            <span class="detail-value">{selectedEmployee.Last_Name__c}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Employee Code</span>
+                                            <span class="detail-value">{selectedEmployeeCode}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Email</span>
+                                            <span class="detail-value">{selectedEmployeeEmail}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Phone</span>
+                                            <span class="detail-value">{selectedEmployeePhone}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Date of Joining</span>
+                                            <span class="detail-value">{selectedEmployeeJoinDate}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <h3 class="detail-section-title">Organization</h3>
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Department</span>
+                                            <span class="detail-value">{selectedEmployeeDepartment}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Designation</span>
+                                            <span class="detail-value">{selectedEmployeeDesignation}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Band</span>
+                                            <span class="detail-value">{selectedEmployeeBand}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Reporting Manager</span>
+                                            <span class="detail-value">{selectedEmployeeManagerName}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Linked User</span>
+                                            <span class="detail-value">{selectedEmployeeUserName}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Status</span>
+                                            <span class={selectedEmployeeStatusClass}>{selectedEmployeeStatusLabel}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Gross Salary</span>
+                                            <span class="detail-value">{selectedEmployeeSalary}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">L1 Approver (Manager)</span>
+                                            <span class="detail-value">{selectedEmployeeL1Approver}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">L2 Approver (Finance)</span>
+                                            <span class="detail-value">{selectedEmployeeL2Approver}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <h3 class="detail-section-title">Territory &amp; Channels</h3>
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Territory</span>
+                                            <span class="detail-value">{selectedEmployeeTerritoryName}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3 detail-field">
+                                            <span class="detail-label">Channels</span>
+                                            <span class="detail-value">{selectedEmployeeChannels}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 detail-field">
+                                            <span class="detail-label">Address</span>
+                                            <span class="detail-value">{selectedEmployeeAddress}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <h3 class="detail-section-title">Week Off Configuration</h3>
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-1 detail-field">
+                                            <span class="detail-label">Week Off Days</span>
+                                            <span class="detail-value">{selectedEmployeeWeekOffDays}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Team Tab -->
+                        <template if:true={isTeamTab}>
+                            <div class="tab-content">
+                                <div class="team-header">
+                                    <h3 class="detail-section-title">Direct Reports</h3>
+                                    <span class="panel-count">{directReportsCount}</span>
+                                </div>
+                                <template if:true={hasDirectReports}>
+                                    <div class="team-list">
+                                        <template for:each={directReports} for:item="report">
+                                            <div class="team-row" key={report.Id}>
+                                                <div class={report.avatarClass}>
+                                                    <span class="avatar-initials avatar-initials-sm">{report.initials}</span>
+                                                </div>
+                                                <div class="team-row-info">
+                                                    <span class="team-row-name">{report.fullName}</span>
+                                                    <span class="team-row-meta">{report.designationDisplay} &bull; {report.departmentDisplay}</span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={hasDirectReports}>
+                                    <div class="empty-state-small">
+                                        <lightning-icon icon-name="utility:groups" size="small" class="empty-icon"></lightning-icon>
+                                        <p class="slds-m-top_small slds-text-color_weak">No direct reports found.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Hierarchy Tab -->
+                        <template if:true={isHierarchyTab}>
+                            <div class="tab-content">
+                                <div class="team-header">
+                                    <h3 class="detail-section-title">Organization Hierarchy</h3>
+                                    <lightning-button variant="base" label="Refresh" icon-name="utility:refresh"
+                                        onclick={handleRefreshHierarchy} class="slds-m-left_small"></lightning-button>
+                                </div>
+                                <template if:true={hasHierarchyData}>
+                                    <div class="org-tree">
+                                        <template for:each={hierarchyTree} for:item="node">
+                                            <c-employee-hierarchy-node
+                                                key={node.id}
+                                                node={node}
+                                                highlighted-id={selectedEmployee.Id}
+                                                onemployeeclick={handleHierarchyNodeClick}>
+                                            </c-employee-hierarchy-node>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={hasHierarchyData}>
+                                    <div class="empty-state-small">
+                                        <lightning-icon icon-name="utility:hierarchy" size="small" class="empty-icon"></lightning-icon>
+                                        <p class="slds-m-top_small slds-text-color_weak">Loading hierarchy...</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Leave Balances Tab (dynamic from Leave_Balance__c) -->
+                        <template if:true={isLeaveTab}>
+                            <div class="tab-content">
+                                <template if:true={leaveBalanceCards.length}>
+                                    <div class="leave-grid">
+                                        <template for:each={leaveBalanceCards} for:item="card">
+                                            <div class="leave-card" key={card.key}>
+                                                <div class="leave-card-header">
+                                                    <span class="leave-card-title">{card.label}</span>
+                                                    <span class="leave-card-value">{card.available}</span>
+                                                </div>
+                                                <div class="leave-progress-bar">
+                                                    <div class="leave-progress-fill" style={card.progressStyle}></div>
+                                                </div>
+                                                <div class="leave-card-details">
+                                                    <span class="leave-detail">Entitled: {card.entitled}</span>
+                                                    <span class="leave-detail">Accrued: {card.accrued}</span>
+                                                    <span class="leave-detail">Used: {card.used}</span>
+                                                    <template if:true={card.pending}>
+                                                        <span class="leave-detail leave-pending">Pending: {card.pending}</span>
+                                                    </template>
+                                                    <template if:true={card.carryForward}>
+                                                        <span class="leave-detail">Carry Fwd: {card.carryForward}</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={leaveBalanceCards.length}>
+                                    <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                                        No leave balances found. Run the yearly initialization first.
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-bar slds-m-top_small">
+                        <lightning-button-group>
+                            <lightning-button variant="neutral" label="Edit" icon-name="utility:edit"
+                                onclick={handleEditEmployee}></lightning-button>
+                            <lightning-button variant="destructive-text" label="Deactivate" icon-name="utility:ban"
+                                onclick={handleDeactivate} disabled={isDeactivateDisabled}></lightning-button>
+                            <lightning-button variant="brand" label="View 360" icon-name="utility:preview"
+                                onclick={handleView360}></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                </template>
+
+                <!-- Empty State: No employee selected -->
+                <template if:false={hasSelectedEmployee}>
+                    <div class="panel select-prompt-panel">
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:user" size="large" class="empty-icon"></lightning-icon>
+                            <p class="slds-m-top_small slds-text-heading_small">Select an employee to view details</p>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                Click on an employee from the list, or create a new one
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- ═══ Employee Form Modal ═══ -->
+        <template if:true={showEmployeeForm}>
+            <section class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            onclick={handleCancelForm}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">{formTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium employee-form-content">
+                        <lightning-record-edit-form object-api-name="Employee__c" record-id={employeeForm.Id}>
+                            <!-- Section: Personal Information -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Personal Information</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="First Name" value={employeeForm.First_Name__c}
+                                            data-field="First_Name__c" onchange={handleFormChange} required></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Last Name" value={employeeForm.Last_Name__c}
+                                            data-field="Last_Name__c" onchange={handleFormChange} required></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Employee Code" value={employeeForm.Employee_Code__c}
+                                            data-field="Employee_Code__c" onchange={handleFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Email" type="email" value={employeeForm.Email__c}
+                                            data-field="Email__c" onchange={handleFormChange} required></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Phone" type="tel" value={employeeForm.Phone__c}
+                                            data-field="Phone__c" onchange={handleFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input label="Date of Joining" type="date"
+                                            value={employeeForm.Date_of_Joining__c}
+                                            data-field="Date_of_Joining__c" onchange={handleFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                        <lightning-textarea label="Address" value={employeeForm.Address__c}
+                                            data-field="Address__c" onchange={handleFormChange}
+                                            max-length="500"></lightning-textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Organization -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Organization</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-combobox label="Department" value={employeeForm.Department__c}
+                                            options={departmentFilterOptions}
+                                            data-field="Department__c"
+                                            onchange={handleFormChange}></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-combobox label="Designation" value={employeeForm.Designation__c}
+                                            options={designationFilterOptions}
+                                            data-field="Designation__c"
+                                            onchange={handleFormChange}></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-combobox label="Band"
+                                            value={employeeForm.Band__c}
+                                            options={bandOptions}
+                                            data-field="Band__c"
+                                            onchange={handleFormChange}
+                                            field-level-help="Employee band — drives expense eligibility rules"></lightning-combobox>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                        <lightning-input type="number" label="Gross Salary"
+                                            value={employeeForm.Gross_Salary__c}
+                                            data-field="Gross_Salary__c" step="0.01" min="0"
+                                            onchange={handleFormChange}
+                                            field-level-help="Monthly gross salary for PBIS incentive calculation"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-m-bottom_small form-active-toggle">
+                                        <lightning-input type="toggle" label="Is Active"
+                                            checked={employeeForm.Is_Active__c}
+                                            data-field="Is_Active__c"
+                                            onchange={handleFormChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <lightning-input-field field-name="Reporting_Manager__c"
+                                            value={employeeForm.Reporting_Manager__c}
+                                            data-field="Reporting_Manager__c"
+                                            onchange={handleFormChange}
+                                            variant="label-stacked"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <lightning-input-field field-name="User__c"
+                                            value={employeeForm.User__c}
+                                            data-field="User__c"
+                                            onchange={handleFormChange}
+                                            variant="label-stacked"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <lightning-input-field field-name="L1_Approver__c"
+                                            value={employeeForm.L1_Approver__c}
+                                            data-field="L1_Approver__c"
+                                            onchange={handleFormChange}
+                                            variant="label-stacked"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                                        <lightning-input-field field-name="L2_Approver__c"
+                                            value={employeeForm.L2_Approver__c}
+                                            data-field="L2_Approver__c"
+                                            onchange={handleFormChange}
+                                            variant="label-stacked"></lightning-input-field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Territory & Channels -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Territory &amp; Channels</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                        <lightning-input-field field-name="Territory__c"
+                                            value={employeeForm.Territory__c}
+                                            data-field="Territory__c"
+                                            onchange={handleFormChange}
+                                            required
+                                            variant="label-stacked"></lightning-input-field>
+                                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                            Zone and Region are automatically derived from the selected Territory.
+                                        </p>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                        <lightning-dual-listbox label="Channels" required
+                                            source-label="Available" selected-label="Assigned"
+                                            options={employeeChannelOptions}
+                                            value={employeeFormChannels}
+                                            onchange={handleEmployeeChannelsChange}></lightning-dual-listbox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Week Off Configuration -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">Week Off Configuration</h3>
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                                        <lightning-dual-listbox label="Week Off Days"
+                                            source-label="Working Days"
+                                            selected-label="Week Off Days"
+                                            options={weekDayOptions}
+                                            value={weekOffDaysFormValue}
+                                            data-field="Week_Off_Days__c"
+                                            onchange={handleFormChange}></lightning-dual-listbox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Leave balances are now managed via Leave_Balance__c records -->
+                        </lightning-record-edit-form>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="neutral" label="Cancel"
+                            onclick={handleCancelForm}></lightning-button>
+                        <lightning-button variant="brand" label="Save Employee"
+                            onclick={handleSaveEmployee} class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+    </div>
+</template>

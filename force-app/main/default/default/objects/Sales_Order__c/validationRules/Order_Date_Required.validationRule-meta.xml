@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order_Date_Required</fullName>
+    <active>true</active>
+    <description>Order date is required on all sales orders</description>
+    <errorConditionFormula>ISBLANK(Order_Date__c)</errorConditionFormula>
+    <errorDisplayField>Order_Date__c</errorDisplayField>
+    <errorMessage>Order Date is required for a Sales Order.</errorMessage>
+</ValidationRule>

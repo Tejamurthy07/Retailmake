@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Conversion_Factor_Positive</fullName>
+    <active>true</active>
+    <description>Conversion factor must be greater than zero</description>
+    <errorConditionFormula>AND(NOT(ISBLANK(Conversion_Factor__c)), Conversion_Factor__c &lt;= 0)</errorConditionFormula>
+    <errorDisplayField>Conversion_Factor__c</errorDisplayField>
+    <errorMessage>Conversion Factor must be greater than zero.</errorMessage>
+</ValidationRule>

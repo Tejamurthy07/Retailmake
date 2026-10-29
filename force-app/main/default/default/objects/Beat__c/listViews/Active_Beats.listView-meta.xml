@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active_Beats</fullName>
+    <columns>NAME</columns>
+    <columns>Beat_Code__c</columns>
+    <columns>Territory__c</columns>
+    <columns>Day_of_Week__c</columns>
+    <columns>Frequency__c</columns>
+    <columns>Total_Outlets__c</columns>
+    <columns>Assigned_User__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Active Beats</label>
+</ListView>

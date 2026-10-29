@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/metadata">
+    <apiVersion>59.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__Tab</target>
+        <target>lightning__HomePage</target>
+    </targets>
+    <masterLabel>Integrations</masterLabel>
+    <description>Admin window to configure third-party integrations (messaging, payments, tax, ERP): enable, choose provider/mode, set non-secret settings, store secrets in the encrypted credential, and test the connection.</description>
+</LightningComponentBundle>

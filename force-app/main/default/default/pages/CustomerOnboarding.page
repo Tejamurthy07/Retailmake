@@ -1,0 +1,369 @@
+<apex:page controller="CustomerOnboardingController"
+           showHeader="false"
+           sidebar="false"
+           standardStylesheets="false"
+           applyHtmlTag="false"
+           applyBodyTag="false"
+           docType="html-5.0"
+           cache="false">
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Customer Onboarding Form</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#1e293b;font:14px Arial,sans-serif}.top{background:#fff;border-bottom:1px solid #e2e8f0;padding:15px 28px}.head,.wrap{max-width:1500px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:12px;align-items:center}.logo{background:#2563eb;color:#fff;font-weight:700;padding:12px;border-radius:12px}.muted{color:#64748b;font-size:12px}.status{background:#fef3c7;color:#92400e;padding:7px 12px;border-radius:20px;font-weight:700}.wrap{padding:20px 28px 32px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 2px 8px #0f172a0d;margin-bottom:18px}.progress{padding:22px}.bar{height:8px;background:#eef2f7;border-radius:8px;overflow:hidden;margin:15px 0}.fill{height:100%;width:25%;background:#2563eb;transition:.25s}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{color:#94a3b8;text-align:center}.step b{display:inline-grid;place-items:center;width:30px;height:30px;border:2px solid #cbd5e1;border-radius:50%;margin-right:7px}.step.active{color:#1d4ed8}.step.active b{border-color:#2563eb;background:#eff6ff}.title{padding:20px 24px;border-bottom:1px solid #eef2f7}.title small{color:#2563eb;font-weight:700}.pane{display:none;padding:24px}.pane.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.full{grid-column:1/-1}label span{display:block;font-weight:700;margin-bottom:8px}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit;outline:none}input:focus,select:focus,textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}.uploads label{border:2px dashed #cbd5e1;border-radius:12px;padding:20px;cursor:pointer}.uploads input{display:none}.uploads strong{display:block;margin-bottom:6px}.summary{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.summary small{color:#64748b}.actions{display:flex;justify-content:space-between;padding:16px 24px;border-top:1px solid #eef2f7;background:#fafafa;border-radius:0 0 16px 16px}button{border:0;border-radius:10px;padding:11px 20px;font-weight:700;cursor:pointer}.primary{background:#2563eb;color:#fff}.primary:disabled{opacity:.6;cursor:default}.secondary{background:#fff;border:1px solid #cbd5e1}.toast{display:none;position:fixed;right:20px;top:20px;background:#0f172a;color:#fff;padding:13px 18px;border-radius:10px;z-index:5;max-width:340px}
+/* Inline field validation */
+.invalid{border-color:#dc2626!important;background:#fff5f5}.invalid:focus{box-shadow:0 0 0 3px #fee2e2!important}
+.fielderr{display:block;color:#dc2626;font-size:12px;font-weight:700;margin-top:6px}
+.uploads label.invalid{border-color:#dc2626!important;border-style:dashed;background:#fff5f5}
+/* Wide viewports get three columns so the extra fields (Territory, Channel,
+   Outlet Type/Class, City/State/Pincode) fit without a long scroll. */
+@media(min-width:1150px){.grid{grid-template-columns:repeat(3,1fr)}.uploads.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:650px){.grid,.summary-grid{grid-template-columns:1fr}.full{grid-column:auto}.steps span{display:none}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<header class="top"><div class="head"><div class="brand"><div class="logo">CO</div><div><b>Customer Onboarding</b><div class="muted">New customer application</div></div></div><div class="status" id="status">Draft</div></div></header>
+
+<main class="wrap">
+<section class="card progress">
+  <div style="display:flex;justify-content:space-between"><b>Onboarding progress</b><span class="muted" id="percent">25% complete</span></div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="steps" id="steps"></div>
+</section>
+
+<section class="card">
+<div class="title"><small id="stepNo">STEP 1 OF 4</small><h2 id="stepTitle">Basic Details</h2></div>
+<form id="form">
+
+  <!-- Step 1 - Basic Details -->
+  <div class="pane active"><div class="grid">
+    <label><span>Customer / Company Name *</span><input id="customer" placeholder="Enter customer name"/></label>
+    <label><span>Customer Type *</span><select id="type"><option value="">Select type</option></select></label>
+    <label><span>Email Address *</span><input id="email" type="email" placeholder="name@company.com"/></label>
+    <label><span>Mobile Number *</span><input id="phone" placeholder="+91 98765 43210"/></label>
+    <label><span>GST Number</span><input id="gst" maxlength="15" placeholder="29ABCDE1234F1Z5"/></label>
+    <label><span>PAN Number</span><input id="pan" maxlength="10" placeholder="ABCDE1234F"/></label>
+    <!-- Territory, Outlet Type/Class and Channel are not in the original mock,
+         but the org rejects an active account without a Territory, and a
+         Retailer without an Outlet Type, so they are captured here. -->
+    <label><span>Territory *</span><select id="territory"><option value="">Select territory</option></select></label>
+    <label><span>Channel</span><select id="channel"></select></label>
+    <label><span>Outlet Type</span><select id="outletType"><option value="">Select outlet type</option></select></label>
+    <label><span>Outlet Class</span><select id="outletClass"><option value="">Select class</option></select></label>
+    <label class="full"><span>Billing Address</span><textarea id="address" rows="3" placeholder="Enter complete address"></textarea></label>
+    <label><span>City</span><input id="city" placeholder="City"/></label>
+    <label><span>State</span><input id="state" placeholder="State"/></label>
+    <label><span>Pincode</span><input id="pincode" placeholder="682024"/></label>
+  </div></div>
+
+  <!-- Step 2 - KYC Documents -->
+  <div class="pane"><div class="grid uploads">
+    <label><input id="panFile" type="file" accept=".pdf,.jpg,.png"/><strong>&#8613; PAN Card *</strong><span class="muted" data-file="panFile">PDF, JPG or PNG &#8226; Max 3 MB</span></label>
+    <label><input id="addressFile" type="file" accept=".pdf,.jpg,.png"/><strong>&#8613; Address Proof *</strong><span class="muted" data-file="addressFile">PDF, JPG or PNG &#8226; Max 3 MB</span></label>
+    <label><input id="gstFile" type="file" accept=".pdf,.jpg,.png"/><strong>&#8613; GST Certificate</strong><span class="muted" data-file="gstFile">Optional</span></label>
+    <label><input id="bankFile" type="file" accept=".pdf,.jpg,.png"/><strong>&#8613; Cancelled Cheque</strong><span class="muted" data-file="bankFile">Optional</span></label>
+  </div></div>
+
+  <!-- Step 3 - Credit Form -->
+  <div class="pane"><div class="grid">
+    <label><span>Requested Credit Limit (&#8377;) *</span><input id="limit" type="number" placeholder="500000"/></label>
+    <label><span>Credit Period (Days) *</span><select id="days"><option value="">Select period</option></select></label>
+    <label><span>Annual Turnover (&#8377;)</span><input id="turnover" type="number" placeholder="5000000"/></label>
+    <label><span>Payment Terms</span><select id="terms"></select></label>
+    <label class="full"><span>Credit Remarks</span><textarea id="remarks" rows="3" placeholder="Add supporting notes"></textarea></label>
+  </div></div>
+
+  <!-- Step 4 - Review and submit -->
+  <div class="pane">
+    <div class="summary"><h3>Application Summary</h3><div class="summary-grid" id="summary"></div></div>
+    <button type="button" class="primary" id="submit" style="width:100%;margin-top:18px">Submit for Approval</button>
+    <!-- The mock's inline Approve / Reject panel is intentionally not rendered:
+         the record is saved as "Pending Approval" and a manager makes the
+         decision from the Account record page. -->
+  </div>
+
+  <div class="actions">
+    <button type="button" class="secondary" id="back">Back</button>
+    <button type="button" class="primary" id="next">Save &amp; Continue &#8594;</button>
+  </div>
+</form>
+</section>
+</main>
+
+<script type="text/javascript">
+var OPTIONS = <apex:outputText value="{!optionsJson}" escape="false"/>;
+
+var names = ['Basic Details', 'KYC Documents', 'Credit Form', 'Approval'];
+var current = 0;
+var $ = function (id) { return document.getElementById(id); };
+var panes = Array.prototype.slice.call(document.querySelectorAll('.pane'));
+
+function toast(t) {
+    $('toast').textContent = t;
+    $('toast').style.display = 'block';
+    clearTimeout(window._t);
+    window._t = setTimeout(function () { $('toast').style.display = 'none'; }, 3200);
+}
+
+function fill(selectId, options, keepPlaceholder) {
+    var sel = $(selectId);
+    if (!keepPlaceholder) { sel.innerHTML = ''; }
+    (options || []).forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o.value;
+        opt.textContent = o.label;
+        sel.appendChild(opt);
+    });
+}
+
+fill('type', OPTIONS.customerTypes, true);
+fill('territory', OPTIONS.territories, true);
+fill('outletType', OPTIONS.outletTypes, true);
+fill('outletClass', OPTIONS.outletClasses, true);
+fill('channel', OPTIONS.channels, false);
+fill('days', OPTIONS.creditPeriods, true);
+fill('terms', OPTIONS.paymentTerms, false);
+
+function render() {
+    panes.forEach(function (p, i) { p.classList.toggle('active', i === current); });
+    $('steps').innerHTML = names.map(function (n, i) {
+        return '<div class="step ' + (i === current ? 'active' : '') + '"><b>' +
+               (i < current ? '✓' : i + 1) + '</b><span>' + n + '</span></div>';
+    }).join('');
+    $('stepNo').textContent = 'STEP ' + (current + 1) + ' OF 4';
+    $('stepTitle').textContent = names[current];
+    $('fill').style.width = (current + 1) * 25 + '%';
+    $('percent').textContent = (current + 1) * 25 + '% complete';
+    $('back').disabled = current === 0;
+    $('next').style.display = current === 3 ? 'none' : 'block';
+    if (current === 3) { summary(); }
+}
+
+function summary() {
+    var typeSel = $('type');
+    var terrSel = $('territory');
+    var rows = [
+        ['Customer', $('customer').value || 'Not entered'],
+        ['Type', typeSel.selectedIndex > 0 ? typeSel.options[typeSel.selectedIndex].text : 'Not selected'],
+        ['Contact', $('phone').value || 'Not entered'],
+        ['Territory', terrSel.selectedIndex > 0 ? terrSel.options[terrSel.selectedIndex].text : 'Not selected'],
+        ['Credit Limit', $('limit').value ? '₹' + Number($('limit').value).toLocaleString('en-IN') : 'Not entered'],
+        ['Credit Period', $('days').value ? $('days').value + ' days' : 'Not selected'],
+        ['KYC Documents', Array.prototype.slice.call(document.querySelectorAll('input[type=file]'))
+            .filter(function (x) { return x.files.length; }).length + ' attached']
+    ];
+    $('summary').innerHTML = rows.map(function (x) {
+        return '<div><small>' + x[0] + '</small><br/><b>' + x[1] + '</b></div>';
+    }).join('');
+}
+
+// PAN and GSTIN are length-capped and format-validated on the Account, so they
+// are checked here rather than letting the user reach step 4 and fail on save.
+var PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+var GST_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Shows the message directly under the field and marks the field itself.
+function setError(id, message) {
+    var el = $(id);
+    el.classList.add('invalid');
+    var holder = el.parentNode;
+    var err = holder.querySelector('.fielderr');
+    if (!err) {
+        err = document.createElement('small');
+        err.className = 'fielderr';
+        holder.appendChild(err);
+    }
+    err.textContent = message;
+}
+
+function clearError(id) {
+    var el = $(id);
+    el.classList.remove('invalid');
+    var err = el.parentNode.querySelector('.fielderr');
+    if (err) { err.remove(); }
+}
+
+// Returns an error message for a field, or '' when it is acceptable.
+function checkField(id) {
+    var value = ($(id).value || '').trim();
+    switch (id) {
+        case 'customer':  return value ? '' : 'Customer name is required.';
+        case 'type':      return value ? '' : 'Select a customer type.';
+        case 'territory': return value ? '' : 'Territory is required.';
+        case 'phone':     return value ? '' : 'Mobile number is required.';
+        case 'email':
+            if (!value) { return 'Email address is required.'; }
+            return EMAIL_RE.test(value) ? '' : 'Enter a valid email address.';
+        case 'pan':
+            if (!value) { return ''; }
+            return PAN_RE.test(value.toUpperCase())
+                ? '' : 'PAN must be 10 characters: 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F).';
+        case 'gst':
+            if (!value) { return ''; }
+            return GST_RE.test(value.toUpperCase())
+                ? '' : 'GST number must be 15 characters (e.g. 29ABCDE1234F1Z5).';
+        case 'limit':     return value ? '' : 'Requested credit limit is required.';
+        case 'days':      return value ? '' : 'Select a credit period.';
+        default:          return '';
+    }
+}
+
+var STEP_FIELDS = [
+    ['customer', 'type', 'email', 'phone', 'territory', 'gst', 'pan'],
+    [],
+    ['limit', 'days'],
+    []
+];
+
+// Validate as soon as the user leaves a field, and clear the moment they fix it.
+STEP_FIELDS.forEach(function (ids) {
+    ids.forEach(function (id) {
+        var el = $(id);
+        el.addEventListener('blur', function () {
+            if (id === 'gst' || id === 'pan') { el.value = el.value.toUpperCase().trim(); }
+            var msg = checkField(id);
+            if (msg) { setError(id, msg); } else { clearError(id); }
+        });
+        el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function () {
+            if (el.classList.contains('invalid') && !checkField(id)) { clearError(id); }
+        });
+    });
+});
+
+// Marks every problem on the step and focuses the first one.
+function validateStep(step) {
+    var bad = [];
+    STEP_FIELDS[step].forEach(function (id) {
+        var msg = checkField(id);
+        if (msg) { setError(id, msg); bad.push(id); } else { clearError(id); }
+    });
+
+    if (step === 1) {
+        [['panFile', 'PAN Card'], ['addressFile', 'Address Proof']].forEach(function (pair) {
+            var input = $(pair[0]);
+            var box = input.closest('label');
+            if (!input.files.length) {
+                box.classList.add('invalid');
+                var err = box.querySelector('.fielderr');
+                if (!err) {
+                    err = document.createElement('small');
+                    err.className = 'fielderr';
+                    box.appendChild(err);
+                }
+                err.textContent = pair[1] + ' is required.';
+                bad.push(pair[0]);
+            } else {
+                box.classList.remove('invalid');
+                var existing = box.querySelector('.fielderr');
+                if (existing) { existing.remove(); }
+            }
+        });
+    }
+
+    if (bad.length) {
+        var first = $(bad[0]);
+        (first.type === 'file' ? first.closest('label') : first).scrollIntoView({ block: 'center' });
+        if (first.type !== 'file') { first.focus(); }
+    }
+    return bad.length === 0;
+}
+
+$('next').onclick = function () {
+    if (!validateStep(current)) { return; }
+    current++;
+    render();
+};
+
+$('back').onclick = function () { if (current > 0) { current--; render(); } };
+
+document.querySelectorAll('input[type=file]').forEach(function (x) {
+    x.onchange = function () {
+        var label = document.querySelector('[data-file=' + x.id + ']');
+        label.textContent = x.files[0] ? x.files[0].name : 'No file selected';
+        // Clear the "required" state as soon as a file is picked.
+        var box = x.closest('label');
+        if (x.files.length) {
+            box.classList.remove('invalid');
+            var err = box.querySelector('.fielderr');
+            if (err) { err.remove(); }
+        }
+    };
+});
+
+// Reads each attached file as base64 so it can be sent with the save call.
+function readFiles() {
+    var inputs = Array.prototype.slice.call(document.querySelectorAll('input[type=file]'))
+        .filter(function (x) { return x.files.length; });
+    return Promise.all(inputs.map(function (x) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                resolve({ name: x.files[0].name, base64: reader.result.split(',')[1] });
+            };
+            reader.onerror = function () { reject(new Error('Could not read ' + x.files[0].name)); };
+            reader.readAsDataURL(x.files[0]);
+        });
+    }));
+}
+
+$('submit').onclick = function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    var payload = {
+        customerName: $('customer').value,
+        recordTypeId: $('type').value,
+        email: $('email').value,
+        phone: $('phone').value,
+        gstin: $('gst').value,
+        pan: $('pan').value,
+        address: $('address').value,
+        city: $('city').value,
+        state: $('state').value,
+        pincode: $('pincode').value,
+        territoryId: $('territory').value,
+        outletType: $('outletType').value,
+        outletClass: $('outletClass').value,
+        channel: $('channel').value,
+        creditLimit: $('limit').value ? Number($('limit').value) : null,
+        creditPeriod: $('days').value,
+        annualTurnover: $('turnover').value ? Number($('turnover').value) : null,
+        paymentTerms: $('terms').value,
+        remarks: $('remarks').value
+    };
+
+    readFiles().then(function (files) {
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.CustomerOnboardingController.createCustomer}',
+            JSON.stringify(payload),
+            JSON.stringify(files),
+            function (result, event) {
+                if (event.status && result) {
+                    $('status').textContent = 'Pending Approval';
+                    toast('Customer saved. Opening the record...');
+                    window.top.location.href = '/' + result;
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit for Approval';
+                    toast('Could not save: ' + (event.message || 'unknown error'));
+                }
+            },
+            { escape: false, timeout: 120000 }
+        );
+    }).catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = 'Submit for Approval';
+        toast(err.message);
+    });
+};
+
+render();
+</script>
+</body>
+</html>
+</apex:page>

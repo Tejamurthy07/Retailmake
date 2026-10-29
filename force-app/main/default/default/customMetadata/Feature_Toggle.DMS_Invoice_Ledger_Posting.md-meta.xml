@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>DMS Invoice Ledger Posting</label>
+    <protected>false</protected>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Posts each invoice to the ledger as a debit entry so Ledger_Entry is a complete source of truth for the statement of account. OFF by default; enable it, then run the invoice-ledger backfill script.</value>
+    </values>
+    <values>
+        <field>Feature_Code__c</field>
+        <value xsi:type="xsd:string">DMS-013</value>
+    </values>
+    <values>
+        <field>Is_Enabled__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">DMS</value>
+    </values>
+    <values>
+        <field>Package_Tier__c</field>
+        <value xsi:type="xsd:string">Base</value>
+    </values>
+</CustomMetadata>

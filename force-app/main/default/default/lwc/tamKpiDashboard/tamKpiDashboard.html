@@ -1,0 +1,252 @@
+<template>
+    <div class="kd-container">
+
+        <!-- Header -->
+        <div class="kd-header">
+            <div class="kd-header-left">
+                <lightning-icon icon-name="standard:dashboard" size="medium"></lightning-icon>
+                <h1>KPI Dashboard</h1>
+            </div>
+            <div class="kd-header-right">
+                <div class="kd-view-toggle">
+                    <template for:each={viewOptions} for:item="v">
+                        <span key={v.value} class={v.pillClass} data-value={v.value}
+                            onclick={handleViewChange}>{v.label}</span>
+                    </template>
+                </div>
+                <lightning-combobox label="Period" value={selectedPeriod}
+                    options={periodOptions} onchange={handlePeriodChange}
+                    variant="label-hidden" class="kd-period-picker"></lightning-combobox>
+                <lightning-combobox label="Compare" value={comparisonPeriod}
+                    options={comparisonPeriodOptions} onchange={handleComparisonChange}
+                    variant="label-hidden" class="kd-compare-picker"
+                    placeholder="Compare with..."></lightning-combobox>
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                    onclick={handleRefresh}></lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Overall Stats Bar -->
+        <div class="kd-stats-bar">
+            <div class="kd-stat kd-stat-primary">
+                <span class="kd-stat-value">{grandPercentDisplay}%</span>
+                <span class="kd-stat-label">Overall Achievement</span>
+            </div>
+            <div class="kd-stat">
+                <span class="kd-stat-value">{grandTargetDisplay}</span>
+                <span class="kd-stat-label">Total Target</span>
+            </div>
+            <div class="kd-stat">
+                <span class="kd-stat-value">{grandActualDisplay}</span>
+                <span class="kd-stat-label">Total Actual</span>
+            </div>
+            <div class="kd-stat kd-stat-incentive">
+                <span class="kd-stat-value">{totalIncentiveDisplay}</span>
+                <span class="kd-stat-label">Incentive Earned</span>
+            </div>
+        </div>
+
+        <!-- KPI Filter Pills -->
+        <template if:true={hasKpis}>
+            <div class="kd-filter-bar">
+                <span class="kd-filter-label">Filter KPIs:</span>
+                <span class={allPillClass} onclick={handleToggleAll}>All</span>
+                <template for:each={kpiFilterOptions} for:item="f">
+                    <span key={f.name} class={f.pillClass} data-name={f.name}
+                        onclick={handleToggleKpi}>{f.name}</span>
+                </template>
+            </div>
+        </template>
+
+        <!-- Top Performers + Incentive Breakdown -->
+        <div class="kd-highlight-row">
+            <div class="kd-card kd-leaderboard-card">
+                <div class="kd-card-header">
+                    <lightning-icon icon-name="utility:trophy" size="x-small"></lightning-icon>
+                    <span>Top Performers</span>
+                </div>
+                <div class="kd-card-body">
+                    <template if:true={hasLeaderboard}>
+                        <template for:each={computedLeaderboard} for:item="person">
+                            <div key={person.userId} class="kd-leader-row">
+                                <span class={person.rankClass}>{person.rank}</span>
+                                <div class="kd-leader-info">
+                                    <strong>{person.name}</strong>
+                                    <div class="kd-leader-bar">
+                                        <div class="kd-leader-fill" style={person.progressWidth}></div>
+                                    </div>
+                                </div>
+                                <div class="kd-leader-stats">
+                                    <span class={person.percentColorClass}>{person.percentDisplay}%</span>
+                                    <span class="kd-leader-val">{person.actualDisplay}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasLeaderboard}>
+                        <div class="kd-no-data">No performers with achievements this period</div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="kd-card kd-chart-card-sm">
+                <div class="kd-card-header">
+                    <lightning-icon icon-name="utility:money" size="x-small"></lightning-icon>
+                    <span>Incentive Breakdown</span>
+                </div>
+                <div class="kd-chart-body-sm">
+                    <canvas class="kd-incentive-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <template if:true={hasFilteredKpis}>
+            <div class="kd-section-title">KPI Breakdown</div>
+            <div class="kd-kpi-grid">
+                <template for:each={computedFilteredKpis} for:item="kpi">
+                    <div key={kpi.key} class="kd-kpi-card">
+                        <div class="kd-kpi-top">
+                            <div class="kd-kpi-ring">
+                                <svg viewBox="0 0 80 80">
+                                    <circle cx="40" cy="40" r="34" fill="none"
+                                        stroke="#e5e5e5" stroke-width="6"></circle>
+                                    <circle cx="40" cy="40" r="34" fill="none"
+                                        stroke={kpi.color} stroke-width="6"
+                                        stroke-dasharray={kpi.circumference}
+                                        stroke-dashoffset={kpi.offset}
+                                        stroke-linecap="round"
+                                        transform="rotate(-90 40 40)"></circle>
+                                </svg>
+                                <span class={kpi.percentClass}>{kpi.percent}%</span>
+                            </div>
+                            <div class="kd-kpi-detail">
+                                <h3>{kpi.name}</h3>
+                                <template if:true={kpi.weight}>
+                                    <span class="kd-kpi-weight">Weight: {kpi.weight}%</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="kd-kpi-bottom">
+                            <div class="kd-kpi-metric">
+                                <span class="kd-metric-label">Target</span>
+                                <span class="kd-metric-value">{kpi.targetDisplay}</span>
+                            </div>
+                            <div class="kd-kpi-metric">
+                                <span class="kd-metric-label">Actual</span>
+                                <span class="kd-metric-value kd-metric-actual">{kpi.actualDisplay}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Charts Row -->
+        <div class="kd-charts-row">
+            <!-- Trend Chart with type selector -->
+            <div class="kd-chart-card kd-chart-trend">
+                <div class="kd-card-header kd-card-header-flex">
+                    <div class="kd-card-header-left">
+                        <lightning-icon icon-name="utility:trending" size="x-small"></lightning-icon>
+                        <span>Performance Trend</span>
+                    </div>
+                    <div class="kd-chart-type-toggle">
+                        <lightning-button-icon icon-name="utility:chart" size="small"
+                            variant={trendLineVariant} data-type="line"
+                            onclick={handleTrendTypeChange} title="Line"></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:metrics" size="small"
+                            variant={trendBarVariant} data-type="bar"
+                            onclick={handleTrendTypeChange} title="Bar"></lightning-button-icon>
+                    </div>
+                </div>
+                <div class="kd-chart-body">
+                    <canvas class="kd-trend-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Criteria / Radar Chart with type selector -->
+            <div class="kd-chart-card kd-chart-criteria">
+                <div class="kd-card-header kd-card-header-flex">
+                    <div class="kd-card-header-left">
+                        <lightning-icon icon-name="utility:metrics" size="x-small"></lightning-icon>
+                        <span>{criteriaChartTitle}</span>
+                    </div>
+                    <div class="kd-chart-type-toggle">
+                        <lightning-button-icon icon-name="utility:metrics" size="small"
+                            variant={criteriaBarVariant} data-type="bar"
+                            onclick={handleCriteriaTypeChange} title="Bar"></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:record" size="small"
+                            variant={criteriaRadarVariant} data-type="radar"
+                            onclick={handleCriteriaTypeChange} title="Radar"></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:chart" size="small"
+                            variant={criteriaDoughnutVariant} data-type="doughnut"
+                            onclick={handleCriteriaTypeChange} title="Doughnut"></lightning-button-icon>
+                    </div>
+                </div>
+                <div class="kd-chart-body">
+                    <template if:true={hasFilteredKpis}>
+                        <canvas class="kd-criteria-canvas"></canvas>
+                    </template>
+                    <template if:false={hasFilteredKpis}>
+                        <div class="kd-no-data">No criteria data</div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Table (Manager/Leadership view) -->
+        <template if:true={showTeam}>
+            <div class="kd-card kd-team-card">
+                <div class="kd-card-header">
+                    <lightning-icon icon-name="utility:people" size="x-small"></lightning-icon>
+                    <span>Team Performance</span>
+                </div>
+                <div class="kd-card-body">
+                    <template if:true={hasTeam}>
+                        <table class="kd-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Profile</th>
+                                    <th>Target</th>
+                                    <th>Actual</th>
+                                    <th>Achievement</th>
+                                    <th>Incentive</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={computedTeam} for:item="row">
+                                    <tr key={row.userId}>
+                                        <td class="kd-name-cell">{row.name}</td>
+                                        <td><span class="kd-badge">{row.profile}</span></td>
+                                        <td>{row.targetDisplay}</td>
+                                        <td>{row.actualDisplay}</td>
+                                        <td>
+                                            <div class="kd-progress-cell">
+                                                <span class={row.percentClass}>{row.percentDisplay}%</span>
+                                                <div class="kd-mini-bar">
+                                                    <div class="kd-mini-fill" style={row.progressWidth}></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="kd-incentive-cell">{row.incentiveDisplay}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template if:false={hasTeam}>
+                        <div class="kd-no-data">No team data available</div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <template if:true={isLoading}>
+        <div class="kd-spinner-backdrop">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+</template>

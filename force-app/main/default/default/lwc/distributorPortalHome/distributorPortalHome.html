@@ -1,0 +1,57 @@
+<template>
+    <lightning-card title="My Distributor Dashboard" icon-name="standard:account">
+        <template if:true={error}>
+            <div class="slds-p-horizontal_medium slds-text-color_error">{error}</div>
+        </template>
+
+        <template if:true={dashboard}>
+            <div class="slds-grid slds-wrap slds-gutters slds-p-horizontal_medium">
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_x-small">
+                    <div class="slds-box slds-box_x-small">
+                        <p class="slds-text-title">Outstanding</p>
+                        <p class="slds-text-heading_medium">{dashboard.outstanding}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_x-small">
+                    <div class="slds-box slds-box_x-small">
+                        <p class="slds-text-title">Credit Available</p>
+                        <p class="slds-text-heading_medium">{dashboard.creditAvailable}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_x-small">
+                    <div class="slds-box slds-box_x-small">
+                        <p class="slds-text-title">Stock On Hand (units)</p>
+                        <p class="slds-text-heading_medium">{dashboard.onHandUnits}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_x-small">
+                    <div class="slds-box slds-box_x-small">
+                        <p class="slds-text-title">Open Indents</p>
+                        <p class="slds-text-heading_medium">{dashboard.openIndents}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_x-small">
+                    <div class="slds-box slds-box_x-small">
+                        <p class="slds-text-title">Near-Expiry Batches</p>
+                        <p class="slds-text-heading_medium">{dashboard.nearExpiryBatches}</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div class="slds-p-around_medium">
+            <h2 class="slds-text-heading_small slds-m-bottom_x-small">Current Inventory</h2>
+            <template if:true={hasInventory}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={inventory}
+                    columns={columns}
+                    hide-checkbox-column="true">
+                </lightning-datatable>
+            </template>
+            <template if:false={hasInventory}>
+                <p class="slds-text-body_small">No current stock on hand.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

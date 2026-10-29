@@ -1,0 +1,422 @@
+/* ================================================================
+   FMCG Workspace Admin — matches the FMCG Workspace home page style
+   (same palette, same card shape, same tab bar — just for config)
+   ================================================================ */
+
+:host {
+    --hp-primary: #0176d3;
+    --hp-primary-dark: #014486;
+    --hp-success: #2e844a;
+    --hp-error: #ea001e;
+    --hp-orange: #dd7a01;
+    --hp-purple: #9050e9;
+    --hp-teal: #06a59a;
+
+    --hp-text: #181818;
+    --hp-text-secondary: #706e6b;
+    --hp-border: #e5e5e5;
+    --hp-bg: #f4f6f9;
+    --hp-white: #fff;
+
+    --hp-radius-sm: 6px;
+    --hp-radius-md: 10px;
+    --hp-radius-lg: 14px;
+    --hp-radius-xl: 20px;
+    --hp-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --hp-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    display: block;
+    font-family: 'Salesforce Sans', Arial, sans-serif;
+    color: var(--hp-text);
+    background: var(--hp-bg);
+    min-height: 100vh;
+}
+
+/* ── Loading ── */
+.fw-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+}
+.fw-loading-text {
+    font-size: 14px;
+    color: var(--hp-text-secondary);
+}
+
+/* ── Header (same as workspace) ── */
+.fw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--hp-primary), var(--hp-primary-dark));
+    color: var(--hp-white);
+    box-shadow: var(--hp-shadow-md);
+}
+.fw-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.fw-header-text {
+    display: flex;
+    flex-direction: column;
+}
+.fw-header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin: 0;
+    line-height: 1.2;
+    color: var(--hp-white);
+}
+.fw-header-date {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+.fw-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fw-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--hp-radius-xl);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: var(--hp-white);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+.fw-save-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+.fw-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Toolbar (profile + actions) ── */
+.fw-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--hp-white);
+    border-bottom: 1px solid var(--hp-border);
+    flex-wrap: wrap;
+}
+.fw-toolbar-left {
+    min-width: 280px;
+    flex: 1;
+}
+.fw-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.fw-counter {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--hp-bg);
+    border-radius: var(--hp-radius-xl);
+}
+.fw-counter-num {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--hp-primary);
+}
+.fw-counter-sep,
+.fw-counter-tot {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--hp-text-secondary);
+}
+.fw-counter-lbl {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--hp-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 4px;
+}
+
+.fw-mini-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--hp-border);
+    background: var(--hp-white);
+    color: var(--hp-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+.fw-mini-action:hover:not(:disabled) {
+    background: var(--hp-primary);
+    color: var(--hp-white);
+    border-color: var(--hp-primary);
+}
+.fw-mini-action:hover:not(:disabled) lightning-icon {
+    --sds-c-icon-color-foreground: var(--hp-white);
+    --sds-c-icon-color-foreground-default: var(--hp-white);
+}
+.fw-mini-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.fw-mini-action-sm {
+    width: 26px;
+    height: 26px;
+}
+
+/* ── Tab Bar (same pill style as workspace) ── */
+.fw-tab-bar {
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 10px 16px;
+    background: var(--hp-white);
+    border-bottom: 1px solid var(--hp-border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.fw-tab-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.fw-tab-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    min-height: 44px;
+    border: none;
+    border-radius: var(--hp-radius-xl);
+    background: transparent;
+    color: var(--hp-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.fw-tab-item:hover {
+    background: #f0f0f0;
+    color: var(--hp-text);
+}
+.fw-tab-active {
+    background: var(--hp-primary);
+    color: var(--hp-white);
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
+}
+.fw-tab-label {
+    pointer-events: none;
+}
+
+/* Colored dot before each tab label */
+.fw-tab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.fw-tab-dot-blue   { background: var(--hp-primary); }
+.fw-tab-dot-green  { background: var(--hp-success); }
+.fw-tab-dot-orange { background: var(--hp-orange); }
+.fw-tab-dot-purple { background: var(--hp-purple); }
+.fw-tab-dot-red    { background: var(--hp-error); }
+.fw-tab-dot-teal   { background: var(--hp-teal); }
+.fw-tab-dot-gray   { background: var(--hp-text-secondary); }
+
+.fw-tab-active .fw-tab-dot {
+    background: var(--hp-white) !important;
+}
+
+/* ── Empty State ── */
+.fw-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    color: var(--hp-text-secondary);
+    gap: 0.75rem;
+    text-align: center;
+}
+
+/* ── Content ── */
+.fw-content {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fw-section {
+    margin-bottom: 24px;
+}
+
+.fw-section-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 4px 12px;
+}
+.fw-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--hp-text);
+    letter-spacing: 0.2px;
+    margin: 0;
+}
+.fw-section-badge {
+    font-size: 11px;
+    font-weight: 800;
+    background: #e8eff9;
+    color: var(--hp-primary);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+.fw-section-badge-full {
+    background: #e6f7e9;
+    color: var(--hp-success);
+}
+.fw-section-badge-empty {
+    background: #f4f4f4;
+    color: var(--hp-text-secondary);
+}
+.fw-section-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+}
+
+/* ── Card Grid (same as Quick Actions in workspace) ── */
+.fw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+}
+
+.fw-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 8px;
+    background: var(--hp-white);
+    border-radius: var(--hp-radius-lg);
+    box-shadow: var(--hp-shadow);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+.fw-card:hover {
+    box-shadow: var(--hp-shadow-md);
+    transform: translateY(-3px);
+}
+
+.fw-card-selected {
+    border-color: var(--hp-success);
+    background: #f0faf3;
+}
+
+/* Icon circle (same as workspace Quick Actions) */
+.fw-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.fw-icon-blue   { background: var(--hp-primary); }
+.fw-icon-green  { background: var(--hp-success); }
+.fw-icon-orange { background: var(--hp-orange); }
+.fw-icon-purple { background: var(--hp-purple); }
+.fw-icon-red    { background: var(--hp-error); }
+.fw-icon-teal   { background: var(--hp-teal); }
+
+.fw-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--hp-text);
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* + / ✓ corner badge */
+.fw-action-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--hp-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.18s ease;
+}
+.fw-action-btn-added {
+    background: var(--hp-success);
+}
+
+/* ── Saving overlay ── */
+.fw-saving-overlay {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    border-radius: var(--hp-radius-md);
+    box-shadow: var(--hp-shadow-md);
+    z-index: 100;
+}
+
+/* ── Responsive ── */
+@media (min-width: 600px) {
+    .fw-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+@media (min-width: 900px) {
+    .fw-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    .fw-content {
+        padding: 20px 24px;
+    }
+}
+@media (max-width: 600px) {
+    .fw-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .fw-toolbar-right {
+        justify-content: space-between;
+    }
+}

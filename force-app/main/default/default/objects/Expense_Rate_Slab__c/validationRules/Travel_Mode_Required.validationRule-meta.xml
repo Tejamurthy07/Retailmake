@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Travel_Mode_Required</fullName>
+    <active>true</active>
+    <description>Travel Mode is required on every rate slab record.</description>
+    <errorConditionFormula>ISBLANK(Travel_Mode__c)</errorConditionFormula>
+    <errorDisplayField>Travel_Mode__c</errorDisplayField>
+    <errorMessage>Travel Mode is required.</errorMessage>
+</ValidationRule>

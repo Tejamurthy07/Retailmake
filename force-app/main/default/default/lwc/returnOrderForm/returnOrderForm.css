@@ -1,0 +1,209 @@
+/* Return Order Form Styles */
+:host {
+    --brand-primary: #0176d3;
+    --success-color: #2e844a;
+    --warning-color: #dd7a01;
+    --error-color: #ea001e;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+    --return-bg: #fff5f5;
+}
+
+/* Invoice Selector */
+.invoice-selector {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.invoice-info-card {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+    border: 1px solid #d0e5fb;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+
+.invoice-label {
+    display: block;
+    font-size: 10px;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.invoice-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #181818;
+    margin-top: 2px;
+}
+
+/* Invoice Lines Table */
+.invoice-lines-section {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.lines-table-container {
+    max-height: 450px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.file-input {
+    display: none;
+}
+
+table.slds-table thead th {
+    background: #fafbfc;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #706e6b;
+}
+
+.qty-cell {
+    text-align: center;
+    font-weight: 600;
+}
+
+.returned-qty {
+    color: var(--warning-color);
+}
+
+.max-return {
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+
+.return-qty-col {
+    width: 100px;
+    min-width: 100px;
+}
+
+.return-amount-cell {
+    font-weight: 700;
+    color: var(--error-color);
+}
+
+.return-active-row {
+    background-color: var(--return-bg) !important;
+    border-left: 3px solid var(--error-color);
+}
+
+.fully-returned-row {
+    background-color: #f3f3f3 !important;
+    opacity: 0.6;
+}
+
+/* Line Photo Preview */
+.line-photo-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.line-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.remove-line-photo {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+}
+
+/* Return Summary */
+.return-summary {
+    background: var(--return-bg);
+    border: 1px solid #f0c0c0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.summary-card {
+    padding-top: 8px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted #e0c0c0;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #706e6b;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+}
+
+.total-row {
+    border-bottom: 2px solid var(--error-color);
+    border-top: 2px solid var(--error-color);
+    padding: 12px 0;
+    margin-top: 8px;
+}
+
+.total-row .summary-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.return-total {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--error-color);
+}
+
+/* Action Section */
+.action-section {
+    padding: 16px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #706e6b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .slds-grid.slds-gutters {
+        flex-direction: column;
+    }
+
+    .slds-col {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .lines-table-container {
+        overflow-x: auto;
+    }
+
+    .return-qty-col {
+        width: 80px;
+        min-width: 80px;
+    }
+}

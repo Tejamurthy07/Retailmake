@@ -1,0 +1,476 @@
+<template>
+    <lightning-card title="Product 360 View" icon-name="standard:product_item">
+        <div slot="actions">
+            <lightning-button-icon
+                icon-name="utility:refresh"
+                alternative-text="Refresh"
+                onclick={refreshData}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-p-around_medium">
+
+            <!-- Product Header -->
+            <div class="product-header slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start">
+                    <div class="slds-col slds-size_3-of-4">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                            <h2 class="product-name slds-m-right_small">{productName}</h2>
+                            <span class={activeStatusClass}>{activeStatusLabel}</span>
+                            <span class={returnableBadgeClass}>{returnableLabel}</span>
+                        </div>
+                        <template if:true={hasSku}>
+                            <div class="product-meta slds-m-bottom_xx-small">
+                                <span class="sku-text">SKU: {skuCode}</span>
+                            </div>
+                        </template>
+                        <div class="product-details-row">
+                            <template if:true={hasBrand}>
+                                <span class="detail-item">
+                                    <lightning-icon icon-name="utility:ribbon" size="xx-small" class="detail-icon"></lightning-icon>
+                                    {brand}
+                                </span>
+                            </template>
+                            <template if:true={hasCategory}>
+                                <span class="detail-item">
+                                    <lightning-icon icon-name="utility:layers" size="xx-small" class="detail-icon"></lightning-icon>
+                                    {categoryName}
+                                </span>
+                            </template>
+                            <template if:true={hasSubCategory}>
+                                <span class="detail-item">
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="detail-icon"></lightning-icon>
+                                    {subCategoryName}
+                                </span>
+                            </template>
+                            <template if:true={hasHsn}>
+                                <span class="detail-item code-text">HSN: {hsnCode}</span>
+                            </template>
+                            <template if:true={hasBarcode}>
+                                <span class="detail-item code-text">EAN: {barcodeEan}</span>
+                            </template>
+                        </div>
+                        <div class="product-details-row slds-m-top_xx-small">
+                            <template if:true={hasUom}>
+                                <span class="detail-item">
+                                    <lightning-icon icon-name="utility:package" size="xx-small" class="detail-icon"></lightning-icon>
+                                    UoM: {unitOfMeasure}
+                                </span>
+                            </template>
+                            <template if:true={hasCaseSize}>
+                                <span class="detail-item">Case Size: {caseSize}</span>
+                            </template>
+                            <template if:true={hasWeight}>
+                                <span class="detail-item">Weight: {weight}</span>
+                            </template>
+                            <template if:true={hasShelfLife}>
+                                <span class="detail-item">Shelf Life: {shelfLifeDays} days</span>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <template if:true={hasProductImage}>
+                            <div class="product-image-container">
+                                <img src={productImageUrl} alt={productName} class="product-image" />
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Tiles -->
+            <div class="kpi-tiles slds-m-bottom_small">
+                <div class="slds-grid slds-gutters_xx-small slds-wrap">
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-price">
+                            <span class="kpi-label">MRP</span>
+                            <span class="kpi-value">{mrp}</span>
+                            <span class="kpi-sub">Unit: {unitPrice}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-orders">
+                            <span class="kpi-label">MTD Orders</span>
+                            <span class="kpi-value">{mtdOrderValue}</span>
+                            <span class="kpi-sub">{mtdOrderQty} units</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-warehouse">
+                            <span class="kpi-label">Warehouse Stock</span>
+                            <span class="kpi-value">{totalStockOnHand}</span>
+                            <span class="kpi-sub">On Hand</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-distributor">
+                            <span class="kpi-label">Distributor Stock</span>
+                            <span class="kpi-value">{totalDistributorStock}</span>
+                            <span class="kpi-sub">Closing</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-batches">
+                            <span class="kpi-label">Active Batches</span>
+                            <span class="kpi-value">{activeBatchCount}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-6">
+                        <div class="kpi-tile kpi-returns">
+                            <span class="kpi-label">MTD Returns</span>
+                            <span class="kpi-value return-value">{mtdReturnQty}</span>
+                            <span class="kpi-sub">units</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Summary -->
+            <div class="pricing-section slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_align-spread">
+                    <span class="pricing-label">MRP: {mrp}</span>
+                    <span class="pricing-label">Unit Price: {unitPrice}</span>
+                    <span class="pricing-label">GST: {gstRate}</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-section">
+                <lightning-tabset active-tab-value={activeTab} onactive={handleTabChange}>
+
+                    <!-- Batches Tab -->
+                    <lightning-tab label="Batches" value="batches" icon-name="standard:product_item_transaction">
+                        <div class="tab-content">
+                            <template if:true={hasBatches}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Batch #</div></th>
+                                                <th scope="col"><div class="slds-truncate">Mfg Date</div></th>
+                                                <th scope="col"><div class="slds-truncate">Expiry Date</div></th>
+                                                <th scope="col"><div class="slds-truncate">Quantity</div></th>
+                                                <th scope="col"><div class="slds-truncate">Status</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={batches} for:item="batch">
+                                                <tr key={batch.id}>
+                                                    <td>
+                                                        <a data-id={batch.id} onclick={navigateToRecord}>{batch.batchNumber}</a>
+                                                    </td>
+                                                    <td>{batch.mfgDate}</td>
+                                                    <td class={batch.expiryClass}>{batch.expiryDate}</td>
+                                                    <td>{batch.quantity}</td>
+                                                    <td><span class={batch.statusClass}>{batch.statusLabel}</span></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasBatches}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:package" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No batches found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Warehouse Stock Tab -->
+                    <lightning-tab label="Warehouse Stock" value="warehouse" icon-name="standard:product_required">
+                        <div class="tab-content">
+                            <template if:true={hasWarehouseStock}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Warehouse</div></th>
+                                                <th scope="col"><div class="slds-truncate">On Hand</div></th>
+                                                <th scope="col"><div class="slds-truncate">Available</div></th>
+                                                <th scope="col"><div class="slds-truncate">Reserved</div></th>
+                                                <th scope="col"><div class="slds-truncate">Last Updated</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={warehouseStock} for:item="ws">
+                                                <tr key={ws.id}>
+                                                    <td>
+                                                        <a data-id={ws.warehouseId} onclick={navigateToRecord}>{ws.warehouseName}</a>
+                                                    </td>
+                                                    <td>{ws.onHand}</td>
+                                                    <td class={ws.qtyClass}>{ws.available}</td>
+                                                    <td>{ws.reserved}</td>
+                                                    <td>{ws.lastUpdated}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasWarehouseStock}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:package" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No warehouse stock found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Distributor Stock Tab -->
+                    <lightning-tab label="Distributor Stock" value="distributor" icon-name="standard:product_consumed">
+                        <div class="tab-content">
+                            <template if:true={hasDistributorStock}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Distributor</div></th>
+                                                <th scope="col"><div class="slds-truncate">Opening</div></th>
+                                                <th scope="col"><div class="slds-truncate">Received</div></th>
+                                                <th scope="col"><div class="slds-truncate">Sold</div></th>
+                                                <th scope="col"><div class="slds-truncate">Damaged</div></th>
+                                                <th scope="col"><div class="slds-truncate">Closing</div></th>
+                                                <th scope="col"><div class="slds-truncate">Batch</div></th>
+                                                <th scope="col"><div class="slds-truncate">Stock Date</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={distributorStock} for:item="ds">
+                                                <tr key={ds.id}>
+                                                    <td>
+                                                        <a data-id={ds.accountId} onclick={navigateToRecord}>{ds.accountName}</a>
+                                                    </td>
+                                                    <td>{ds.opening}</td>
+                                                    <td>{ds.received}</td>
+                                                    <td>{ds.sold}</td>
+                                                    <td>{ds.damaged}</td>
+                                                    <td class={ds.qtyClass}>{ds.closing}</td>
+                                                    <td>{ds.batchNo}</td>
+                                                    <td>{ds.stockDate}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasDistributorStock}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:package" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No distributor stock found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Pricing Tab -->
+                    <lightning-tab label="Pricing" value="pricing" icon-name="standard:price_book_entries">
+                        <div class="tab-content">
+                            <template if:true={hasPricing}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Price List</div></th>
+                                                <th scope="col"><div class="slds-truncate">Price</div></th>
+                                                <th scope="col"><div class="slds-truncate">Effective From</div></th>
+                                                <th scope="col"><div class="slds-truncate">Effective To</div></th>
+                                                <th scope="col"><div class="slds-truncate">Status</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={pricing} for:item="pl">
+                                                <tr key={pl.id}>
+                                                    <td>
+                                                        <a data-id={pl.id} onclick={navigateToRecord}>{pl.name}</a>
+                                                    </td>
+                                                    <td class="amount-cell">{pl.price}</td>
+                                                    <td>{pl.effectiveFrom}</td>
+                                                    <td>{pl.effectiveTo}</td>
+                                                    <td><span class={pl.statusClass}>{pl.statusLabel}</span></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasPricing}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:moneybag" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No pricing records found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Orders Tab -->
+                    <lightning-tab label="Orders" value="orders" icon-name="standard:orders">
+                        <div class="tab-content">
+                            <template if:true={hasOrderLines}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Order #</div></th>
+                                                <th scope="col"><div class="slds-truncate">Date</div></th>
+                                                <th scope="col"><div class="slds-truncate">Outlet</div></th>
+                                                <th scope="col"><div class="slds-truncate">Qty</div></th>
+                                                <th scope="col"><div class="slds-truncate">Unit Price</div></th>
+                                                <th scope="col"><div class="slds-truncate">Line Total</div></th>
+                                                <th scope="col"><div class="slds-truncate">Status</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={orderLines} for:item="ol">
+                                                <tr key={ol.id}>
+                                                    <td>
+                                                        <a data-id={ol.orderId} onclick={navigateToRecord}>{ol.orderName}</a>
+                                                    </td>
+                                                    <td>{ol.orderDate}</td>
+                                                    <td>{ol.accountName}</td>
+                                                    <td>{ol.quantity}</td>
+                                                    <td>{ol.unitPrice}</td>
+                                                    <td class="amount-cell">{ol.lineTotal}</td>
+                                                    <td><span class={ol.statusBadge}>{ol.status}</span></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasOrderLines}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:cart" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No recent orders found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Schemes Tab -->
+                    <lightning-tab label="Schemes" value="schemes" icon-name="standard:promotions">
+                        <div class="tab-content">
+                            <template if:true={hasSchemes}>
+                                <div class="scheme-cards-grid">
+                                    <template for:each={schemes} for:item="scheme">
+                                        <div class="scheme-mini-card" key={scheme.id}>
+                                            <div class="scheme-mini-header">
+                                                <span class="scheme-mini-name">{scheme.name}</span>
+                                                <span class="scheme-mini-type" style={scheme.typeBadgeStyle}>{scheme.type}</span>
+                                            </div>
+                                            <template if:true={scheme.code}>
+                                                <p class="scheme-code">{scheme.code}</p>
+                                            </template>
+                                            <p class="scheme-mini-desc">{scheme.description}</p>
+                                            <div class="scheme-mini-dates">{scheme.validFrom} - {scheme.validTo}</div>
+                                            <template if:true={scheme.maxDiscount}>
+                                                <div class="scheme-budget">Max Discount: {scheme.maxDiscount}</div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasSchemes}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:promotion_segments" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No active schemes found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Returns Tab -->
+                    <lightning-tab label="Returns" value="returns" icon-name="standard:return_order">
+                        <div class="tab-content">
+                            <template if:true={hasReturns}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Return #</div></th>
+                                                <th scope="col"><div class="slds-truncate">Date</div></th>
+                                                <th scope="col"><div class="slds-truncate">Outlet</div></th>
+                                                <th scope="col"><div class="slds-truncate">Qty</div></th>
+                                                <th scope="col"><div class="slds-truncate">Reason</div></th>
+                                                <th scope="col"><div class="slds-truncate">Status</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={returns} for:item="ret">
+                                                <tr key={ret.id}>
+                                                    <td>
+                                                        <a data-id={ret.returnOrderId} onclick={navigateToRecord}>{ret.returnOrderName}</a>
+                                                    </td>
+                                                    <td>{ret.returnDate}</td>
+                                                    <td>{ret.accountName}</td>
+                                                    <td>{ret.quantity}</td>
+                                                    <td>{ret.reason}</td>
+                                                    <td><span class={ret.statusBadge}>{ret.status}</span></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasReturns}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:undo" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No returns found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- Stock Transactions Tab -->
+                    <lightning-tab label="Transactions" value="transactions" icon-name="standard:record">
+                        <div class="tab-content">
+                            <template if:true={hasStockTransactions}>
+                                <div class="slds-scrollable_y tab-table-container">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col"><div class="slds-truncate">Transaction</div></th>
+                                                <th scope="col"><div class="slds-truncate">Type</div></th>
+                                                <th scope="col"><div class="slds-truncate">Qty</div></th>
+                                                <th scope="col"><div class="slds-truncate">Date</div></th>
+                                                <th scope="col"><div class="slds-truncate">Warehouse</div></th>
+                                                <th scope="col"><div class="slds-truncate">Reference</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={stockTransactions} for:item="st">
+                                                <tr key={st.id}>
+                                                    <td>
+                                                        <a data-id={st.id} onclick={navigateToRecord}>{st.name}</a>
+                                                    </td>
+                                                    <td><span class={st.typeBadge}>{st.type}</span></td>
+                                                    <td>{st.quantity}</td>
+                                                    <td>{st.date}</td>
+                                                    <td>{st.warehouseName}</td>
+                                                    <td>{st.reference}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasStockTransactions}>
+                                <div class="empty-tab">
+                                    <lightning-icon icon-name="utility:sort" size="large" class="empty-icon"></lightning-icon>
+                                    <p class="slds-text-color_weak slds-m-top_small">No stock transactions found.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                </lightning-tabset>
+            </div>
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

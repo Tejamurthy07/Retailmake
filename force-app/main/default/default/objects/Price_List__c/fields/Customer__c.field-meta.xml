@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Customer__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Customer (Account) for customer-specific pricing. When populated, this price list entry applies only to this customer (highest priority).</description>
+    <label>Customer</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Customer Price Lists</relationshipLabel>
+    <relationshipName>Customer_Price_Lists</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Completion_Activities__c</fullName>
+    <description>Activities completed during the visit</description>
+    <label>Completion Activities</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Order Taken</fullName>
+                <default>false</default>
+                <label>Order Taken</label>
+            </value>
+            <value>
+                <fullName>Payment Collected</fullName>
+                <default>false</default>
+                <label>Payment Collected</label>
+            </value>
+            <value>
+                <fullName>Merchandising Done</fullName>
+                <default>false</default>
+                <label>Merchandising Done</label>
+            </value>
+            <value>
+                <fullName>Survey Completed</fullName>
+                <default>false</default>
+                <label>Survey Completed</label>
+            </value>
+            <value>
+                <fullName>Returns Processed</fullName>
+                <default>false</default>
+                <label>Returns Processed</label>
+            </value>
+            <value>
+                <fullName>Scheme Communicated</fullName>
+                <default>false</default>
+                <label>Scheme Communicated</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

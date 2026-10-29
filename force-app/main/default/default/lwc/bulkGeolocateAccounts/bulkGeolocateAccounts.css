@@ -1,0 +1,155 @@
+.bga-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.bga-coverage {
+    background: linear-gradient(135deg, #f3f8ff 0%, #fff 100%);
+    border: 1px solid #b3d4ff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.bga-coverage-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.bga-coverage-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+}
+
+.bga-coverage-pct {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0176d3;
+}
+
+.bga-coverage-bar {
+    height: 8px;
+    background: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.bga-coverage-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0176d3, #2e844a);
+    transition: width 0.4s;
+}
+
+.bga-coverage-detail {
+    font-size: 12px;
+    color: #706e6b;
+    margin-top: 6px;
+}
+
+.bga-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.bga-stat {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-left: 4px solid #0176d3;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.bga-stat-green { border-left-color: #2e844a; }
+.bga-stat-amber { border-left-color: #dd7a01; }
+.bga-stat-red   { border-left-color: #c23934; }
+
+.bga-stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1;
+}
+
+.bga-stat-label {
+    font-size: 11px;
+    color: #706e6b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+}
+
+.bga-action-section {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.bga-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #181818;
+    margin: 0 0 6px 0;
+}
+
+.bga-help {
+    font-size: 12px;
+    color: #706e6b;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.bga-help code {
+    background: #f3f3f3;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 11px;
+}
+
+.bga-radius-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.bga-radius-label {
+    font-size: 12px;
+    color: #181818;
+    font-weight: 500;
+    min-width: 220px;
+}
+
+.bga-radius-input {
+    width: 120px;
+}
+
+.bga-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.bga-note {
+    margin-top: 14px;
+    font-size: 11px;
+    color: #706e6b;
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+@media (max-width: 600px) {
+    .bga-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

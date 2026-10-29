@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Salesperson_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>ISBLANK(Salesperson__c)</errorConditionFormula>
+    <errorMessage>Salesperson is required for a Journey Plan.</errorMessage>
+</ValidationRule>

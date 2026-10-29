@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Selfie Required</label>
+    <protected>false</protected>
+    <values>
+        <field>Config_Key__c</field>
+        <value xsi:type="xsd:string">SELFIE_REQUIRED_FOR_CHECKIN</value>
+    </values>
+    <values>
+        <field>Config_Value__c</field>
+        <value xsi:type="xsd:string">true</value>
+    </values>
+    <values>
+        <field>Data_Type__c</field>
+        <value xsi:type="xsd:string">Boolean</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Whether a selfie is required for check-in verification</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">DFO</value>
+    </values>
+</CustomMetadata>

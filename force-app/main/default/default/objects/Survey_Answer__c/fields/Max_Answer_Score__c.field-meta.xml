@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Max_Answer_Score__c</fullName>
+    <description>Maximum points this answer could contribute: 5 x weight for a Rating, or the weight for a Single Choice. 0 for non-scored types.</description>
+    <externalId>false</externalId>
+    <label>Max Answer Score</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,712 @@
+<template>
+    <!-- ═══════════════════════════════════════════════
+         LOADING STATE
+         ═══════════════════════════════════════════════ -->
+    <template if:true={isLoading}>
+        <div class="hp-loading">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            <p class="hp-loading-text">Loading FMCG Workspace...</p>
+        </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════
+         MAIN CONTENT
+         ═══════════════════════════════════════════════ -->
+    <template if:false={isLoading}>
+        <!-- HEADER -->
+        <div class="hp-header">
+            <div class="hp-header-left">
+                <lightning-icon icon-name="standard:home" size="small"></lightning-icon>
+                <div class="hp-header-text">
+                    <h1 class="hp-header-title">FMCG Workspace</h1>
+                    <span class="hp-header-date">{currentTime}</span>
+                </div>
+            </div>
+            <div class="hp-header-right">
+                <button class="hp-refresh-btn" onclick={handleRefresh} title="Refresh">
+                    <lightning-icon icon-name="utility:refresh" size="xx-small" variant="inverse"></lightning-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGATION (filtered by visibility) -->
+        <nav class="hp-tab-bar">
+            <template for:each={tabItems} for:item="tab">
+                <button key={tab.key}
+                        class={tab.cssClass}
+                        data-tab={tab.key}
+                        onclick={handleTabClick}>
+                    <lightning-icon icon-name={tab.icon} size="xx-small"></lightning-icon>
+                    <span class="hp-tab-label">{tab.label}</span>
+                </button>
+            </template>
+        </nav>
+
+        <!-- TAB CONTENT AREA -->
+        <div class="hp-content">
+
+            <!-- ═══════ DASHBOARD TAB ═══════ -->
+            <template if:true={isDashboard}>
+                <template if:true={showDashboardOverview}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Today's Overview</h2>
+                        <div class="hp-stat-grid">
+                            <template if:true={vis.card_day_status}>
+                                <div class="hp-stat-card hp-card-blue" data-target="Visit_Manager" onclick={navigateTo}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:log_a_call" size="small"></lightning-icon>
+                                        <span class={attendanceBadgeClass}>{data.attendanceStatus}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Day Status</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_visits_completed}>
+                                <div class="hp-stat-card hp-card-green" data-target="Visit_Manager" onclick={navigateTo}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:address" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.completedVisitCount}/{data.todayVisitCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Visits Completed</span>
+                                        <div class="hp-progress-bar">
+                                            <div class="hp-progress-fill hp-fill-green" style={visitProgressStyle}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_pending_orders}>
+                                <div class="hp-stat-card hp-card-orange" data-object="Sales_Order__c" onclick={navigateToObject}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:orders" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.pendingOrderCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Pending Orders</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_pending_collections}>
+                                <div class="hp-stat-card hp-card-purple" data-object="Collection__c" onclick={navigateToObject}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:currency" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.pendingCollectionCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Pending Collections</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_open_tickets}>
+                                <div class="hp-stat-card hp-card-red" data-object="Ticket__c" onclick={navigateToObject}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:case" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.openTicketCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Open Tickets</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_active_schemes}>
+                                <div class="hp-stat-card hp-card-teal" data-target="Scheme_Manager" onclick={navigateTo}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:reward" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.activeSchemeCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Active Schemes</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_pending_returns}>
+                                <div class="hp-stat-card hp-card-orange" data-object="Return_Order__c" onclick={navigateToObject}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="standard:return_order" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.pendingReturnCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Pending Returns</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_low_stock_alerts}>
+                                <div class="hp-stat-card hp-card-red" data-target="Stock_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.lowStockAlertCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Low Stock Alerts</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template if:true={vis.card_near_expiry_batches}>
+                                <div class="hp-stat-card hp-card-orange" data-target="Product_Management_Hub" onclick={navigateTo}>
+                                    <div class="hp-stat-header">
+                                        <lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
+                                        <span class="hp-stat-number">{data.nearExpiryBatchCount}</span>
+                                    </div>
+                                    <div class="hp-stat-body">
+                                        <span class="hp-stat-label">Near Expiry Batches</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showDashboardQuickActions}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Quick Actions</h2>
+                        <div class="hp-quick-grid">
+                            <template if:true={vis.qa_start_day}>
+                                <div class="hp-quick-card" data-target="Visit_Manager" onclick={navigateTo}>
+                                    <div class="hp-quick-icon hp-icon-blue">
+                                        <lightning-icon icon-name="utility:checkin" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">Start Day</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_visit_board}>
+                                <div class="hp-quick-card" data-target="Visit_Manager" onclick={navigateTo}>
+                                    <div class="hp-quick-icon hp-icon-green">
+                                        <lightning-icon icon-name="utility:location" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">Visit Board</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_beat_plan}>
+                                <div class="hp-quick-card" data-target="Beat_Manager" onclick={navigateTo}>
+                                    <div class="hp-quick-icon hp-icon-orange">
+                                        <lightning-icon icon-name="utility:routing_offline" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">Beat Plan</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_new_order}>
+                                <div class="hp-quick-card" data-object="Sales_Order__c" onclick={navigateToObject}>
+                                    <div class="hp-quick-icon hp-icon-purple">
+                                        <lightning-icon icon-name="utility:cart" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">New Order</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_collections}>
+                                <div class="hp-quick-card" data-object="Collection__c" onclick={navigateToObject}>
+                                    <div class="hp-quick-icon hp-icon-teal">
+                                        <lightning-icon icon-name="utility:money" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">Collections</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_catalog}>
+                                <div class="hp-quick-card" data-target="Product_Catalog" onclick={navigateTo}>
+                                    <div class="hp-quick-icon hp-icon-red">
+                                        <lightning-icon icon-name="utility:product_consumed" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">Catalog</span>
+                                </div>
+                            </template>
+                            <template if:true={vis.qa_kpi_dashboard}>
+                                <div class="hp-quick-card" data-target="Dynamic_KPI_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-quick-icon hp-icon-blue">
+                                        <lightning-icon icon-name="utility:chart" size="small" variant="inverse"></lightning-icon>
+                                    </div>
+                                    <span class="hp-quick-label">KPI Dashboard</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showDashboardAnalytics}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Analytics & Insights</h2>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.ai_dynamic_kpi}>
+                                <div class="hp-nav-card" data-target="Dynamic_KPI_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue">
+                                        <lightning-icon icon-name="standard:dashboard" size="medium"></lightning-icon>
+                                    </div>
+                                    <div class="hp-nav-info">
+                                        <h3 class="hp-nav-title">Dynamic KPI Dashboard</h3>
+                                        <p class="hp-nav-desc">Pick any metric, filter by any dimension, analyse trends and forecasts</p>
+                                    </div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.ai_achievement_dashboard}>
+                                <div class="hp-nav-card" data-target="Achievement_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-teal">
+                                        <lightning-icon icon-name="standard:performance" size="medium"></lightning-icon>
+                                    </div>
+                                    <div class="hp-nav-info">
+                                        <h3 class="hp-nav-title">Achievement Dashboard</h3>
+                                        <p class="hp-nav-desc">Individual KPIs, monthly trends, and leaderboard</p>
+                                    </div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.ai_kpi_metric_manager}>
+                                <div class="hp-nav-card" data-target="KPI_Metric_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange">
+                                        <lightning-icon icon-name="custom:custom25" size="medium"></lightning-icon>
+                                    </div>
+                                    <div class="hp-nav-info">
+                                        <h3 class="hp-nav-title">KPI Metric Manager</h3>
+                                        <p class="hp-nav-desc">Define and manage KPI metrics with smart field pickers</p>
+                                    </div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ═══════ FIELD OPS TAB ═══════ -->
+            <template if:true={isFieldOps}>
+                <template if:true={showFieldOpsSetup}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Setup: Territory &amp; Beats</h2>
+                        <p class="hp-section-hint">Configure these first — beats and journey plans depend on territories and outlets.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.fo_beat_manager}>
+                                <div class="hp-nav-card" data-target="Beat_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:shift" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Beat Manager</h3><p class="hp-nav-desc">Create and manage beats, assign outlets to beats</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.fo_beat_calendar}>
+                                <div class="hp-nav-card" data-target="Beat_Calendar" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:event" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Beat Plan Calendar</h3><p class="hp-nav-desc">Weekly and monthly beat planning calendar view</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.fo_journey_plans}>
+                                <div class="hp-nav-card" data-object="Journey_Plan__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:travel_mode" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Journey Plans</h3><p class="hp-nav-desc">View and manage journey plan assignments</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showFieldOpsDaily}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Daily Operations</h2>
+                        <p class="hp-section-hint">Day-to-day visit execution, tracking and team monitoring.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.fo_visit_manager}>
+                                <div class="hp-nav-card" data-target="Visit_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:address" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Visit Manager</h3><p class="hp-nav-desc">Day start/end, visit check-in/out, and activity tracking</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.fo_team_visit_dashboard}>
+                                <div class="hp-nav-card" data-target="Team_Visit_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:dashboard" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Team Visit Dashboard</h3><p class="hp-nav-desc">Monitor team visit performance and coverage</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.fo_visit_records}>
+                                <div class="hp-nav-card" data-object="Visit__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:record" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Visit Records</h3><p class="hp-nav-desc">Browse and search all visit records</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ═══════ SALES TAB ═══════ -->
+            <template if:true={isSales}>
+                <template if:true={showSalesSetup}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Setup: Accounts &amp; Schemes</h2>
+                        <p class="hp-section-hint">Set up customers and schemes first — orders, collections and targets depend on these.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.sales_accounts}>
+                                <div class="hp-nav-card" data-object="Account" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:account" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Accounts / Outlets</h3><p class="hp-nav-desc">Customer accounts and outlet management</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_scheme_manager}>
+                                <div class="hp-nav-card" data-target="Scheme_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:reward" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Scheme Manager</h3><p class="hp-nav-desc">Trade schemes, discounts, and promotions</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_competitors}>
+                                <div class="hp-nav-card" data-object="Competitor__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:swarm_session" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Competitors</h3><p class="hp-nav-desc">Competitor tracking and intelligence</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showSalesOrderMgmt}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Order Management</h2>
+                        <p class="hp-section-hint">Day-to-day sales transactions — orders, collections, returns, invoices.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.sales_orders}>
+                                <div class="hp-nav-card" data-object="Sales_Order__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:orders" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Sales Orders</h3><p class="hp-nav-desc">View and manage sales orders</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_collections}>
+                                <div class="hp-nav-card" data-object="Collection__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:currency" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Collections</h3><p class="hp-nav-desc">Payment collection tracking and management</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_invoices}>
+                                <div class="hp-nav-card" data-object="Invoice__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:contract" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Invoices</h3><p class="hp-nav-desc">View invoices and billing records</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_returns}>
+                                <div class="hp-nav-card" data-object="Return_Order__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-red"><lightning-icon icon-name="standard:return_order" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Return Orders</h3><p class="hp-nav-desc">Process and track product returns</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showSalesTargets}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Targets &amp; Incentives</h2>
+                        <p class="hp-section-hint">Configure in order: Periods &rarr; Criteria &rarr; Allocation &rarr; Incentive Slabs.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.sales_target_periods}>
+                                <div class="hp-nav-card" data-object="Target_Period__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:date_input" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Target Periods</h3><p class="hp-nav-desc">Monthly, quarterly, and yearly target periods</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_target_criteria}>
+                                <div class="hp-nav-card" data-target="Target_Criteria_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:filter" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Target Criteria Manager</h3><p class="hp-nav-desc">Create, edit, and manage dynamic target criteria</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_target_allocation}>
+                                <div class="hp-nav-card" data-target="Target_Allocation" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:goals" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Target Allocation</h3><p class="hp-nav-desc">Allocate, distribute, and track target achievements</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_incentive_slabs}>
+                                <div class="hp-nav-card" data-target="Incentive_Slab_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:slider" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Incentive Slab Manager</h3><p class="hp-nav-desc">Configure incentive payout tiers and multipliers</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.sales_incentive_dashboard}>
+                                <div class="hp-nav-card" data-target="Incentive_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:reward" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Incentive Dashboard</h3><p class="hp-nav-desc">Calculate, approve, and track incentive payouts</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ═══════ INVENTORY TAB ═══════ -->
+            <template if:true={isInventory}>
+                <template if:true={showInvSetup}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Setup: Products &amp; Warehouses</h2>
+                        <p class="hp-section-hint">Set up products, UOM, pricing and warehouses first — stock and orders depend on these.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.inv_product_hub}>
+                                <div class="hp-nav-card" data-target="Product_Management_Hub" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:product_workspace" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Product Management Hub</h3><p class="hp-nav-desc">Products, pricing, categories, UOM, and conversions</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.inv_uom_conversions}>
+                                <div class="hp-nav-card" data-target="Product_Management_Hub" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-red"><lightning-icon icon-name="standard:data_transforms" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">UOM &amp; Conversions</h3><p class="hp-nav-desc">UOM master and conversion rules (in Product Hub)</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.inv_warehouses_setup}>
+                                <div class="hp-nav-card" data-object="Warehouse__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:location" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Warehouses</h3><p class="hp-nav-desc">Warehouse master records</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showInvOps}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Stock Operations</h2>
+                        <p class="hp-section-hint">Monitor stock levels, manage transfers, and browse the product catalog.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.inv_stock_dashboard}>
+                                <div class="hp-nav-card" data-target="Stock_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:product_item" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Stock Dashboard</h3><p class="hp-nav-desc">Stock levels, low-stock alerts, and expiry tracking</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.inv_warehouse_dashboard}>
+                                <div class="hp-nav-card" data-target="Warehouse_Stock_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:location" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Warehouse Dashboard</h3><p class="hp-nav-desc">Warehouse-wise inventory management</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.inv_stock_transfers}>
+                                <div class="hp-nav-card" data-object="Stock_Transfer__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:asset_action" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Stock Transfers</h3><p class="hp-nav-desc">Inter-location stock transfer records</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.inv_product_catalog}>
+                                <div class="hp-nav-card" data-target="Product_Catalog" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:product" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Product Catalog</h3><p class="hp-nav-desc">Browse and search product listings</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ═══════ HR & EXPENSE TAB ═══════ -->
+            <template if:true={isHr}>
+                <template if:true={showHrSetup}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Setup: Employees &amp; Policies</h2>
+                        <p class="hp-section-hint">Set up employees, leave policies, holidays and expense rules first.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.hr_employee_manager}>
+                                <div class="hp-nav-card" data-target="Employee_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:people" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Employee Manager</h3><p class="hp-nav-desc">Employee records and profile management</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_leave_policies}>
+                                <div class="hp-nav-card" data-object="Leave_Policy__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:entitlement" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Leave Policies</h3><p class="hp-nav-desc">Configure leave entitlements per designation</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_holiday_manager}>
+                                <div class="hp-nav-card" data-target="Holiday_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:today" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Holiday Manager</h3><p class="hp-nav-desc">Holiday calendar and configuration</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_expense_eligibility}>
+                                <div class="hp-nav-card" data-target="Expense_Eligibility_Admin" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:settings" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Expense Eligibility</h3><p class="hp-nav-desc">Configure expense eligibility rules per band</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showHrLeave}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Leave Management</h2>
+                        <p class="hp-section-hint">Apply, approve, and track leave requests and balances.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.hr_leave_manager}>
+                                <div class="hp-nav-card" data-target="Leave_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="standard:event" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Leave Manager</h3><p class="hp-nav-desc">Apply for leave and view leave balance</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_leave_approval}>
+                                <div class="hp-nav-card" data-target="Leave_Approval" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:approval" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Leave Approval</h3><p class="hp-nav-desc">Approve or reject team leave requests</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_leave_balances}>
+                                <div class="hp-nav-card" data-object="Leave_Balance__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:timesheet" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Leave Balances</h3><p class="hp-nav-desc">View entitled, accrued, used, and available leave balances</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showHrAttendanceExpense}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Attendance &amp; Expenses</h2>
+                        <p class="hp-section-hint">Daily attendance tracking and expense claim management.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.hr_team_attendance}>
+                                <div class="hp-nav-card" data-target="Team_Attendance_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:date_input" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Team Attendance</h3><p class="hp-nav-desc">Team attendance tracking and reports</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.hr_expense_manager}>
+                                <div class="hp-nav-card" data-target="Expense_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-red"><lightning-icon icon-name="standard:expense" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Expense Manager</h3><p class="hp-nav-desc">Submit and track expense claims</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ═══════ ADMIN TAB ═══════ -->
+            <template if:true={isAdmin}>
+                <template if:true={showAdminMasterData}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Step 1: Master Data</h2>
+                        <p class="hp-section-hint">Set these up first — everything else depends on territories and warehouses.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.admin_territory_master}>
+                                <div class="hp-nav-card" data-object="Territory_Master__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:address" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Territory Master</h3><p class="hp-nav-desc">Territory hierarchy and assignments</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_warehouses}>
+                                <div class="hp-nav-card" data-object="Warehouse__c" onclick={navigateToObject}>
+                                    <div class="hp-nav-icon hp-icon-red"><lightning-icon icon-name="standard:location" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Warehouses</h3><p class="hp-nav-desc">Warehouse master records</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showAdminMappings}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Step 2: Mappings &amp; Configuration</h2>
+                        <p class="hp-section-hint">Assign categories to customers/users, configure KPI metrics, and set up surveys.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.admin_category_mapping}>
+                                <div class="hp-nav-card" data-target="Category_Mapping_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:hierarchy" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Category Mapping</h3><p class="hp-nav-desc">Assign product categories to customers and employees</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_kpi_metric_manager}>
+                                <div class="hp-nav-card" data-target="KPI_Metric_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-orange"><lightning-icon icon-name="custom:custom25" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">KPI Metric Manager</h3><p class="hp-nav-desc">Create and manage KPI metrics with smart field pickers</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_survey_manager}>
+                                <div class="hp-nav-card" data-target="Survey_Manager" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-purple"><lightning-icon icon-name="standard:survey" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Survey Manager</h3><p class="hp-nav-desc">Create surveys, add questions, view responses</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={showAdminDashboards}>
+                    <div class="hp-section">
+                        <h2 class="hp-section-title">Dashboards &amp; Analytics</h2>
+                        <p class="hp-section-hint">Monitor performance once the above setup is complete.</p>
+                        <div class="hp-nav-grid">
+                            <template if:true={vis.admin_fscrm_dashboard}>
+                                <div class="hp-nav-card" data-target="FSCRM_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:dashboard" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">CRM Dashboard</h3><p class="hp-nav-desc">Overall CRM analytics and KPI reports</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_kpi_dashboard}>
+                                <div class="hp-nav-card" data-target="KPI_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-green"><lightning-icon icon-name="standard:performance" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">KPI Dashboard</h3><p class="hp-nav-desc">Unified targets, actuals, incentives, and team performance</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_achievement_dashboard}>
+                                <div class="hp-nav-card" data-target="Achievement_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-teal"><lightning-icon icon-name="standard:performance" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Achievement Dashboard</h3><p class="hp-nav-desc">Individual KPIs, monthly trends, and leaderboard</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                            <template if:true={vis.admin_dynamic_kpi_dashboard}>
+                                <div class="hp-nav-card" data-target="Dynamic_KPI_Dashboard" onclick={navigateTo}>
+                                    <div class="hp-nav-icon hp-icon-blue"><lightning-icon icon-name="standard:dashboard" size="medium"></lightning-icon></div>
+                                    <div class="hp-nav-info"><h3 class="hp-nav-title">Dynamic KPI Dashboard</h3><p class="hp-nav-desc">Configurable dashboard with metric picker, filters, and trends</p></div>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" class="hp-nav-arrow"></lightning-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+        </div>
+    </template>
+</template>

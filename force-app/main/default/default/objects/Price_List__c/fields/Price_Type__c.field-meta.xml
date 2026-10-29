@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Price_Type__c</fullName>
+    <label>Price Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>MRP</fullName>
+                <default>false</default>
+                <label>MRP</label>
+            </value>
+            <value>
+                <fullName>Distributor Price</fullName>
+                <default>false</default>
+                <label>Distributor Price</label>
+            </value>
+            <value>
+                <fullName>Retailer Price</fullName>
+                <default>false</default>
+                <label>Retailer Price</label>
+            </value>
+            <value>
+                <fullName>Special Price</fullName>
+                <default>false</default>
+                <label>Special Price</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

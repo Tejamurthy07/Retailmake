@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>VisitActivityConfigController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Admin access to the Visit Activity Settings window. Fields deployed via the Metadata API get no field permissions by default, so without this the window reads them back as null.</description>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Description__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Is_Active__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Is_Enabled__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Outlet_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Profile_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Visit_Activity_Rule__c.Sort_Order__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Visit Activity Config</label>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Visit_Activity_Rule__c</object>
+        <viewAllFields>false</viewAllFields>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+    <tabSettings>
+        <tab>Visit_Activity_Settings</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

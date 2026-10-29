@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Scheme_Type__c</fullName>
+    <description>The trigger condition type for scheme qualification</description>
+    <label>Scheme Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Same Product (QTY)</fullName>
+                <default>false</default>
+                <label>Same Product (QTY)</label>
+            </value>
+            <value>
+                <fullName>Same Product (VAL)</fullName>
+                <default>false</default>
+                <label>Same Product (VAL)</label>
+            </value>
+            <value>
+                <fullName>Assorted Product (QTY)</fullName>
+                <default>false</default>
+                <label>Assorted Product (QTY)</label>
+            </value>
+            <value>
+                <fullName>Assorted Product (VAL)</fullName>
+                <default>false</default>
+                <label>Assorted Product (VAL)</label>
+            </value>
+            <value>
+                <fullName>Invoice Qty Based</fullName>
+                <default>false</default>
+                <label>Invoice Qty Based</label>
+            </value>
+            <value>
+                <fullName>Invoice Val Based</fullName>
+                <default>false</default>
+                <label>Invoice Val Based</label>
+            </value>
+            <value>
+                <fullName>Reward Points</fullName>
+                <default>false</default>
+                <label>Reward Points</label>
+            </value>
+            <value>
+                <fullName>Amount Off</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Amount Off</label>
+            </value>
+            <value>
+                <fullName>Buy X Get Y</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Buy X Get Y</label>
+            </value>
+            <value>
+                <fullName>Combo Offer</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Combo Offer</label>
+            </value>
+            <value>
+                <fullName>Flat Discount Percent</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Flat Discount Percent</label>
+            </value>
+            <value>
+                <fullName>Slab Based</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Slab Based</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

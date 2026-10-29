@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gem Edible CRM · Demo Home</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .hero {
+      background: linear-gradient(110deg, var(--green-900), var(--green-700));
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 32px 30px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 26px; }
+    .hero p { margin: 0; opacity: .9; max-width: 640px; }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .nav-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .12s, box-shadow .12s, border-color .12s;
+    }
+    .nav-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--green-500);
+      text-decoration: none;
+    }
+    .nav-card .ic {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 24px;
+      background: var(--green-050);
+      border: 1px solid var(--green-100);
+    }
+    .nav-card h3 { margin: 4px 0 0; font-size: 16px; color: var(--green-900); }
+    .nav-card p { margin: 0; font-size: 13px; color: var(--ink-500); flex: 1; }
+    .nav-card .go { font-size: 13px; font-weight: 700; color: var(--green-600); }
+    @media (max-width: 820px) { .nav-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <h1>Gem Edible CRM — Sauda &amp; Rate</h1>
+        <div class="sub">Sauda (Agreement) flow and product rate configuration for an edible-oils trader.</div>
+      </div>
+    </div>
+
+    <div class="nav-grid">
+      <a class="nav-card" href="sauda-list.html">
+        <div class="ic">📄</div>
+        <h3>Saudas (Agreements)</h3>
+        <p>Browse all saudas with search and status filters. The main entry point for the agreement module.</p>
+        <span class="go">Open list →</span>
+      </a>
+
+      <a class="nav-card" href="sauda-create.html">
+        <div class="ic">➕</div>
+        <h3>Create Sauda</h3>
+        <p>Raise a new agreement — header details plus dynamic line items with product, qty, buy/sell price and validity dates.</p>
+        <span class="go">Create new →</span>
+      </a>
+
+      <a class="nav-card" href="sauda-detail.html?id=SAU-1001">
+        <div class="ic">🔄</div>
+        <h3>Sauda Detail</h3>
+        <p>View a sample sauda with the Extend, Cancel, BuyBack and Convert actions and the Indent → Delivery flow.</p>
+        <span class="go">View SAU-1001 →</span>
+      </a>
+
+      <a class="nav-card" href="rate-config.html">
+        <div class="ic">🏷️</div>
+        <h3>Rate Configuration</h3>
+        <p>Product price update — set revised prices and effective start dates, filtered by product category.</p>
+        <span class="go">Configure rates →</span>
+      </a>
+
+      <a class="nav-card" href="rate-rollout.html">
+        <div class="ic">🔁</div>
+        <h3>Rate Rollout</h3>
+        <p>Rate creation &amp; approval chain — SRM → NSM → Zonal Head → Sales Team, with premium/discount rules and approvals.</p>
+        <span class="go">Roll out rates →</span>
+      </a>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    mountTopbar("home");
+  </script>
+</body>
+</html>

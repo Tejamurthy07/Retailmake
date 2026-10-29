@@ -1,0 +1,480 @@
+<template>
+    <!-- Offline Indicator Badge -->
+    <template if:true={isOffline}>
+        <div class="offline-badge" role="status" aria-live="polite">
+            <lightning-icon icon-name="utility:offline" size="xx-small" variant="inverse"
+                class="slds-m-right_xx-small"></lightning-icon>
+            <span>Offline</span>
+        </div>
+    </template>
+
+    <lightning-card title="Day Attendance" icon-name="standard:shift">
+        <!-- Live Clock in Card Header -->
+        <div slot="actions" class="header-actions">
+            <div class="live-clock">
+                <lightning-icon icon-name="utility:clock" size="xx-small"
+                    class="slds-m-right_xx-small"></lightning-icon>
+                <span class="clock-time">{currentTimeDisplay}</span>
+            </div>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <!-- ===================================================================
+                 SECTION 1: DAY START PANEL (when day has NOT started)
+                 =================================================================== -->
+            <template if:false={isDayActive}>
+                <div class="day-start-panel">
+                    <!-- Greeting Header -->
+                    <div class="start-header">
+                        <lightning-icon icon-name="standard:today" size="large"></lightning-icon>
+                        <h2 class="slds-text-heading_medium slds-m-top_small">{greetingMessage}</h2>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-m-top_xx-small">
+                            {todayDateDisplay}
+                        </p>
+                    </div>
+
+                    <!-- Device Status Cards - Responsive Grid -->
+                    <div class="start-info slds-m-top_medium">
+                        <div class="slds-grid slds-gutters slds-wrap">
+                            <!-- Current Time -->
+                            <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-m-bottom_small">
+                                <div class="info-card">
+                                    <lightning-icon icon-name="utility:clock" size="small"
+                                        class="slds-m-right_small"></lightning-icon>
+                                    <div>
+                                        <span class="info-label">Current Time</span>
+                                        <span class="info-value">{currentTimeDisplay}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Location Status -->
+                            <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-m-bottom_small">
+                                <div class="info-card">
+                                    <lightning-icon icon-name="utility:location" size="small"
+                                        class="slds-m-right_small"></lightning-icon>
+                                    <div>
+                                        <span class="info-label">Location</span>
+                                        <span class="info-value">{locationStatusText}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Battery Level -->
+                            <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-m-bottom_small">
+                                <div class="info-card">
+                                    <lightning-icon icon-name="utility:battery_charging" size="small"
+                                        class="slds-m-right_small"></lightning-icon>
+                                    <div>
+                                        <span class="info-label">Battery</span>
+                                        <span class="info-value">{batteryLevelDisplay}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Network Status -->
+                            <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-m-bottom_small">
+                                <div class="info-card">
+                                    <lightning-icon icon-name={networkIcon} size="small"
+                                        class="slds-m-right_small"></lightning-icon>
+                                    <div>
+                                        <span class="info-label">Network</span>
+                                        <span class={networkStatusClass}>{networkStatusText}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selfie Capture for Day Start -->
+                    <template if:true={configSelfieRequired}>
+                        <div class="selfie-section slds-m-top_medium">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">Attendance Selfie</h3>
+                            <div class="photo-upload-area">
+                                <template if:false={startSelfiePreview}>
+                                    <div class="upload-placeholder">
+                                        <lightning-icon icon-name="utility:photo" size="large"></lightning-icon>
+                                        <p class="slds-m-top_x-small slds-text-body_small">
+                                            Capture selfie for attendance verification
+                                        </p>
+                                        <input type="file" accept="image/*" capture="user"
+                                            class="file-input" data-id="startSelfie"
+                                            onchange={handleStartSelfieCapture} />
+                                        <lightning-button variant="neutral" label="Take Selfie"
+                                            icon-name="utility:photo"
+                                            onclick={triggerStartSelfieCapture}
+                                            class="slds-m-top_small">
+                                        </lightning-button>
+                                    </div>
+                                </template>
+                                <template if:true={startSelfiePreview}>
+                                    <div class="photo-preview">
+                                        <img src={startSelfiePreview} alt="Start Day Selfie"
+                                            class="captured-photo" />
+                                        <lightning-button-icon icon-name="utility:close"
+                                            alternative-text="Remove Photo" variant="bare-inverse"
+                                            class="remove-photo-btn" onclick={removeStartSelfie}>
+                                        </lightning-button-icon>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Odometer Reading -->
+                    <div class="slds-m-top_medium">
+                        <lightning-input
+                            type="number"
+                            label="Odometer Reading (km)"
+                            value={odometerStart}
+                            onchange={handleOdometerStartChange}
+                            placeholder="Enter current odometer reading"
+                            min="0"
+                            step="0.1"
+                            field-level-help="Enter your vehicle's odometer reading before starting the day">
+                        </lightning-input>
+                    </div>
+
+                    <!-- Companion Selection -->
+                    <div class="slds-m-top_medium">
+                        <lightning-input
+                            type="toggle"
+                            label="With Companion"
+                            checked={withCompanion}
+                            onchange={handleCompanionToggle}
+                            message-toggle-active="Yes"
+                            message-toggle-inactive="No">
+                        </lightning-input>
+                        <template if:true={withCompanion}>
+                            <div class="companion-lookup slds-m-top_small">
+                                <label class="slds-form-element__label">Companion</label>
+                                <div class="slds-combobox_container">
+                                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click">
+                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right">
+                                            <input type="text"
+                                                class="slds-input slds-combobox__input"
+                                                value={companionSearchTerm}
+                                                oninput={handleCompanionSearch}
+                                                placeholder="Search employees by name..."
+                                                autocomplete="off" />
+                                            <template if:true={companionId}>
+                                                <lightning-button-icon
+                                                    icon-name="utility:close"
+                                                    alternative-text="Clear"
+                                                    variant="bare"
+                                                    size="small"
+                                                    class="companion-clear-btn"
+                                                    onclick={clearCompanion}>
+                                                </lightning-button-icon>
+                                            </template>
+                                        </div>
+                                        <template if:true={showCompanionDropdown}>
+                                            <div class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox">
+                                                <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                                    <template for:each={companionSearchResults} for:item="emp">
+                                                        <li key={emp.id} role="presentation"
+                                                            class="slds-listbox__item"
+                                                            data-id={emp.id}
+                                                            onclick={handleCompanionSelect}>
+                                                            <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                                                role="option">
+                                                                <span class="slds-media__body">
+                                                                    <span class="slds-truncate">{emp.name}</span>
+                                                                    <span class="slds-text-body_small slds-text-color_weak">{emp.subtitle}</span>
+                                                                </span>
+                                                            </div>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Start Day Button -->
+                    <div class="slds-m-top_large slds-text-align_center">
+                        <lightning-button
+                            variant="brand"
+                            label="Start Day"
+                            icon-name="utility:play"
+                            onclick={handleStartDay}
+                            disabled={startDayDisabled}
+                            class="start-day-btn">
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ===================================================================
+                 SECTION 2: ACTIVE DAY DASHBOARD (after day has started)
+                 =================================================================== -->
+            <template if:true={isDayActive}>
+                <!-- Timer & Status Header with End Day Button -->
+                <div class="active-day-header">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap">
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_4-of-12">
+                            <span class="active-badge">
+                                <lightning-icon icon-name="utility:success" size="xx-small"
+                                    variant="inverse" class="slds-m-right_xx-small"></lightning-icon>
+                                Day Active
+                            </span>
+                            <p class="slds-text-body_small header-subtitle slds-m-top_xx-small">
+                                Started at {dayStartTimeDisplay}
+                            </p>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_4-of-12 timer-col">
+                            <div class="running-timer">
+                                <span class="timer-label">Duration</span>
+                                <span class="timer-value">{dayDurationDisplay}</span>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-text-align_right slds-m-top_small">
+                            <lightning-button
+                                variant="destructive"
+                                label="End Day"
+                                icon-name="utility:stop"
+                                onclick={handleEndDayClick}
+                                disabled={isProcessing}
+                                class="end-day-btn">
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Stats Grid - 6 Tiles, Responsive -->
+                <div class="stats-grid slds-m-top_medium slds-m-bottom_medium">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <!-- Tile 1: Completed Visits -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-visits">
+                                <span class="stat-icon stat-icon-visits">
+                                    <lightning-icon icon-name="standard:log_a_call" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{completedVisits}</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                        </div>
+                        <!-- Tile 2: Productive % -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-productive">
+                                <span class="stat-icon stat-icon-productive">
+                                    <lightning-icon icon-name="standard:performance" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{productivityPercent}%</span>
+                                <span class="stat-label">Productive</span>
+                            </div>
+                        </div>
+                        <!-- Tile 3: Orders -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-orders">
+                                <span class="stat-icon stat-icon-orders">
+                                    <lightning-icon icon-name="standard:orders" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{ordersToday}</span>
+                                <span class="stat-label">Orders</span>
+                            </div>
+                        </div>
+                        <!-- Tile 4: Order Value -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-order-value">
+                                <span class="stat-icon stat-icon-order-value">
+                                    <lightning-icon icon-name="standard:currency" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{orderValueFormatted}</span>
+                                <span class="stat-label">Order Value</span>
+                            </div>
+                        </div>
+                        <!-- Tile 5: Collections -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-collections">
+                                <span class="stat-icon stat-icon-collections">
+                                    <lightning-icon icon-name="standard:cash" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{collectionTotalFormatted}</span>
+                                <span class="stat-label">Collections</span>
+                            </div>
+                        </div>
+                        <!-- Tile 6: Distance -->
+                        <div class="slds-col slds-size_6-of-12 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                            <div class="stat-card stat-distance">
+                                <span class="stat-icon stat-icon-distance">
+                                    <lightning-icon icon-name="standard:location" size="small"></lightning-icon>
+                                </span>
+                                <span class="stat-number">{distanceCovered} km</span>
+                                <span class="stat-label">Distance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GPS Tracking Status -->
+                <template if:true={configGpsTrackingEnabled}>
+                    <div class="gps-tracking-status slds-m-bottom_medium">
+                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div class="slds-col">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <span class={gpsIndicatorClass}></span>
+                                    <span class="slds-text-body_small slds-m-left_x-small">
+                                        GPS Tracking {gpsTrackingStatusText}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-text-align_right">
+                                <template if:true={offlineGpsQueueCount}>
+                                    <span class="offline-queue-badge">
+                                        {offlineGpsQueueCount} queued
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Embedded Visit Plan Board -->
+                <div class="slds-m-top_medium">
+                    <c-visit-plan-board></c-visit-plan-board>
+                </div>
+            </template>
+
+            <!-- ===================================================================
+                 SECTION 3: END DAY MODAL
+                 =================================================================== -->
+            <template if:true={showEndDayModal}>
+                <section role="dialog" tabindex="-1" aria-modal="true"
+                    aria-labelledby="end-day-modal-heading"
+                    class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <!-- Modal Header -->
+                        <header class="slds-modal__header">
+                            <lightning-button-icon icon-name="utility:close"
+                                alternative-text="Close" variant="bare-inverse"
+                                class="slds-modal__close" onclick={closeEndDayModal}>
+                            </lightning-button-icon>
+                            <h2 id="end-day-modal-heading" class="slds-text-heading_medium">
+                                Day End Summary
+                            </h2>
+                            <p class="slds-m-top_x-small slds-text-body_small slds-text-color_inverse-weak">
+                                Review your day before ending
+                            </p>
+                        </header>
+
+                        <!-- Modal Content -->
+                        <div class="slds-modal__content slds-p-around_medium">
+                            <!-- Summary Stats Table -->
+                            <div class="summary-grid">
+                                <div class="summary-row">
+                                    <span class="summary-label">Day Duration</span>
+                                    <span class="summary-value">{dayDurationDisplay}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Completed Visits</span>
+                                    <span class="summary-value">{completedVisits}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Productive Calls</span>
+                                    <span class="summary-value">{productiveCalls}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Non-Productive Calls</span>
+                                    <span class="summary-value">{nonProductiveCalls}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Orders Booked</span>
+                                    <span class="summary-value">{ordersToday}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Order Value</span>
+                                    <span class="summary-value">{orderValueFormatted}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Collections</span>
+                                    <span class="summary-value">{collectionTotalFormatted}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Distance Covered</span>
+                                    <span class="summary-value">{distanceCovered} km</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Productivity</span>
+                                    <span class="summary-value">{productivityPercent}%</span>
+                                </div>
+                            </div>
+
+                            <!-- End Day Selfie -->
+                            <div class="slds-m-top_medium">
+                                <h4 class="slds-text-title_caps slds-m-bottom_x-small">End Day Photo</h4>
+                                <div class="photo-upload-area-small">
+                                    <template if:false={endSelfiePreview}>
+                                        <input type="file" accept="image/*" capture="user"
+                                            class="file-input" data-id="endSelfie"
+                                            onchange={handleEndSelfieCapture} />
+                                        <lightning-button variant="neutral" label="Take Photo"
+                                            icon-name="utility:photo"
+                                            onclick={triggerEndSelfieCapture}>
+                                        </lightning-button>
+                                    </template>
+                                    <template if:true={endSelfiePreview}>
+                                        <div class="photo-preview-small">
+                                            <img src={endSelfiePreview} alt="End Day Photo"
+                                                class="captured-photo-small" />
+                                            <lightning-button-icon icon-name="utility:close"
+                                                alternative-text="Remove" variant="bare"
+                                                class="remove-photo-btn-small"
+                                                onclick={removeEndSelfie}>
+                                            </lightning-button-icon>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Odometer End Reading -->
+                            <lightning-input
+                                type="number"
+                                label="Odometer End Reading (km)"
+                                value={odometerEnd}
+                                onchange={handleOdometerEndChange}
+                                placeholder="Enter odometer reading at end of day"
+                                min="0"
+                                step="0.1"
+                                class="slds-m-top_small">
+                            </lightning-input>
+
+                            <!-- End Day Remarks -->
+                            <lightning-textarea
+                                label="Day End Remarks"
+                                value={endDayRemarks}
+                                onchange={handleEndRemarksChange}
+                                placeholder="How was your day? Any observations, issues, or highlights..."
+                                max-length="1000"
+                                class="slds-m-top_small">
+                            </lightning-textarea>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <footer class="slds-modal__footer">
+                            <lightning-button
+                                variant="neutral"
+                                label="Cancel"
+                                onclick={closeEndDayModal}>
+                            </lightning-button>
+                            <lightning-button
+                                variant="brand"
+                                label="Confirm End Day"
+                                icon-name="utility:check"
+                                onclick={handleEndDay}
+                                disabled={isProcessing}
+                                class="slds-m-left_x-small">
+                            </lightning-button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+
+            <!-- Loading Spinner -->
+            <template if:true={isProcessing}>
+                <lightning-spinner alternative-text="Processing..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

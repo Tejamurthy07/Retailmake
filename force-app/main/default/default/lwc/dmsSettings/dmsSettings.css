@@ -1,0 +1,20 @@
+.wrap { padding: 0.5rem 1.25rem 1.5rem; }
+.err { color: #c23934; padding: 0.5rem 0; }
+.section { font-size: 1rem; font-weight: 700; color: #16325c; margin: 1.25rem 0 0.25rem; }
+.hint { font-size: 0.8rem; color: #8a94a6; margin: 0 0 0.85rem; }
+
+.grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.row {
+    display: grid; grid-template-columns: 1fr 260px; align-items: center; gap: 1rem;
+    background: #fff; border: 1px solid #eef1f6; border-radius: 10px; padding: 0.7rem 1rem;
+}
+.row-info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.row-label { font-size: 0.9rem; font-weight: 600; color: #16325c; }
+.row-desc { font-size: 0.78rem; color: #5a6b87; }
+.row-key { font-size: 0.68rem; color: #b0b8c6; font-family: monospace; }
+.row-input { justify-self: end; width: 100%; max-width: 260px; }
+
+@media (max-width: 700px) {
+    .row { grid-template-columns: 1fr; }
+    .row-input { justify-self: start; }
+}

@@ -1,0 +1,24 @@
+<template>
+    <div class="portal">
+        <nav class="nav">
+            <template for:each={tabs} for:item="t">
+                <button key={t.key} data-name={t.key} class={t.css} onclick={select}>{t.label}</button>
+            </template>
+        </nav>
+
+        <div class="content">
+            <template if:true={isHome}><c-dms-home></c-dms-home></template>
+            <template if:true={isProducts}><c-dms-products></c-dms-products></template>
+            <template if:true={isOrders}><c-distributor-orders></c-distributor-orders></template>
+            <template if:true={isInvoices}><c-distributor-invoices></c-distributor-invoices></template>
+            <template if:true={isGrn}><c-distributor-grn></c-distributor-grn></template>
+            <template if:true={isInventory}><c-distributor-inventory></c-distributor-inventory></template>
+            <template if:true={isLedger}><c-distributor-ledger></c-distributor-ledger></template>
+            <template if:true={isCollection}><c-distributor-collection></c-distributor-collection></template>
+            <template if:true={isReturns}><c-distributor-returns></c-distributor-returns></template>
+            <template if:true={isClaims}><c-distributor-claims></c-distributor-claims></template>
+            <template if:true={isCustomers}><c-distributor-customers></c-distributor-customers></template>
+            <template if:true={isSupport}><c-distributor-tickets></c-distributor-tickets></template>
+        </div>
+    </div>
+</template>

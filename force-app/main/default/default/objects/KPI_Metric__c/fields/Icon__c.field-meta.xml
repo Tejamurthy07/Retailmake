@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Icon__c</fullName>
+    <description>SLDS icon name to display on the KPI card (e.g., utility:money, utility:people, standard:orders).</description>
+    <externalId>false</externalId>
+    <label>Icon</label>
+    <length>80</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

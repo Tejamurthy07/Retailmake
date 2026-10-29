@@ -1,0 +1,293 @@
+/* Admin Config Console Styles */
+:host {
+    --brand-primary: #0176d3;
+    --success-color: #2e844a;
+    --warning-color: #dd7a01;
+    --error-color: #ea001e;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+    --sidebar-bg: #f3f3f3;
+}
+
+.file-input {
+    display: none;
+}
+
+/* Sidebar Navigation */
+.config-sidebar {
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 500px;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #706e6b;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+}
+
+.sidebar-item:hover {
+    background: #e5e5e5;
+    color: #181818;
+}
+
+.sidebar-item.active {
+    background: var(--brand-primary);
+    color: #ffffff;
+}
+
+.sidebar-item.active lightning-icon {
+    --lwc-colorTextIconDefault: #ffffff;
+}
+
+/* Config Panel */
+.config-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.panel-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--brand-primary);
+}
+
+.panel-header h3 {
+    margin-bottom: 4px;
+}
+
+.panel-actions {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Feature Toggles */
+.toggles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toggle-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: border-color 0.15s ease;
+}
+
+.toggle-card:hover {
+    border-color: var(--brand-primary);
+}
+
+.toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-info {
+    flex: 1;
+}
+
+.toggle-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #181818;
+}
+
+.toggle-description {
+    display: block;
+    font-size: 12px;
+    color: #706e6b;
+    margin-top: 2px;
+}
+
+.toggle-module {
+    display: inline-block;
+    font-size: 10px;
+    color: #706e6b;
+    background: var(--bg-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.toggle-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Tier Badges */
+.tier-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tier-core {
+    background: #e6f7e9;
+    color: var(--success-color);
+}
+
+.tier-standard {
+    background: #e8f4fd;
+    color: var(--brand-primary);
+}
+
+.tier-premium {
+    background: #f3e8ff;
+    color: #9b59b6;
+}
+
+.tier-enterprise {
+    background: linear-gradient(135deg, #f9d923 0%, #f0c419 100%);
+    color: #7a6200;
+}
+
+/* App Config Table */
+.config-table-container {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.config-key {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-primary);
+    background: #f0f7ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.config-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+}
+
+.config-desc {
+    font-size: 12px;
+    color: #706e6b;
+}
+
+table.slds-table thead th {
+    background: #fafbfc;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #706e6b;
+}
+
+/* Geo Settings */
+.geo-settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.geo-setting-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.setting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.setting-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #181818;
+}
+
+.setting-current {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    background: #f0f7ff;
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+.setting-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.inline-toggle {
+    padding: 4px 0;
+}
+
+/* Approval Matrix */
+.approval-matrix-container {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.process-name {
+    font-weight: 600;
+    color: var(--brand-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .config-sidebar {
+        min-height: auto;
+        margin-bottom: 16px;
+    }
+
+    .sidebar-nav {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+    }
+
+    .sidebar-item {
+        white-space: nowrap;
+    }
+
+    .slds-size_1-of-5 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .slds-size_4-of-5 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}

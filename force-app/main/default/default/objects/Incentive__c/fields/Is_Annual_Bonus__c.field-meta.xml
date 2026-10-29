@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Annual_Bonus__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Flags this record as an annual bonus calculation rather than a regular incentive.</description>
+    <inlineHelpText>If checked, this incentive record represents an annual bonus (average of top 3 quarterly incentives), not a regular period-based incentive calculation.</inlineHelpText>
+    <label>Is Annual Bonus</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

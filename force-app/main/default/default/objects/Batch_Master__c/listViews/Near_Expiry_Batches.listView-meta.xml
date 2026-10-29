@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Near_Expiry_Batches</fullName>
+    <columns>NAME</columns>
+    <columns>Batch_Number__c</columns>
+    <columns>Product_Ext__c</columns>
+    <columns>Expiry_Date__c</columns>
+    <columns>Shelf_Life_Remaining_Pct__c</columns>
+    <columns>Quantity_Manufactured__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Active</value>
+    </filters>
+    <filters>
+        <field>Is_Near_Expiry__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Near Expiry Batches</label>
+</ListView>

@@ -1,0 +1,53 @@
+<template>
+    <section class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container dkd-modal-container">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    variant="bare-inverse"
+                    class="slds-modal__close"
+                    onclick={handleCancel}></lightning-button-icon>
+                <h2 class="slds-modal__title">{modalTitle}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <lightning-input
+                    label="View Name"
+                    required
+                    value={_localName}
+                    onchange={handleNameChange}
+                    placeholder="e.g., Delhi Sales Performance"
+                    class="slds-m-bottom_small"></lightning-input>
+
+                <lightning-textarea
+                    label="Description"
+                    value={_localDescription}
+                    onchange={handleDescriptionChange}
+                    placeholder="Optional — what this view shows"
+                    class="slds-m-bottom_small"></lightning-textarea>
+
+                <div class="slds-form-element slds-m-bottom_small">
+                    <div class="slds-form-element__control">
+                        <label class="slds-checkbox">
+                            <input type="checkbox" checked={_localIsShared} onchange={handleSharedChange}/>
+                            <span class="slds-checkbox_faux"></span>
+                            <span class="slds-form-element__label">Share with all users</span>
+                        </label>
+                    </div>
+                    <p class="slds-form-element__help dkd-help">
+                        When checked, anyone with access to the dashboard can see this view.
+                    </p>
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick={handleCancel} disabled={isSaving}>
+                    Cancel
+                </button>
+                <button class="slds-button slds-button_brand" onclick={handleSave} disabled={isSaveDisabled}>
+                    <template if:true={isSaving}>Saving...</template>
+                    <template if:false={isSaving}>{saveButtonLabel}</template>
+                </button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

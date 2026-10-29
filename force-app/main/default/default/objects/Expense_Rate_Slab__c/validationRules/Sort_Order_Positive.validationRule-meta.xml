@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sort_Order_Positive</fullName>
+    <active>true</active>
+    <description>Sort Order must be a positive number when specified.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Sort_Order__c)),
+    Sort_Order__c &lt; 1
+)</errorConditionFormula>
+    <errorDisplayField>Sort_Order__c</errorDisplayField>
+    <errorMessage>Sort Order must be a positive number.</errorMessage>
+</ValidationRule>

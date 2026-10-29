@@ -1,0 +1,119 @@
+<template>
+    <lightning-card title="Filters">
+
+        <template for:each={filters} for:item="f">
+            <div key={f.id} class="filter-card slds-box slds-m-vertical_small slds-p-around_small">
+
+                <!-- FIELD + OPERATOR IN ONE ROW -->
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+
+                    <div class="slds-col slds-size_6-of-12 slds-p-right_small">
+                        <!-- FIELD SEARCH INPUT -->
+                        <div class="fbe-search-box">
+                            <lightning-input type="text" label={f.label}
+                                placeholder="Search field (Amount, CloseDate...)" data-id={f.id}
+                                value={f.fieldSearchText} onchange={handleFieldSearch}>
+                            </lightning-input>
+
+                            <template if:true={f.showFieldDropdown}>
+                                <div class="fbe-dropdown">
+                                    <template for:each={f.filteredFieldOptions} for:item="opt">
+                                        <div key={opt.value} class="fbe-option" data-id={f.id} data-value={opt.value}
+                                            onclick={selectField}>
+
+                                            <lightning-icon icon-name={opt.icon} size="x-small"></lightning-icon>
+
+                                            <div>
+                                                <div class="fbe-option-label">{opt.label}</div>
+                                                <span class={opt.typeBadgeClass}>{opt.type}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+
+                    <!-- OPERATOR -->
+                    <div class="slds-col slds-size_4-of-12 slds-p-right_small">
+                        <lightning-combobox label="Operator" data-id={f.id} value={f.operator}
+                            options={f.operatorOptions} onchange={handleOperatorChange}>
+                        </lightning-combobox>
+                    </div>
+
+                    <!-- DELETE -->
+                    <div class="slds-col slds-size_2-of-12 slds-p-top_large">
+                        <lightning-button-icon icon-name="utility:delete" alternative-text="Delete filter"
+                            variant="destructive" data-id={f.id} onclick={deleteFilter}>
+                        </lightning-button-icon>
+                    </div>
+                </div>
+
+                <!-- VALUE AREA -->
+                <template if:true={f.showValue}>
+                    <div class="slds-m-top_small">
+
+                        <!-- NUMBER -->
+                        <template if:true={f.isNumber}>
+                            <lightning-input type="number" label="Value" data-id={f.id} value={f.value}
+                                onchange={handleValueChange}>
+                            </lightning-input>
+                        </template>
+
+                        <!-- STRING -->
+                        <template if:true={f.isString}>
+                            <lightning-input type="text" label="Value" data-id={f.id} value={f.value}
+                                onchange={handleValueChange}>
+                            </lightning-input>
+                        </template>
+
+                        <!-- DATE / DATETIME -->
+                        <template if:true={f.isDate}>
+                            <lightning-input type="date" label="Value" data-id={f.id} value={f.value}
+                                onchange={handleValueChange}>
+                            </lightning-input>
+                        </template>
+
+                        <!-- IN / NOT IN (comma separated) -->
+                        <template if:true={f.isMultiValue}>
+                            <lightning-input type="text" label="Values (comma separated)" data-id={f.id} value={f.value}
+                                onchange={handleMultiValueChange}>
+                            </lightning-input>
+                        </template>
+
+                        <!-- PICKLIST -->
+                        <template if:true={f.isPicklist}>
+                            <lightning-combobox label="Select value" data-id={f.id} value={f.value}
+                                options={f.picklistOptions} onchange={handleValueChange}>
+                            </lightning-combobox>
+                        </template>
+
+                        <!-- MULTIPICKLIST -->
+                        <template if:true={f.isMultiPicklist}>
+                            <lightning-dual-listbox label="Select values" source-label="Available"
+                                selected-label="Selected" data-id={f.id} options={f.picklistOptions}
+                                value={f.valueArray} onchange={handleMultiPicklistChange}>
+                            </lightning-dual-listbox>
+                        </template>
+
+                        <!-- BOOLEAN -->
+                        <template if:true={f.isBoolean}>
+                            <lightning-combobox label="Value" data-id={f.id} value={f.value} options={booleanOptions}
+                                onchange={handleValueChange}>
+                            </lightning-combobox>
+                        </template>
+
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+        <!-- ADD FILTER BUTTON -->
+        <div class="slds-m-top_medium slds-align_absolute-center">
+            <lightning-button label="Add Filter" variant="brand-outline" onclick={addFilter}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

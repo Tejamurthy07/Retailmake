@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rate_Type__c</fullName>
+    <label>Rate Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Per Day</fullName>
+                <default>false</default>
+                <label>Per Day</label>
+            </value>
+            <value>
+                <fullName>Per KM</fullName>
+                <default>false</default>
+                <label>Per KM</label>
+            </value>
+            <value>
+                <fullName>Flat Monthly</fullName>
+                <default>false</default>
+                <label>Flat Monthly</label>
+            </value>
+            <value>
+                <fullName>Actual</fullName>
+                <default>false</default>
+                <label>Actual</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

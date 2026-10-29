@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Email (SMTP)</label>
+    <protected>false</protected>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Messaging</value>
+    </values>
+    <values>
+        <field>Connector_Class__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Transactional email delivery for invoices, statements and alerts.</value>
+    </values>
+    <values>
+        <field>Docs_URL__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Icon__c</field>
+        <value xsi:type="xsd:string">utility:email</value>
+    </values>
+    <values>
+        <field>Named_Credential_Name__c</field>
+        <value xsi:type="xsd:string">Integration_Email</value>
+    </values>
+    <values>
+        <field>Provider_Options__c</field>
+        <value xsi:type="xsd:string">SendGrid;Amazon SES;Custom SMTP</value>
+    </values>
+    <values>
+        <field>Requires_Credential__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Settings_Schema__c</field>
+        <value xsi:type="xsd:string">[{&quot;key&quot;:&quot;fromName&quot;,&quot;label&quot;:&quot;From Name&quot;,&quot;type&quot;:&quot;text&quot;,&quot;required&quot;:true},{&quot;key&quot;:&quot;fromAddress&quot;,&quot;label&quot;:&quot;From Address&quot;,&quot;type&quot;:&quot;text&quot;,&quot;required&quot;:true},{&quot;key&quot;:&quot;apiKey&quot;,&quot;label&quot;:&quot;API Key / SMTP Password&quot;,&quot;type&quot;:&quot;password&quot;,&quot;secret&quot;:true,&quot;required&quot;:true}]</value>
+    </values>
+    <values>
+        <field>Sort_Order__c</field>
+        <value xsi:type="xsd:double">30.0</value>
+    </values>
+</CustomMetadata>

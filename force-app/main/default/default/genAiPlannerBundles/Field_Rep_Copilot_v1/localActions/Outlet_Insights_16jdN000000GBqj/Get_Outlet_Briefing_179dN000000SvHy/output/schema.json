@@ -1,0 +1,118 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "agingSummary" : {
+      "title" : "Aging Summary",
+      "description" : "Outstanding balance split by age bucket: current, 31-60, 61-90 and 90+ days.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "channel" : {
+      "title" : "Channel",
+      "description" : "The sales channel the outlet belongs to.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "city" : {
+      "title" : "City",
+      "description" : "The outlet city.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "creditLimit" : {
+      "title" : "Credit Limit",
+      "description" : "The outlet credit limit, in rupees.",
+      "multipleOf" : 1.0E-34,
+      "lightning:type" : "lightning__numberType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "hasAccess" : {
+      "title" : "Has Access",
+      "description" : "True if the running user can see this outlet. False means it was not found or access is denied.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "lastOrderSummary" : {
+      "title" : "Last Order Summary",
+      "description" : "One sentence describing the most recent order: date, amount and status.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "lastVisitDate" : {
+      "title" : "Last Visit Date",
+      "description" : "The date the outlet was last visited.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "outletName" : {
+      "title" : "Outlet Name",
+      "description" : "The outlet name.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "outletType" : {
+      "title" : "Outlet Type",
+      "description" : "The outlet type, e.g. Retailer or General Store.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "outstandingBalance" : {
+      "title" : "Outstanding Balance",
+      "description" : "Total amount the outlet currently owes, in rupees.",
+      "multipleOf" : 1.0E-34,
+      "lightning:type" : "lightning__numberType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "pendingOrders" : {
+      "title" : "Pending Orders",
+      "description" : "Number of pending, unfulfilled orders for the outlet.",
+      "multipleOf" : 1.0E-34,
+      "lightning:type" : "lightning__numberType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "summary" : {
+      "title" : "Summary",
+      "description" : "A ready-to-read one-paragraph outlet summary. Prefer this for the reply.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType",
+  "lightning:textIndexed" : true
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Shelf_Life_Remaining_Pct__c</fullName>
+    <formula>IF(
+    AND(NOT(ISBLANK(Expiry_Date__c)), NOT(ISBLANK(Manufacturing_Date__c)), Expiry_Date__c &gt; Manufacturing_Date__c),
+    MAX(0, (Expiry_Date__c - TODAY()) / (Expiry_Date__c - Manufacturing_Date__c)),
+    0
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Shelf Life Remaining %</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Percent</type>
+</CustomField>

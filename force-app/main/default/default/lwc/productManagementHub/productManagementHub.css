@@ -1,0 +1,484 @@
+/* ── Layout ──────────────────────────────────────────────────────────── */
+
+:host {
+    display: block;
+}
+
+.hub-container {
+    display: flex;
+    min-height: calc(100vh - 120px);
+    background: #f4f6f9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────── */
+
+.sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: #1b2a4a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.sidebar-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-left-color: #4a9eff;
+    font-weight: 600;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 6px 16px;
+}
+
+/* ── Main Content ───────────────────────────────────────────────────── */
+
+.main-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.content-header {
+    margin-bottom: 20px;
+}
+
+.content-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1b2a4a;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+}
+
+/* ── Dashboard Grid ─────────────────────────────────────────────────── */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 24px 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.stat-blue { border-left-color: #4a9eff; }
+.stat-blue .stat-value { color: #4a9eff; }
+.stat-green { border-left-color: #22c55e; }
+.stat-green .stat-value { color: #22c55e; }
+.stat-purple { border-left-color: #8b5cf6; }
+.stat-purple .stat-value { color: #8b5cf6; }
+.stat-teal { border-left-color: #14b8a6; }
+.stat-teal .stat-value { color: #14b8a6; }
+.stat-orange { border-left-color: #f59e0b; }
+.stat-orange .stat-value { color: #f59e0b; }
+.stat-red { border-left-color: #ef4444; }
+.stat-red .stat-value { color: #ef4444; }
+.stat-dark-red { border-left-color: #991b1b; }
+.stat-dark-red .stat-value { color: #991b1b; }
+.stat-indigo { border-left-color: #6366f1; }
+.stat-indigo .stat-value { color: #6366f1; }
+.stat-cyan { border-left-color: #06b6d4; }
+.stat-cyan .stat-value { color: #06b6d4; }
+.stat-pink { border-left-color: #ec4899; }
+.stat-pink .stat-value { color: #ec4899; }
+
+/* ── Toolbar ────────────────────────────────────────────────────────── */
+
+.section-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+/* Fixed widths for the filter inputs in the Products toolbar so the
+   search box doesn't collapse when combobox filters get long labels. */
+.toolbar-search {
+    min-width: 260px;
+}
+
+.toolbar-filter {
+    min-width: 180px;
+}
+
+/* ── Data Table ─────────────────────────────────────────────────────── */
+
+.data-table-wrapper {
+    background: #fff;
+    border-radius: 8px;
+    /* Cap vertical height so long result sets scroll inside the wrapper
+       instead of pushing the page-level scrollbar down to the footer. */
+    max-height: calc(100vh - 320px);
+    min-height: 200px;
+    overflow: auto;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.data-table {
+    /* Let the table size to its content so columns stop squishing and the
+       horizontal scrollbar appears INSIDE the wrapper. min-width:100% keeps
+       the table at least as wide as its container when there's extra room. */
+    min-width: 100%;
+    width: max-content;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.data-table thead th {
+    background: #f8f9fb;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    /* Pin the header to the top of .data-table-wrapper so it stays
+       visible while the body scrolls vertically. z-index 2 so header
+       layers above body cells but below the sticky actions column,
+       whose top-right cell bumps to 3 below. */
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.data-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #2d3748;
+}
+
+.data-table tbody tr:hover {
+    background: #f7fafc;
+}
+
+.cell-mono {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* LWC scopes CSS with [lwc-xxx] attribute selectors, which push the
+   existing `.data-table thead th` rule to specificity 0,0,4,2 and
+   causes it to override a plain `.cell-number` rule. Matching the
+   same thead/tbody path bumps us to 0,0,5,2 so numeric headers
+   actually right-align and actions headers actually center. */
+.data-table thead th.cell-number,
+.data-table tbody td.cell-number {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table thead th.cell-actions,
+.data-table tbody td.cell-actions {
+    text-align: center !important;
+    white-space: nowrap;
+}
+
+.data-table tbody td.cell-actions {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    box-shadow: -4px 0 8px rgba(0, 0, 0, 0.06);
+    /* Above normal body cells so the sticky column paints over them
+       during horizontal scroll, but below the sticky header. */
+    z-index: 1;
+}
+
+.data-table tbody tr:hover .cell-actions {
+    background: #f7fafc;
+}
+
+.data-table thead th:last-child {
+    position: sticky;
+    right: 0;
+    background: #f8f9fb;
+    box-shadow: -4px 0 8px rgba(0, 0, 0, 0.06);
+    /* Top-right intersection: sits above BOTH the sticky header row
+       (z-index 2) AND the sticky right column (z-index 1), so the
+       corner cell stays fully visible when scrolling in either axis. */
+    z-index: 3;
+}
+
+/* ── Badges ─────────────────────────────────────────────────────────── */
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-green {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-gray {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-blue {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-red {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Stronger red for already-expired batches (past expiry date) so they
+   visually out-weigh the near-expiry warning. */
+.badge-dark-red {
+    background: #991b1b;
+    color: #fef2f2;
+}
+
+.badge-purple {
+    background: #f3e8ff;
+    color: #6b21a8;
+}
+
+/* ── Pagination ─────────────────────────────────────────────────────── */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.page-info {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────── */
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.empty-state p {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+/* ── Modal Overrides ────────────────────────────────────────────────── */
+
+.slds-modal__header {
+    background: #1b2a4a;
+    color: #fff;
+}
+
+.slds-modal__title {
+    color: #fff !important;
+}
+
+.slds-modal__content {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+/* ── Product Lookup ────────────────────────────────────────────────── */
+
+.product-lookup-container {
+    position: relative;
+}
+
+.product-lookup-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef4ff;
+    border: 1px solid #b3d1ff;
+    border-radius: 4px;
+    padding: 6px 8px;
+    min-height: 34px;
+}
+
+.product-lookup-pill .pill-label {
+    flex: 1;
+    font-size: 13px;
+    color: #1b2a4a;
+    font-weight: 500;
+}
+
+.product-lookup-pill .pill-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+}
+
+.product-lookup-pill .pill-remove:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.product-lookup-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #d8dde6;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lookup-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.lookup-option:hover {
+    background: #f3f6fb;
+}
+
+.lookup-option-name {
+    font-size: 13px;
+    color: #1b2a4a;
+    font-weight: 500;
+}
+
+.lookup-option-meta {
+    font-size: 11px;
+    color: #6b7280;
+    font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+/* ── Priority Info Box ───────────────────────────────────────────── */
+
+.priority-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #1e40af;
+    line-height: 1.4;
+}
+
+.priority-config-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #0369a1;
+}

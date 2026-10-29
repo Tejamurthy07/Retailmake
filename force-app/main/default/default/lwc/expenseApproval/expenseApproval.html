@@ -1,0 +1,272 @@
+<template>
+    <!-- Loading Spinner -->
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+
+    <!-- Messages -->
+    <template if:true={errorMessage}>
+        <div class="msg msg-error">{errorMessage}</div>
+    </template>
+    <template if:true={successMessage}>
+        <div class="msg msg-success">{successMessage}</div>
+    </template>
+
+    <div class="approval-container">
+        <!-- Header -->
+        <div class="approval-header">
+            <div class="header-info">
+                <h2 class="header-title">Expense Approval</h2>
+                <span class="header-ref">{expense.Name}</span>
+            </div>
+            <span class={statusBadgeClass}>{expense.Status__c}</span>
+        </div>
+
+        <!-- Employee Info -->
+        <div class="employee-info">
+            <div class="emp-field">
+                <span class="emp-label">Employee</span>
+                <span class="emp-value">{employeeName}</span>
+            </div>
+            <div class="emp-field">
+                <span class="emp-label">Band</span>
+                <span class="emp-value">{employeeBand}</span>
+            </div>
+            <div class="emp-field">
+                <span class="emp-label">Month</span>
+                <span class="emp-value">{expense.Month__c} {expense.Year__c}</span>
+            </div>
+            <div class="emp-field">
+                <span class="emp-label">Eligible</span>
+                <span class="emp-value emp-amount">{totalEligible}</span>
+            </div>
+            <div class="emp-field">
+                <span class="emp-label">Claimed</span>
+                <span class="emp-value emp-amount">{totalClaimed}</span>
+            </div>
+            <div class="emp-field">
+                <span class="emp-label">Approved</span>
+                <span class="emp-value emp-amount">{totalApproved}</span>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <template if:true={isApprover}>
+            <div class="bulk-actions">
+                <div class="bulk-left">
+                    <template if:true={hasSelected}>
+                        <lightning-button
+                            label="Approve Selected ({selectedCount})"
+                            variant="success"
+                            onclick={handleApproveSelected}
+                            icon-name="utility:check">
+                        </lightning-button>
+                        <lightning-button
+                            label="Reject Selected ({selectedCount})"
+                            variant="destructive"
+                            onclick={handleRejectSelected}
+                            icon-name="utility:close">
+                        </lightning-button>
+                    </template>
+                </div>
+                <div class="bulk-right">
+                    <lightning-button
+                        label="Save Amounts"
+                        variant="brand"
+                        onclick={handleSaveAmounts}
+                        icon-name="utility:save">
+                    </lightning-button>
+                    <lightning-button
+                        label="Approve All"
+                        variant="success"
+                        onclick={handleApproveAll}
+                        icon-name="utility:check">
+                    </lightning-button>
+                    <lightning-button
+                        label="Reject All"
+                        variant="destructive"
+                        onclick={handleRejectAll}
+                        icon-name="utility:close">
+                    </lightning-button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Items Table -->
+        <div class="table-wrap">
+            <table class="approval-table">
+                <thead>
+                    <tr>
+                        <template if:true={isApprover}>
+                            <th class="check-col">
+                                <input type="checkbox" checked={selectAll} onchange={handleSelectAll} />
+                            </th>
+                        </template>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>From/To</th>
+                        <th class="num-col">KM</th>
+                        <th class="num-col">Eligible</th>
+                        <th class="num-col">System Calc.</th>
+                        <th class="num-col">Claimed</th>
+                        <th class="num-col">Approved</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Files</th>
+                        <template if:true={isApprover}>
+                            <th class="comment-col">Comment</th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={items} for:item="item">
+                        <tr key={item.key} class={item.rowClass}>
+                            <template if:true={isApprover}>
+                                <td class="check-col">
+                                    <template if:true={item.isEditable}>
+                                        <input type="checkbox"
+                                            checked={item.selected}
+                                            data-id={item.id}
+                                            onchange={handleSelectItem} />
+                                    </template>
+                                </td>
+                            </template>
+                            <td>{item.date}</td>
+                            <td class="type-col">
+                                <strong>{item.expenseType}</strong>
+                                <template if:true={item.vehicleType}>
+                                    <span class="vehicle-badge">{item.vehicleType}</span>
+                                </template>
+                                <template if:true={item.travelMode}>
+                                    <span class="travel-mode-badge">{item.travelMode}</span>
+                                </template>
+                            </td>
+                            <td>
+                                <template if:true={item.fromLocation}>
+                                    {item.fromLocation} → {item.toLocation}
+                                </template>
+                                <template if:true={item.city}>
+                                    {item.city}
+                                </template>
+                            </td>
+                            <td class="num-col">{item.manualDistance}</td>
+                            <td class="num-col">{item.eligibleAmount}</td>
+                            <td class="num-col">
+                                <span class="system-calc-value">{item.systemCalcAmount}</span>
+                                <template if:true={item.claimedExceedsSystem}>
+                                    <span class="exceeds-system-warn">!</span>
+                                </template>
+                            </td>
+                            <td class="num-col">{item.claimedAmount}</td>
+                            <td class="num-col">
+                                <template if:true={item.isEditable}>
+                                    <lightning-input
+                                        type="number"
+                                        step="0.01"
+                                        value={item.approvedAmount}
+                                        data-id={item.id}
+                                        onchange={handleAmountChange}
+                                        variant="label-hidden"
+                                        class="amt-input">
+                                    </lightning-input>
+                                    <template if:true={item.exceedsClaimed}>
+                                        <span class="exceeds-warn">Exceeds claimed</span>
+                                    </template>
+                                </template>
+                                <template if:false={item.isEditable}>
+                                    {item.approvedAmount}
+                                </template>
+                            </td>
+                            <td>
+                                <span class={item.statusClass}>{item.approvalStatus}</span>
+                            </td>
+                            <td class="notes-col" title={item.notes}>{item.notes}</td>
+                            <td class="files-col">
+                                <template if:true={item.hasFiles}>
+                                    <span class="file-count-badge">{item.fileCount}</span>
+                                    <template for:each={item.files} for:item="file">
+                                        <span key={file.contentDocumentId}
+                                            class="file-link"
+                                            data-docid={file.contentDocumentId}
+                                            onclick={handlePreviewFile}
+                                            title={file.title}>
+                                            {file.title}
+                                        </span>
+                                    </template>
+                                </template>
+                                <template if:false={item.hasFiles}>
+                                    <span class="no-file">-</span>
+                                </template>
+                            </td>
+                            <!-- Inline Comment -->
+                            <template if:true={isApprover}>
+                                <td class="comment-col">
+                                    <template if:true={item.isEditable}>
+                                        <lightning-button-icon
+                                            icon-name="utility:comments"
+                                            alternative-text="Add comment"
+                                            size="small"
+                                            variant="bare"
+                                            data-id={item.id}
+                                            onclick={handleToggleInlineComment}>
+                                        </lightning-button-icon>
+                                        <template if:true={item.showInlineComment}>
+                                            <div class="inline-comment-wrap">
+                                                <lightning-textarea
+                                                    value={item.inlineComment}
+                                                    data-id={item.id}
+                                                    onchange={handleInlineCommentChange}
+                                                    placeholder="Add comment..."
+                                                    max-length="1000"
+                                                    class="inline-comment-input">
+                                                </lightning-textarea>
+                                            </div>
+                                        </template>
+                                    </template>
+                                    <template if:true={item.approverComments}>
+                                        <span class="prev-comments" title={item.approverComments}>{item.approverComments}</span>
+                                    </template>
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Action Modal -->
+    <template if:true={showActionModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        onclick={closeActionModal}
+                        class="slds-modal__close">
+                    </lightning-button-icon>
+                    <h2 class="slds-text-heading_medium">{actionModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea
+                        label="Remarks / Reason"
+                        value={actionRemarks}
+                        onchange={handleActionRemarksChange}
+                        placeholder="Enter remarks..."
+                        max-length="32000">
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeActionModal}></lightning-button>
+                    <lightning-button
+                        label={actionConfirmLabel}
+                        variant={actionConfirmVariant}
+                        onclick={handleConfirmAction}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

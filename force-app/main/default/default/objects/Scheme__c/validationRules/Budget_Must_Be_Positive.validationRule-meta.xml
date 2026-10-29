@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Budget_Must_Be_Positive</fullName>
+    <active>true</active>
+    <description>Ensures scheme budget amount is positive when specified</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Budget_Amount__c)),
+    Budget_Amount__c &lt;= 0
+)</errorConditionFormula>
+    <errorDisplayField>Budget_Amount__c</errorDisplayField>
+    <errorMessage>Budget Amount must be greater than zero.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Leave_Type__c</fullName>
+    <label>Leave Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Casual Leave</fullName>
+                <default>false</default>
+                <label>Casual Leave</label>
+            </value>
+            <value>
+                <fullName>Sick Leave</fullName>
+                <default>false</default>
+                <label>Sick Leave</label>
+            </value>
+            <value>
+                <fullName>Earned Leave</fullName>
+                <default>false</default>
+                <label>Earned Leave</label>
+            </value>
+            <value>
+                <fullName>Compensatory Off</fullName>
+                <default>false</default>
+                <label>Compensatory Off</label>
+            </value>
+            <value>
+                <fullName>Half Day</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Half Day</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

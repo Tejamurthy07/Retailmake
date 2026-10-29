@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Todays_Attendance</fullName>
+    <columns>NAME</columns>
+    <columns>Salesperson__c</columns>
+    <columns>Status__c</columns>
+    <columns>Beat__c</columns>
+    <columns>Start_Time__c</columns>
+    <columns>End_Time__c</columns>
+    <columns>Hours_Worked__c</columns>
+    <columns>Total_Visits__c</columns>
+    <columns>Productive_Calls__c</columns>
+    <columns>Total_Orders__c</columns>
+    <columns>Total_Order_Value__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Attendance_Date__c</field>
+        <operation>equals</operation>
+        <value>TODAY</value>
+    </filters>
+    <label>Today&apos;s Attendance</label>
+</ListView>

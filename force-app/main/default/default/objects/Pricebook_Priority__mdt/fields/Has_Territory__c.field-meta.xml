@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Has_Territory__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Whether this priority level requires a Territory to be specified on the price list entry.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Has Territory</label>
+    <type>Checkbox</type>
+</CustomField>

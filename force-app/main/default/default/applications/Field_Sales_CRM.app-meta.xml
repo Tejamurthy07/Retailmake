@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <content>FMCG_Home</content>
+        <formFactor>Large</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+        <pageOrSobjectType>standard-home</pageOrSobjectType>
+    </actionOverrides>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Field Sales CRM</label>
+    <navType>Standard</navType>
+    <tabs>standard-home</tabs>
+    <tabs>Home_Page</tabs>
+    <tabs>standard-Account</tabs>
+    <tabs>Beat_Manager</tabs>
+    <tabs>Beat_Calendar</tabs>
+    <tabs>Visit_Manager</tabs>
+    <tabs>Survey_Manager</tabs>
+    <tabs>Product_Management_Hub</tabs>
+    <tabs>Stock_Management</tabs>
+    <tabs>KPI_Dashboard</tabs>
+    <tabs>Achievement_Dashboard</tabs>
+    <tabs>Visit_Activity_Settings</tabs>
+    <tabs>Sales_Order__c</tabs>
+    <tabs>Collection__c</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>standard-Dashboard</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

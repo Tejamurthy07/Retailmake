@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Benefit_Type__c</fullName>
+    <label>Benefit Type</label>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Discount</fullName>
+                <default>false</default>
+                <label>Discount</label>
+            </value>
+            <value>
+                <fullName>Free Product</fullName>
+                <default>false</default>
+                <label>Free Product</label>
+            </value>
+            <value>
+                <fullName>Points</fullName>
+                <default>false</default>
+                <label>Points</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

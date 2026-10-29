@@ -1,0 +1,118 @@
+<template>
+    <div class="dms-coll">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-toolbar__left">
+                    <lightning-input class="dms-search" type="search" variant="label-hidden"
+                        placeholder="Search receipt, payer, invoice..." value={search} onchange={handleSearch}></lightning-input>
+                </div>
+                <button class="dms-btn" type="button" onclick={openModal}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Record Collection
+                </button>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-card">
+                        <span class="dms-card__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={hasRows}>
+                <div class="dms-tbl dms-tbl_coll">
+                    <div class="dms-thead">
+                        <span>Receipt #</span><span>Date</span><span>Payer</span><span>Invoice</span>
+                        <span class="dms-num">Amount</span><span>Mode</span><span>Status</span>
+                    </div>
+                    <template for:each={rows} for:item="c">
+                        <div key={c.key} class="dms-trow">
+                            <span class="dms-link" data-label="Receipt #" data-id={c.id} onclick={openDetail}>{c.name}</span>
+                            <span data-label="Date"><lightning-formatted-date-time value={c.collectionDate}></lightning-formatted-date-time></span>
+                            <span data-label="Payer">{c.payer}</span>
+                            <span class="dms-code" data-label="Invoice">{c.invoiceNumber}</span>
+                            <span class="dms-num dms-strong" data-label="Amount"><lightning-formatted-number value={c.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                            <span data-label="Mode"><c-dms-status-badge label={c.paymentMode} theme={c.modeTheme}></c-dms-status-badge></span>
+                            <span data-label="Status"><c-dms-status-badge label={c.status}></c-dms-status-badge></span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasRows}>
+                <p class="dms-empty">No collections yet.</p>
+            </template>
+        </div>
+
+        <!-- ===================== Record Collection ===================== -->
+        <template if:true={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>Record Collection</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Against Invoice</label>
+                    <lightning-combobox variant="label-hidden" value={formInvoice}
+                        options={invoiceOptions} onchange={handleInvoice}></lightning-combobox>
+
+                    <label class="dms-flabel">Amount *</label>
+                    <lightning-input type="number" variant="label-hidden" min="0" placeholder="e.g. 15000"
+                        value={formAmount} onchange={handleAmount}></lightning-input>
+
+                    <label class="dms-flabel">Payment Mode *</label>
+                    <div class="dms-segs">
+                        <template for:each={modeButtons} for:item="m">
+                            <button key={m.mode} class={m.class} data-mode={m.mode} onclick={setMode} type="button">{m.mode}</button>
+                        </template>
+                    </div>
+
+                    <template if:true={showRefField}>
+                        <label class="dms-flabel">{refLabel}</label>
+                        <lightning-input variant="label-hidden" value={formRef} onchange={handleRef}></lightning-input>
+                    </template>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={save} disabled={saveDisabled}>Save</button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Collection detail (flyout) ===================== -->
+        <template if:true={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{selected.name}</h2>
+                        <p class="dms-flyout__sub"><lightning-formatted-date-time value={selected.collectionDate}></lightning-formatted-date-time></p>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Amount</span><span class="dms-flyout__val"><lightning-formatted-number value={selected.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span></div>
+                    <div><span class="dms-flyout__lbl">Status</span><span class="dms-flyout__val"><c-dms-status-badge label={selected.status}></c-dms-status-badge></span></div>
+                    <div><span class="dms-flyout__lbl">Payer</span><span class="dms-flyout__val">{selected.payer}</span></div>
+                    <div><span class="dms-flyout__lbl">Payment Mode</span><span class="dms-flyout__val"><c-dms-status-badge label={selected.paymentMode} theme={selected.modeTheme}></c-dms-status-badge></span></div>
+                    <div><span class="dms-flyout__lbl">Against Invoice</span><span class="dms-flyout__val">{selected.invoiceNumber}</span></div>
+                </div>
+            </aside>
+        </template>
+    </div>
+</template>

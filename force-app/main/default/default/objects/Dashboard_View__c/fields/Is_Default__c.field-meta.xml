@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Default__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When true, this is the owner&apos;s default view that loads automatically when the dashboard opens. Only one view per owner can be default.</description>
+    <label>Is Default</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

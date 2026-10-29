@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Customer_Type__c</fullName>
+    <label>Customer Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Retailer</fullName>
+                <default>false</default>
+                <label>Retailer</label>
+            </value>
+            <value>
+                <fullName>Distributor</fullName>
+                <default>false</default>
+                <label>Distributor</label>
+            </value>
+            <value>
+                <fullName>Super Stockist</fullName>
+                <default>false</default>
+                <label>Super Stockist</label>
+            </value>
+            <value>
+                <fullName>Modern Trade</fullName>
+                <default>false</default>
+                <label>Modern Trade</label>
+            </value>
+            <value>
+                <fullName>D2R</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>D2R</label>
+            </value>
+            <value>
+                <fullName>Institutional</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Institutional</label>
+            </value>
+            <value>
+                <fullName>Wholesale</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Wholesale</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>System_Calculated_Amount__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>System-computed eligible amount based on eligibility rules. Displayed alongside claimed amount for transparency.</description>
+    <label>System Calculated Amount</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Partner_Type__c</fullName>
+    <label>Partner Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Distributor</fullName>
+                <default>false</default>
+                <label>Distributor</label>
+            </value>
+            <value>
+                <fullName>Super Stockist</fullName>
+                <default>false</default>
+                <label>Super Stockist</label>
+            </value>
+            <value>
+                <fullName>C&amp;F Agent</fullName>
+                <default>false</default>
+                <label>C&amp;F Agent</label>
+            </value>
+            <value>
+                <fullName>Wholesaler</fullName>
+                <default>false</default>
+                <label>Wholesaler</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

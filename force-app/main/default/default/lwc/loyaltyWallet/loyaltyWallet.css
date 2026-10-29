@@ -1,0 +1,79 @@
+.lw-hero {
+    background: linear-gradient(135deg, #6b46c1 0%, #4a3a8c 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(107, 70, 193, 0.25);
+}
+
+.lw-hero-points {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.lw-hero-points-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.lw-hero-points-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.lw-hero-cash {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+.lw-empty {
+    color: #706e6b;
+    font-style: italic;
+    padding: 1rem;
+    text-align: center;
+    background: #f3f3f3;
+    border-radius: 6px;
+}
+
+.lw-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.lw-pill-earned {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.lw-pill-redeemed {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.lw-pill-expired {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.lw-pill-adjusted {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.lw-points-pos {
+    color: #027a48;
+    font-weight: 600;
+}
+
+.lw-points-neg {
+    color: #b91c1c;
+    font-weight: 600;
+}

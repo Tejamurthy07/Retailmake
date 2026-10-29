@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Adjustment_Type__c</fullName>
+    <label>Adjustment Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Physical_Count</fullName>
+                <default>false</default>
+                <label>Physical Count</label>
+            </value>
+            <value>
+                <fullName>Damage</fullName>
+                <default>false</default>
+                <label>Damage</label>
+            </value>
+            <value>
+                <fullName>Expiry_Write_Off</fullName>
+                <default>false</default>
+                <label>Expiry Write Off</label>
+            </value>
+            <value>
+                <fullName>Correction_Add</fullName>
+                <default>false</default>
+                <label>Correction Add</label>
+            </value>
+            <value>
+                <fullName>Correction_Deduct</fullName>
+                <default>false</default>
+                <label>Correction Deduct</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

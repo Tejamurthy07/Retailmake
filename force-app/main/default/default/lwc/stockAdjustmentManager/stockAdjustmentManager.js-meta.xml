@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Stock Adjustment Manager</masterLabel>
+    <description>Create, edit, and submit stock adjustments. System Qty auto-fills from Warehouse_Stock__c; approval flow writes back via existing INV service.</description>
+    <targets>
+        <target>lightning__Tab</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+</LightningComponentBundle>

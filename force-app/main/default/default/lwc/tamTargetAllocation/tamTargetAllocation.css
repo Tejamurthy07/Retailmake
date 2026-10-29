@@ -1,0 +1,165 @@
+/* Main container */
+.ta-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+/* ===== HEADER ===== */
+.ta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.ta-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ta-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* ===== CONTROLS BAR ===== */
+.ta-controls {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.ta-control-item {
+    min-width: 200px;
+    flex: 1;
+    max-width: 280px;
+}
+
+.ta-control-buttons {
+    display: flex;
+    align-items: center;
+    padding-bottom: 2px;
+}
+
+/* ===== TABLE ===== */
+.ta-table-wrapper {
+    background: white;
+    border-radius: 10px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ta-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ta-table thead { background: #f3f6f9; }
+
+.ta-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #54698d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.ta-th-name { min-width: 160px; }
+
+.ta-th-group {
+    text-align: center;
+    border-left: 2px solid #e5e5e5;
+    border-right: 2px solid #e5e5e5;
+}
+
+.ta-table td {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.ta-row:hover { background: #f8fafc; }
+
+.ta-name-cell { font-weight: 600; color: #3e3e3c; }
+
+/* ===== INLINE EDITING ===== */
+.ta-edit-cell { min-width: 100px; }
+
+.ta-editable-value {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px dashed transparent;
+    transition: all 0.15s;
+}
+
+.ta-editable-value:hover {
+    background: #eef4ff;
+    border-color: #0176d3;
+}
+
+.ta-inline-input {
+    max-width: 120px;
+}
+
+/* ===== ACHIEVEMENT % ===== */
+.ta-percent-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.ta-percent {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ta-percent-green { color: #2e844a; }
+.ta-percent-amber { color: #e65100; }
+.ta-percent-red { color: #c23934; }
+
+.ta-progress-bar {
+    height: 4px;
+    background: #e5e5e5;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.ta-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #0176d3, #2e844a);
+    transition: width 0.3s ease;
+}
+
+/* ===== EMPTY STATE ===== */
+.ta-empty {
+    text-align: center;
+    padding: 50px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ta-empty h2 { font-size: 18px; font-weight: 600; margin-top: 16px; color: #3e3e3c; }
+.ta-empty p { color: #6b6d70; margin-top: 8px; }
+
+/* ===== SPINNER ===== */
+.ta-spinner-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}

@@ -1,0 +1,44 @@
+<template>
+    <div class="dms-cust">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <lightning-input class="dms-search" type="search" variant="label-hidden"
+                    placeholder="Search customer, city..." onchange={handleSearch}></lightning-input>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={cards} for:item="c">
+                    <div key={c.id} class="dms-card">
+                        <span class="dms-card__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={error}>
+                <div class="dms-empty" style="color:var(--dms-danger)">{error}</div>
+            </template>
+            <template if:true={hasRows}>
+                <div class="dms-tbl dms-tbl_cust">
+                    <div class="dms-thead">
+                        <span>Customer</span><span>City</span><span>Outlet Type</span>
+                        <span class="dms-num">Credit Limit</span><span class="dms-num">Outstanding</span><span>Status</span>
+                    </div>
+                    <template for:each={rows} for:item="r">
+                        <div key={r.key} class="dms-trow">
+                            <span class="dms-strong" data-label="Customer">{r.name}</span>
+                            <span data-label="City">{r.city}</span>
+                            <span data-label="Outlet Type">{r.outletType}</span>
+                            <span class="dms-num" data-label="Credit Limit"><lightning-formatted-number value={r.creditLimit} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                            <span class="dms-num" data-label="Outstanding"><lightning-formatted-number value={r.outstanding} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                            <span data-label="Status"><c-dms-status-badge label={r.statusLabel} theme={r.statusTheme}></c-dms-status-badge></span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasRows}>
+                <p class="dms-empty">No customers found.</p>
+            </template>
+        </div>
+    </div>
+</template>

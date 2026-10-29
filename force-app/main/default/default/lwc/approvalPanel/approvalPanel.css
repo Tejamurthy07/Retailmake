@@ -1,0 +1,115 @@
+:host {
+    --ap-purple: #9050e9;
+    --ap-success: #2e844a;
+    --ap-error: #ea001e;
+    --ap-orange: #dd7a01;
+    --ap-text: #181818;
+    --ap-muted: #706e6b;
+    --ap-border: #e5e5e5;
+    --ap-bg: #f4f6f9;
+    display: block;
+    font-family: 'Salesforce Sans', Arial, sans-serif;
+    color: var(--ap-text);
+}
+
+.ap-card { border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.ap-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: linear-gradient(135deg, var(--ap-purple), #6b3bb8);
+    color: #fff;
+}
+.ap-header-left { display: flex; align-items: center; gap: 8px; }
+.ap-title { font-size: 15px; font-weight: 700; margin: 0; color: #fff; }
+
+.ap-status { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.4px; }
+.ap-status-pending { background: rgba(255,255,255,0.25); color: #fff; }
+.ap-status-approved { background: #fff; color: var(--ap-success); }
+.ap-status-rejected { background: #fff; color: var(--ap-error); }
+.ap-status-recalled { background: #fff; color: var(--ap-muted); }
+
+.ap-loading { padding: 30px; text-align: center; }
+
+.ap-empty { padding: 24px 16px; text-align: center; }
+.ap-empty-text { margin: 0 0 16px; color: var(--ap-text); }
+.ap-muted { color: var(--ap-muted); font-style: italic; }
+
+.ap-summary {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    padding: 14px 16px; background: var(--ap-bg); border-bottom: 1px solid var(--ap-border);
+}
+.ap-summary-item { display: flex; flex-direction: column; gap: 2px; }
+.ap-summary-label { font-size: 10px; font-weight: 700; color: var(--ap-muted);
+    text-transform: uppercase; letter-spacing: 0.4px; }
+.ap-summary-value { font-size: 13px; font-weight: 600; color: var(--ap-text); }
+.ap-current { color: var(--ap-purple); }
+
+.ap-actions { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--ap-border); }
+.ap-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border-radius: 999px; border: 1.5px solid transparent;
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    transition: all 0.15s ease;
+}
+.ap-btn-primary { background: var(--ap-purple); color: #fff; border-color: var(--ap-purple); }
+.ap-btn-primary:hover { background: #7c3ed1; }
+.ap-btn-approve { background: var(--ap-success); color: #fff; border-color: var(--ap-success); }
+.ap-btn-approve:hover { background: #246b3a; }
+.ap-btn-reject { background: var(--ap-error); color: #fff; border-color: var(--ap-error); }
+.ap-btn-reject:hover { background: #c50019; }
+.ap-btn-recall { background: #fff; color: var(--ap-muted); border-color: var(--ap-border); }
+.ap-btn-recall:hover { background: var(--ap-bg); }
+
+.ap-timeline-title {
+    padding: 12px 16px 4px; font-size: 11px; font-weight: 800; color: var(--ap-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ap-timeline { padding: 0 16px 16px; }
+.ap-step { display: flex; gap: 12px; padding: 8px 0; }
+.ap-step-left {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    position: relative; flex-shrink: 0;
+}
+.ap-step-dot {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 11px; font-weight: 800;
+    color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.ap-step-dot-approved { background: var(--ap-success); }
+.ap-step-dot-rejected { background: var(--ap-error); }
+.ap-step-dot-current { background: var(--ap-purple); animation: ap-pulse 1.5s infinite; }
+.ap-step-dot-pending { background: #c9c7c5; }
+.ap-step-dot-skipped { background: #999; opacity: 0.6; }
+@keyframes ap-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(144,80,233,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(144,80,233,0); }
+    100% { box-shadow: 0 0 0 0 rgba(144,80,233,0); }
+}
+.ap-step-line {
+    width: 2px; flex: 1; background: var(--ap-border); min-height: 20px;
+}
+
+.ap-step-body { flex: 1; display: flex; flex-direction: column; gap: 2px; padding-bottom: 8px; }
+.ap-step-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ap-step-approver { font-size: 13px; font-weight: 700; color: var(--ap-text); }
+.ap-step-badge {
+    font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+}
+.ap-badge-approved { background: #e6f7e9; color: var(--ap-success); }
+.ap-badge-rejected { background: #fde8eb; color: var(--ap-error); }
+.ap-badge-current { background: #f1e6fb; color: var(--ap-purple); }
+.ap-badge-pending { background: #f0f0f0; color: var(--ap-muted); }
+.ap-badge-skipped { background: #f4f4f4; color: var(--ap-muted); }
+.ap-step-meta { font-size: 11px; color: var(--ap-muted); }
+.ap-step-date { font-size: 11px; color: var(--ap-muted); }
+.ap-step-comments {
+    margin-top: 4px; padding: 6px 10px; background: var(--ap-bg);
+    border-left: 3px solid var(--ap-purple); border-radius: 4px;
+    font-size: 12px; color: var(--ap-text); font-style: italic;
+}
+
+.ap-modal-header { background: linear-gradient(135deg, var(--ap-purple), #6b3bb8); color: #fff; }
+.ap-modal-header h2 { color: #fff; }
+.ap-modal-hint { margin: 8px 0 0; font-size: 11px; color: var(--ap-error); }

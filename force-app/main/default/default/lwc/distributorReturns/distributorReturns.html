@@ -1,0 +1,201 @@
+<template>
+    <div class="dms-returns">
+        <div class="dms-subtabs" role="tablist">
+            <template for:each={subTabs} for:item="tab">
+                <button key={tab.id} class={tab.class} data-tab={tab.id} onclick={handleTab} type="button">
+                    {tab.label}
+                </button>
+            </template>
+        </div>
+
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <div class="dms-filter">
+                    <span class="dms-filter__label">Status:</span>
+                    <lightning-combobox variant="label-hidden" value={statusFilter}
+                        options={statusOptions} onchange={handleStatus}></lightning-combobox>
+                </div>
+                <template if:true={canCreate}>
+                    <button class="dms-btn" type="button" onclick={openWizard}>
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Return
+                    </button>
+                </template>
+                <template if:false={canCreate}>
+                    <span class="dms-viewonly">View only</span>
+                </template>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-card">
+                        <span class="dms-card__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={hasRows}>
+                <div class="dms-tbl dms-tbl_ret">
+                    <div class="dms-thead">
+                        <span>Return #</span><span>Date</span><span class="dms-num">Qty</span>
+                        <span class="dms-num">Amount</span><span>Status</span><span>Credit Note</span>
+                    </div>
+                    <template for:each={rows} for:item="r">
+                        <div key={r.key} class="dms-trow">
+                            <span class="dms-link" data-label="Return #" data-id={r.id} onclick={openDetail}>{r.name}</span>
+                            <span data-label="Date"><lightning-formatted-date-time value={r.returnDate}></lightning-formatted-date-time></span>
+                            <span class="dms-num" data-label="Qty">{r.quantity}</span>
+                            <span class="dms-num" data-label="Amount"><lightning-formatted-number value={r.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span>
+                            <span data-label="Status"><c-dms-status-badge label={r.status}></c-dms-status-badge></span>
+                            <span class="dms-code" data-label="Credit Note">{r.creditNote}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasRows}>
+                <p class="dms-empty">No returns in this view.</p>
+            </template>
+        </div>
+
+        <!-- ===================== Create Return wizard ===================== -->
+        <template if:true={wizardOpen}>
+            <div class="dms-modal__overlay" onclick={closeWizard}></div>
+            <div class="dms-wizard" role="dialog">
+                <header class="dms-wizard__head">
+                    <div class="dms-wizard__title">
+                        <h2>Create Primary Return</h2>
+                        <div class="dms-steps">
+                            <template for:each={stepDots} for:item="d">
+                                <span key={d.n} class={d.class}>{d.n}</span>
+                            </template>
+                            <span class="dms-steps__label">{stepLabel}</span>
+                        </div>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeWizard} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="dms-wizard__body">
+                    <template if:true={isStep1}>
+                        <div class="dms-note">Choose the invoice these goods were billed on — a primary invoice raises a
+                            return to the company, a secondary invoice a return from your retailer.</div>
+                        <p class="dms-wizard__label">Select Invoice</p>
+                        <div class="dms-picklist">
+                            <template for:each={invoiceCards} for:item="inv">
+                                <button key={inv.key} class={inv.rowClass} data-id={inv.id} onclick={selectInvoice} type="button">
+                                    <span class={inv.radioClass}></span>
+                                    <span class="dms-pick__main">
+                                        <span class="dms-pick__top">
+                                            <span class="dms-pick__id">{inv.invoiceNumber}</span>
+                                            <span class="dms-pick__tag">{inv.orderType}</span>
+                                        </span>
+                                        <span class="dms-pick__meta">{inv.metaLabel}</span>
+                                        <span class="dms-pick__prods">{inv.productsLabel}</span>
+                                    </span>
+                                </button>
+                            </template>
+                            <template if:false={invoiceCards.length}>
+                                <p class="dms-empty">No invoices available to return against.</p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:true={isStep2}>
+                        <p class="dms-wizard__hint">Enter the return quantity and reason for each product.</p>
+                        <div class="dms-tbl dms-tbl_items">
+                            <div class="dms-thead">
+                                <span>Product</span><span class="dms-num">Delivered</span>
+                                <span>Return Qty</span><span>Reason</span>
+                            </div>
+                            <template for:each={itemRows} for:item="it">
+                                <div key={it.id} class="dms-trow">
+                                    <span class="dms-strong" data-label="Product">{it.name}</span>
+                                    <span class="dms-num" data-label="Delivered">{it.delivered}</span>
+                                    <span data-label="Return Qty">
+                                        <input class="dms-qtyinput" type="number" min="0" max={it.delivered}
+                                            value={it.returnQty} data-id={it.id} onchange={handleReturnQty} />
+                                    </span>
+                                    <span data-label="Reason">
+                                        <select class="dms-select" data-id={it.id} onchange={handleItemReason}>
+                                            <template for:each={it.options} for:item="opt">
+                                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                                            </template>
+                                        </select>
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="dms-rtotal">
+                            <span class="dms-rtotal__label">Total Return Qty</span>
+                            <span class="dms-rtotal__value">{totalReturnQty} units</span>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-wizard__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={backStep}>
+                        <template if:true={isStep1}>Cancel</template><template if:true={isStep2}>Back</template>
+                    </button>
+                    <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
+                        <template if:true={isStep2}>Save Return</template><template if:true={isStep1}>Next</template>
+                    </button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ===================== Return detail (flyout) ===================== -->
+        <template if:true={detailOpen}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{selected.name}</h2>
+                        <p class="dms-flyout__sub">
+                            <lightning-formatted-date-time value={selected.returnDate}></lightning-formatted-date-time>
+                            &nbsp;·&nbsp;{selected.returnType} Return
+                        </p>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Status</span><span class="dms-flyout__val"><c-dms-status-badge label={selected.status}></c-dms-status-badge></span></div>
+                    <div><span class="dms-flyout__lbl">Total Qty</span><span class="dms-flyout__val">{selected.quantity}</span></div>
+                    <div><span class="dms-flyout__lbl">Amount</span><span class="dms-flyout__val"><lightning-formatted-number value={selected.amount} format-style="currency" currency-code="INR"></lightning-formatted-number></span></div>
+                    <template if:true={selected.creditNote}>
+                        <div><span class="dms-flyout__lbl">Credit Note</span><span class="dms-flyout__val">{selected.creditNote}</span></div>
+                    </template>
+                </div>
+                <p class="dms-flyout__section">Return Lines</p>
+                <div class="dms-tbl dms-tbl_rdetail">
+                    <div class="dms-thead">
+                        <span>Product</span><span>Batch</span><span class="dms-num">Qty</span><span>Reason</span>
+                    </div>
+                    <template for:each={detailLines} for:item="l">
+                        <div key={l.key} class="dms-trow">
+                            <span class="dms-strong" data-label="Product">{l.productName}</span>
+                            <span class="dms-code" data-label="Batch">{l.batch}</span>
+                            <span class="dms-num" data-label="Qty">{l.quantity}</span>
+                            <span class="dms-reason" data-label="Reason">{l.reason}</span>
+                        </div>
+                    </template>
+                    <template if:false={hasDetailLines}>
+                        <p class="dms-empty">No line items.</p>
+                    </template>
+                </div>
+            </aside>
+        </template>
+    </div>
+</template>

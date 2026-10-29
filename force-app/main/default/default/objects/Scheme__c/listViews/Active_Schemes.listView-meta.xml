@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active_Schemes</fullName>
+    <columns>NAME</columns>
+    <columns>Scheme_Code__c</columns>
+    <columns>Scheme_Type__c</columns>
+    <columns>Start_Date__c</columns>
+    <columns>End_Date__c</columns>
+    <columns>Discount_Percent__c</columns>
+    <columns>Free_Quantity__c</columns>
+    <columns>Product_Category__c</columns>
+    <columns>Priority__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Active Schemes</label>
+</ListView>

@@ -1,0 +1,41 @@
+.lr-locked {
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.lr-summary {
+    background: #f3f3f3;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.lr-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+}
+
+.lr-summary-divider {
+    border-top: 1px solid #d8dde6;
+    margin-top: 0.35rem;
+    padding-top: 0.55rem;
+}
+
+.lr-summary-label {
+    color: #54698d;
+    font-size: 0.85rem;
+}
+
+.lr-summary-value {
+    font-weight: 600;
+    color: #16325c;
+}
+
+.lr-summary-redeemed {
+    color: #027a48;
+}

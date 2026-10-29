@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Revenue_Targets</fullName>
+    <columns>NAME</columns>
+    <columns>Salesperson__c</columns>
+    <columns>Territory__c</columns>
+    <columns>Target_Value__c</columns>
+    <columns>Achievement_Value__c</columns>
+    <columns>Achievement_Percent__c</columns>
+    <columns>Period_Start__c</columns>
+    <columns>Period_End__c</columns>
+    <columns>Status__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Target_Type__c</field>
+        <operation>equals</operation>
+        <value>Revenue</value>
+    </filters>
+    <label>Revenue Targets</label>
+</ListView>

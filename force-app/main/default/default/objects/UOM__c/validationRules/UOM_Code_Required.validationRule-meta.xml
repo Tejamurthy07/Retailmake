@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>UOM_Code_Required</fullName>
+    <active>true</active>
+    <description>UOM Code is required</description>
+    <errorConditionFormula>ISBLANK(UOM_Code__c)</errorConditionFormula>
+    <errorDisplayField>UOM_Code__c</errorDisplayField>
+    <errorMessage>UOM Code is required.</errorMessage>
+</ValidationRule>

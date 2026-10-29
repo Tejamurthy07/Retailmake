@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order_UOM__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The UOM the sales rep ordered in (links to UOM master)</description>
+    <label>Order UOM</label>
+    <referenceTo>UOM__c</referenceTo>
+    <relationshipLabel>Primary Orders</relationshipLabel>
+    <relationshipName>POL_Order_UOM</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

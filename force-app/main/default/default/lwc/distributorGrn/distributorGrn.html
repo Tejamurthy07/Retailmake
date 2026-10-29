@@ -1,0 +1,226 @@
+<template>
+    <div class="dms-grn">
+        <div class="dms-body">
+            <template lwc:if={error}>
+                <div class="dms-err">{error}</div>
+            </template>
+
+            <div class="dms-toolbar">
+                <span class="dms-h">Goods Receipt Notes</span>
+                <button class="dms-btn" type="button" onclick={openWizard}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New GRN
+                </button>
+            </div>
+
+            <div class="dms-chips">
+                <template for:each={summary} for:item="c">
+                    <div key={c.id} class="dms-chip">
+                        <span class="dms-chip__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+                <div class="dms-chip dms-chip_warn">
+                    <span class="dms-chip__label">Awaiting GRN (Dispatches)</span>
+                    <span class="dms-chip__value dms-chip__value_pending">{pendingCount}</span>
+                </div>
+            </div>
+
+            <template lwc:if={hasGrns}>
+                <div class="dms-tbl dms-tbl_grn">
+                    <div class="dms-thead">
+                        <span>GRN ID</span><span>Date</span><span>Invoice Ref</span>
+                        <span class="dms-num">SKUs</span><span class="dms-num">Recd / Disp</span>
+                        <span>Issues</span><span>Status</span>
+                    </div>
+                    <template for:each={grnRows} for:item="g">
+                        <div key={g.key} class="dms-trow">
+                            <span class="dms-link dms-clickable" data-label="GRN ID" data-id={g.id} onclick={view} role="button" tabindex="0">{g.name}</span>
+                            <span data-label="Date">{g.dateLabel}</span>
+                            <span class="dms-link" data-label="Invoice Ref">{g.invoiceNumber}</span>
+                            <span class="dms-num" data-label="SKUs">{g.skuCount}</span>
+                            <span class="dms-num" data-label="Recd / Disp">{g.qtyLabel}</span>
+                            <span data-label="Issues">
+                                <template lwc:if={g.hasIssue}><span class="dms-issue">{g.issueLabel}</span></template>
+                                <template lwc:else><span class="dms-muted">—</span></template>
+                            </span>
+                            <span data-label="Status">
+                                <c-dms-status-badge label={g.status} theme={g.theme}></c-dms-status-badge>
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template lwc:else>
+                <div class="dms-empty">
+                    <p>No goods receipts yet.</p>
+                    <button class="dms-btn" type="button" onclick={openWizard}>Receive a dispatch</button>
+                </div>
+            </template>
+        </div>
+
+        <!-- ═══════════ GRN detail flyout ═══════════ -->
+        <template lwc:if={detail}>
+            <div class="dms-modal__overlay" onclick={closeDetail}></div>
+            <aside class="dms-flyout" role="dialog">
+                <header class="dms-flyout__head">
+                    <div>
+                        <h2 class="dms-flyout__title">{detail.name}</h2>
+                        <p class="dms-flyout__sub">{detail.invoiceNumber} · {detail.status}</p>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeDetail} title="Close">✕</button>
+                </header>
+                <div class="dms-flyout__kpis">
+                    <div><span class="dms-flyout__lbl">Date</span><span class="dms-flyout__val">{detail.dateLabel}</span></div>
+                    <div><span class="dms-flyout__lbl">Received By</span><span class="dms-flyout__val">{detail.receivedBy}</span></div>
+                </div>
+                <p class="dms-flyout__section">Received Lines</p>
+                <template lwc:if={hasDetailLines}>
+                    <div class="dms-tbl dms-tbl_gdetail">
+                        <div class="dms-thead">
+                            <span>Product</span><span class="dms-num">Disp</span><span class="dms-num">Recd</span>
+                            <span class="dms-num">Dmg</span><span>Batch</span><span>Expiry</span>
+                        </div>
+                        <template for:each={detailLines} for:item="l">
+                            <div key={l.id} class="dms-trow">
+                                <span class="dms-strong" data-label="Product">{l.name}</span>
+                                <span class="dms-num" data-label="Disp">{l.dispatched}</span>
+                                <span class="dms-num" data-label="Recd">{l.received}</span>
+                                <span class="dms-num" data-label="Dmg">{l.damaged}</span>
+                                <span data-label="Batch">{l.batch}</span>
+                                <span data-label="Expiry">{l.expiry}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <p class="dms-empty">No lines.</p>
+                </template>
+            </aside>
+        </template>
+
+        <!-- ═══════════ Create GRN wizard ═══════════ -->
+        <template lwc:if={wizardOpen}>
+            <div class="dms-modal__overlay" onclick={closeWizard}></div>
+            <div class="dms-wizard" role="dialog">
+                <header class="dms-wizard__head">
+                    <div class="dms-wizard__title">
+                        <h2>Create GRN</h2>
+                        <div class="dms-steps">
+                            <template for:each={stepDots} for:item="d">
+                                <span key={d.n} class={d.class}>{d.n}</span>
+                            </template>
+                            <span class="dms-steps__label">{stepLabel}</span>
+                        </div>
+                    </div>
+                    <button class="dms-iconbtn" type="button" onclick={closeWizard} title="Close">✕</button>
+                </header>
+
+                <div class="dms-wizard__body">
+                    <template lwc:if={wizardError}>
+                        <div class="dms-err">{wizardError}</div>
+                    </template>
+
+                    <!-- Step 1: select dispatches -->
+                    <template lwc:if={isStep1}>
+                        <div class="dms-wizard__subhead">
+                            <span class="dms-wizard__hint">Select the primary dispatch invoices you have received.</span>
+                            <span class="dms-wizard__count">{selectedCountLabel}</span>
+                        </div>
+                        <template lwc:if={hasPending}>
+                            <div class="dms-picklist">
+                                <template for:each={invoiceCards} for:item="inv">
+                                    <button key={inv.key} class={inv.rowClass} data-id={inv.id} onclick={toggleInvoice} type="button">
+                                        <span class={inv.boxClass}>
+                                            <svg class="dms-ic dms-ic_xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </span>
+                                        <span class="dms-pick__main">
+                                            <span class="dms-pick__top">
+                                                <span class="dms-pick__id">{inv.invoiceNumber}</span>
+                                                <span class="dms-pick__amt">{inv.amountLabel}</span>
+                                            </span>
+                                            <span class="dms-pick__meta">{inv.metaLabel}</span>
+                                            <span class="dms-pick__prods">{inv.productsLabel}</span>
+                                        </span>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <p class="dms-empty">No dispatches are awaiting receipt. New primary orders appear here once the company dispatches (invoices) them.</p>
+                        </template>
+                    </template>
+
+                    <!-- Step 2: confirm received quantities -->
+                    <template lwc:if={isStep2}>
+                        <p class="dms-wizard__hint">Enter the received quantity, any damaged units, and the batch / expiry for each line.</p>
+                        <div class="dms-tbl dms-tbl_items">
+                            <div class="dms-thead">
+                                <span>Product</span><span class="dms-num">Disp</span>
+                                <span>Received</span><span>Damaged</span>
+                                <span>Batch</span><span>Expiry</span>
+                            </div>
+                            <template for:each={itemRows} for:item="it">
+                                <div key={it.id} class={it.rowClass}>
+                                    <span class="dms-itemcell" data-label="Product">
+                                        <span class="dms-strong">{it.name}</span>
+                                        <span class="dms-itemmeta">{it.skuMeta}</span>
+                                        <template lwc:if={it.shortLabel}><span class="dms-issue">{it.shortLabel}</span></template>
+                                    </span>
+                                    <span class="dms-num" data-label="Disp">{it.dispatched}</span>
+                                    <span data-label="Received">
+                                        <input class="dms-qtyinput" type="number" min="0" max={it.dispatched} value={it.received} data-id={it.id} onchange={handleReceived} />
+                                    </span>
+                                    <span data-label="Damaged">
+                                        <input class="dms-qtyinput" type="number" min="0" max={it.received} value={it.damaged} data-id={it.id} onchange={handleDamaged} />
+                                    </span>
+                                    <span data-label="Batch">
+                                        <input class="dms-textinput" type="text" placeholder="Batch #" value={it.batchNo} data-id={it.id} onchange={handleBatch} />
+                                    </span>
+                                    <span data-label="Expiry">
+                                        <input class="dms-textinput" type="date" value={it.expiryDate} data-id={it.id} onchange={handleExpiry} />
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="dms-wizard__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={backStep}>
+                        ‹ <template lwc:if={isStep1}>Cancel</template><template lwc:else>Back</template>
+                    </button>
+                    <button class="dms-btn" type="button" onclick={nextStep} disabled={nextDisabled}>
+                        <template lwc:if={isStep2}>Save GRN</template>
+                        <template lwc:else>Next ›</template>
+                    </button>
+                </footer>
+            </div>
+        </template>
+
+        <!-- ═══════════ Saved confirmation ═══════════ -->
+        <template lwc:if={showSuccess}>
+            <div class="dms-modal__overlay"></div>
+            <div class="dms-modal" role="dialog">
+                <div class="dms-modal__check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h2 class="dms-modal__title">GRN Saved</h2>
+                <p class="dms-modal__summary">{successMessage}</p>
+                <p class="dms-modal__summary dms-muted">Received stock has been posted to your inventory and the order marked Received.</p>
+                <template lwc:if={hasReturn}>
+                    <div class="dms-returnbox">
+                        <p class="dms-returnbox__title">{returnMessage}</p>
+                    </div>
+                </template>
+                <button class="dms-btn dms-modal__done" type="button" onclick={closeSuccess}>Done</button>
+            </div>
+        </template>
+    </div>
+</template>

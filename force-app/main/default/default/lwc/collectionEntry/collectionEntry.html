@@ -1,0 +1,327 @@
+<template>
+    <lightning-card title="Payment Collection" icon-name="standard:currency">
+        <div class="slds-p-around_medium">
+
+            <!-- Aging Summary -->
+            <div class="aging-section slds-m-bottom_medium">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Aging Summary</h3>
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="aging-card aging-total">
+                            <span class="aging-label">Total Outstanding</span>
+                            <span class="aging-value">{agingSummary.totalOutstandingFormatted}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="aging-card aging-current">
+                            <span class="aging-label">0-30 Days</span>
+                            <span class="aging-value">{agingSummary.bucket0to30Formatted}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="aging-card aging-30">
+                            <span class="aging-label">31-60 Days</span>
+                            <span class="aging-value">{agingSummary.bucket31to60Formatted}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="aging-card aging-60">
+                            <span class="aging-label">61-90 Days</span>
+                            <span class="aging-value">{agingSummary.bucket61to90Formatted}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="aging-card aging-90">
+                            <span class="aging-label">90+ Days</span>
+                            <span class="aging-value">{agingSummary.bucket90PlusFormatted}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outstanding Invoices Table -->
+            <div class="invoices-section slds-m-bottom_medium">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">
+                    Outstanding Invoices ({outstandingInvoices.length})
+                </h3>
+                <template if:true={hasOutstandingInvoices}>
+                    <div class="slds-scrollable_y invoice-table-container">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">
+                                        <lightning-input type="checkbox" label="Select All"
+                                            variant="label-hidden" onchange={handleSelectAll}
+                                            checked={allSelected}>
+                                        </lightning-input>
+                                    </th>
+                                    <th scope="col"><div class="slds-truncate">Invoice #</div></th>
+                                    <th scope="col"><div class="slds-truncate">Date</div></th>
+                                    <th scope="col"><div class="slds-truncate">Invoice Amount</div></th>
+                                    <th scope="col"><div class="slds-truncate">Balance Due</div></th>
+                                    <th scope="col"><div class="slds-truncate">Days Overdue</div></th>
+                                    <th scope="col"><div class="slds-truncate">Allocate</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={outstandingInvoices} for:item="invoice">
+                                    <tr key={invoice.id} class={invoice.rowClass}>
+                                        <td>
+                                            <lightning-input type="checkbox"
+                                                label="Select" variant="label-hidden"
+                                                checked={invoice.selected}
+                                                data-invoice-id={invoice.id}
+                                                onchange={handleInvoiceSelect}>
+                                            </lightning-input>
+                                        </td>
+                                        <td>
+                                            <a data-invoice-id={invoice.id} onclick={viewInvoice}>
+                                                {invoice.invoiceNumber}
+                                            </a>
+                                        </td>
+                                        <td>{invoice.invoiceDateFormatted}</td>
+                                        <td>{invoice.invoiceAmountFormatted}</td>
+                                        <td class="balance-due">{invoice.balanceDueFormatted}</td>
+                                        <td>
+                                            <span class={invoice.overdueBadgeClass}>{invoice.daysOverdue} days</span>
+                                        </td>
+                                        <td class="allocate-col">
+                                            <template if:true={invoice.selected}>
+                                                <lightning-input
+                                                    type="number"
+                                                    label="Amount" variant="label-hidden"
+                                                    min="0"
+                                                    max={invoice.balanceDue}
+                                                    value={invoice.allocatedAmount}
+                                                    data-invoice-id={invoice.id}
+                                                    onchange={handleAllocationChange}
+                                                    step="0.01">
+                                                </lightning-input>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasOutstandingInvoices}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:check" size="large" variant="success"></lightning-icon>
+                        <p class="slds-m-top_small slds-text-heading_small">No Outstanding Invoices</p>
+                        <p class="slds-text-body_small slds-text-color_weak">This outlet has no pending invoices.</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Collection Form -->
+            <div class="collection-form slds-m-bottom_medium">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Collection Entry</h3>
+                <div class="form-container">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <!-- Amount -->
+                        <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                            <lightning-input
+                                type="number"
+                                label="Collection Amount"
+                                value={collectionRecord.amount}
+                                onchange={handleAmountChange}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                required>
+                            </lightning-input>
+                        </div>
+
+                        <!-- Payment Mode -->
+                        <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                            <lightning-combobox
+                                label="Payment Mode"
+                                value={collectionRecord.paymentMode}
+                                options={paymentModeOptions}
+                                onchange={handlePaymentModeChange}
+                                required>
+                            </lightning-combobox>
+                        </div>
+
+                        <!-- Allocation Type -->
+                        <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                            <lightning-combobox
+                                label="Allocation Type"
+                                value={collectionRecord.allocationType}
+                                options={allocationTypeOptions}
+                                onchange={handleAllocationTypeChange}>
+                            </lightning-combobox>
+                        </div>
+
+                        <!-- Cheque Fields -->
+                        <template if:true={isChequePayment}>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="text"
+                                    label="Cheque Number"
+                                    value={collectionRecord.chequeNumber}
+                                    onchange={handleChequeNumberChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="date"
+                                    label="Cheque Date"
+                                    value={collectionRecord.chequeDate}
+                                    onchange={handleChequeDateChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="text"
+                                    label="Bank Name"
+                                    value={collectionRecord.bankName}
+                                    onchange={handleBankNameChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+                        </template>
+
+                        <!-- UPI Fields -->
+                        <template if:true={isUpiPayment}>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="text"
+                                    label="UPI Reference Number"
+                                    value={collectionRecord.upiReference}
+                                    onchange={handleUpiReferenceChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+                        </template>
+
+                        <!-- NEFT Fields -->
+                        <template if:true={isNeftPayment}>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="text"
+                                    label="NEFT/RTGS Reference"
+                                    value={collectionRecord.neftReference}
+                                    onchange={handleNeftReferenceChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                                <lightning-input
+                                    type="date"
+                                    label="Transaction Date"
+                                    value={collectionRecord.transactionDate}
+                                    onchange={handleTransactionDateChange}>
+                                </lightning-input>
+                            </div>
+                        </template>
+
+                        <!-- Remarks -->
+                        <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                            <lightning-textarea
+                                label="Remarks"
+                                value={collectionRecord.remarks}
+                                onchange={handleRemarksChange}
+                                placeholder="Add collection notes..."
+                                max-length="500">
+                            </lightning-textarea>
+                        </div>
+                    </div>
+
+                    <!-- Allocation Summary -->
+                    <template if:true={showAllocationSummary}>
+                        <div class="allocation-summary slds-m-top_small">
+                            <div class="slds-grid slds-grid_align-spread">
+                                <span>Collection Amount: <strong>{collectionAmountFormatted}</strong></span>
+                                <span>Allocated: <strong>{totalAllocatedFormatted}</strong></span>
+                                <span>Unallocated: <strong class={unallocatedClass}>{unallocatedAmountFormatted}</strong></span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Action Buttons -->
+                    <div class="slds-m-top_medium slds-grid slds-grid_align-center slds-gutters">
+                        <template if:true={isEmbedded}>
+                            <div class="slds-col">
+                                <lightning-button
+                                    variant="neutral"
+                                    label="Cancel"
+                                    icon-name="utility:back"
+                                    onclick={handleCancel}>
+                                </lightning-button>
+                            </div>
+                        </template>
+                        <div class="slds-col">
+                            <lightning-button
+                                variant="brand"
+                                label="Submit Collection"
+                                icon-name="utility:check"
+                                onclick={handleSubmitCollection}
+                                disabled={isSubmitting}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collection History -->
+            <div class="history-section">
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Collection History</h3>
+                <template if:true={hasCollectionHistory}>
+                    <div class="slds-scrollable_y history-table-container">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col"><div class="slds-truncate">Receipt #</div></th>
+                                    <th scope="col"><div class="slds-truncate">Date</div></th>
+                                    <th scope="col"><div class="slds-truncate">Amount</div></th>
+                                    <th scope="col"><div class="slds-truncate">Mode</div></th>
+                                    <th scope="col"><div class="slds-truncate">Reference</div></th>
+                                    <th scope="col"><div class="slds-truncate">Status</div></th>
+                                    <th scope="col"><div class="slds-truncate">Receipt</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={collectionHistory} for:item="item">
+                                    <tr key={item.id}>
+                                        <td>{item.receiptNumber}</td>
+                                        <td>{item.dateFormatted}</td>
+                                        <td class="collection-amount">{item.amountFormatted}</td>
+                                        <td>
+                                            <lightning-badge label={item.paymentMode}></lightning-badge>
+                                        </td>
+                                        <td>{item.reference}</td>
+                                        <td>
+                                            <span class={item.statusBadgeClass}>{item.status}</span>
+                                        </td>
+                                        <td>
+                                            <lightning-button-icon icon-name="utility:download"
+                                                alternative-text="Download Receipt"
+                                                title="Download Receipt"
+                                                variant="bare" size="small"
+                                                data-id={item.id}
+                                                onclick={handleDownloadReceipt}></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasCollectionHistory}>
+                    <div class="empty-state-small">
+                        <p class="slds-text-body_small slds-text-color_weak">No collection history found.</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

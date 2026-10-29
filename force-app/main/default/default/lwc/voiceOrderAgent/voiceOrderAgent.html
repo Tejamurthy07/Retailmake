@@ -1,0 +1,149 @@
+<template>
+    <div class="voa-fab-wrap">
+        <!-- audio sink stays mounted always, so collapsing the panel
+             doesn't kill a live session's audio -->
+        <audio class="voa-rt-audio" autoplay></audio>
+
+        <!-- collapsed: floating mic button -->
+        <template if:false={panelOpen}>
+            <button type="button" class={fabClass} onclick={togglePanel}
+                    title="Voice order">
+                <lightning-icon icon-name="utility:unmuted" size="small"
+                                variant="inverse"></lightning-icon>
+            </button>
+        </template>
+
+        <!-- expanded: panel -->
+        <template if:true={panelOpen}>
+            <div class={panelClass}>
+                <!-- header doubles as the drag handle -->
+                <div class="voa-panel-head" onmousedown={startDrag} ontouchstart={startDrag}>
+                    <span class="voa-panel-title">
+                        <lightning-icon icon-name="utility:drag_and_drop" size="x-small"
+                                        variant="inverse"></lightning-icon>
+                        Voice Order
+                    </span>
+                    <span class="voa-head-actions">
+                        <button type="button" class="voa-icon-btn" onclick={toggleExpand}
+                                title={expandLabel}>
+                            <lightning-icon icon-name="utility:expand_alt" size="xx-small"
+                                            variant="inverse"></lightning-icon>
+                        </button>
+                        <button type="button" class="voa-icon-btn" onclick={togglePanel}
+                                title="Minimize">&#8211;</button>
+                    </span>
+                </div>
+
+                <div class="voa-controls">
+                    <!-- Push-to-talk (Tap & speak) — commented out; focusing on Live voice.
+                    <button type="button" class={micClass} onclick={handleMicClick}
+                            disabled={micDisabled}>
+                        <lightning-icon icon-name="utility:unmuted" size="x-small"
+                                        variant="inverse"></lightning-icon>
+                        <span>{micLabel}</span>
+                    </button>
+                    -->
+                    <!-- Hands-free auto-turn — commented out; focusing on Live voice.
+                    <button type="button" class={handsFreeClass} onclick={handleHandsFreeToggle}
+                            disabled={handsFreeDisabled}>
+                        <lightning-icon icon-name="utility:record" size="x-small"></lightning-icon>
+                        <span>{handsFreeLabel}</span>
+                    </button>
+                    -->
+                    <!-- the mic: starts / stops Live voice -->
+                    <button type="button" class={liveClass} onclick={handleLiveToggle}
+                            disabled={liveDisabled}>
+                        <lightning-icon icon-name="utility:unmuted" size="small"
+                                        variant="inverse"></lightning-icon>
+                        <span>{liveLabel}</span>
+                    </button>
+                    <!-- settings gear, beside the mic -->
+                    <button type="button" class="voa-gear" onclick={toggleSettings}
+                            title="Settings">
+                        <lightning-icon icon-name="utility:settings" size="small"></lightning-icon>
+                    </button>
+                </div>
+
+                <!-- settings dropdown: captions / offers / language -->
+                <template if:true={settingsOpen}>
+                    <div class="voa-settings">
+                        <label class="voa-set-row">
+                            <span>Captions</span>
+                            <input type="checkbox" checked={showCaptions} onchange={toggleCaptions} />
+                        </label>
+                        <label class="voa-set-row">
+                            <span>Offers &amp; schemes</span>
+                            <input type="checkbox" checked={suggestOffers} onchange={toggleOffers} />
+                        </label>
+                        <div class="voa-set-row">
+                            <span>Language</span>
+                            <select class="voa-lang-select" onchange={handleLangChange}>
+                                <template for:each={langOptions} for:item="o">
+                                    <option key={o.value} value={o.value} selected={o.selected}>{o.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={rtActive}>
+                    <p class="voa-rt-status">&#9679; {rtStatus}</p>
+                </template>
+
+                <!-- live captions: the rep's words + the agent's words, any language.
+                     Toggled on/off from Settings. -->
+                <div class="voa-transcript">
+                    <template if:true={showCaptions}>
+                        <template if:true={youSaid}>
+                            <div class="voa-line voa-you">
+                                <span class="voa-who">You</span>
+                                <span class="voa-text">{youSaid}</span>
+                            </div>
+                        </template>
+                        <template if:true={agentSaid}>
+                            <div class="voa-line voa-agent">
+                                <span class="voa-who">Agent</span>
+                                <span class="voa-text">{agentSaid}</span>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:true={statusText}>
+                        <p class="voa-status">{statusText}</p>
+                    </template>
+                    <template if:true={isEmptyTranscript}>
+                        <p class="voa-hint">Start Live voice, then say e.g.
+                            &ldquo;add six groundnut oil&rdquo;.</p>
+                    </template>
+                </div>
+
+                <!-- disambiguation picker — pick one OR more, set qty each, tap Done -->
+                <template if:true={hasCandidates}>
+                    <div class="voa-picker">
+                        <p class="voa-picker-title">Choose item(s), set quantity, then tap Done</p>
+                        <template for:each={candidates} for:item="c">
+                            <div key={c.productId} class="voa-cand-row">
+                                <input type="checkbox" class="voa-cand-check" data-id={c.productId}
+                                       checked={c.selected} onchange={handleCandidateToggle} />
+                                <span class="voa-cand-name">{c.label}</span>
+                                <input type="number" min="0" class="voa-cand-qty" data-id={c.productId}
+                                       value={c.qty} onchange={handleCandidateQty} />
+                            </div>
+                        </template>
+                        <div class="voa-picker-actions">
+                            <button type="button" class="voa-btn voa-btn_confirm"
+                                    onclick={handleAddSelected}>Done</button>
+                            <button type="button" class="voa-btn voa-btn_cancel"
+                                    onclick={handleCancelPicker}>Cancel</button>
+                        </div>
+                        <button type="button" class="voa-searchall"
+                                onclick={handleSearchAll}>Search all products &rarr;</button>
+                    </div>
+                </template>
+
+                <!-- drag this corner to resize freely -->
+                <div class="voa-resize" onmousedown={startResize}
+                     ontouchstart={startResize} title="Drag to resize"></div>
+            </div>
+        </template>
+    </div>
+</template>

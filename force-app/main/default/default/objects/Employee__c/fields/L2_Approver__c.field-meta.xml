@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>L2_Approver__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>User who approves expenses at Level 2 (Finance level) for this employee</description>
+    <label>L2 Approver (Finance)</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>L2 Approver For Employees</relationshipLabel>
+    <relationshipName>L2_Approver_Employees</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order_Type__c</fullName>
+    <label>Order Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Regular</fullName>
+                <default>true</default>
+                <label>Regular</label>
+            </value>
+            <value>
+                <fullName>Urgent</fullName>
+                <default>false</default>
+                <label>Urgent</label>
+            </value>
+            <value>
+                <fullName>Replacement</fullName>
+                <default>false</default>
+                <label>Replacement</label>
+            </value>
+            <value>
+                <fullName>Sample</fullName>
+                <default>false</default>
+                <label>Sample</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

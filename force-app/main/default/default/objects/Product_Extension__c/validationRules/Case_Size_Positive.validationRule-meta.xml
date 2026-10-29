@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Case_Size_Positive</fullName>
+    <active>true</active>
+    <description>Case Size must be greater than zero when specified.</description>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Case_Size__c)),
+    Case_Size__c &lt;= 0
+)</errorConditionFormula>
+    <errorDisplayField>Case_Size__c</errorDisplayField>
+    <errorMessage>Case Size must be greater than zero.</errorMessage>
+</ValidationRule>

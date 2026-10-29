@@ -1,0 +1,66 @@
+<template>
+    <lightning-card title="DMS Settings" icon-name="standard:settings">
+        <div slot="actions">
+            <lightning-button label="Save Changes" variant="brand" disabled={saveDisabled} onclick={save}></lightning-button>
+        </div>
+
+        <div class="wrap">
+            <template if:true={error}>
+                <div class="err">{error}</div>
+            </template>
+
+            <!-- Module behavior -->
+            <p class="section">Module Behavior</p>
+            <p class="hint">Admin-editable configuration (App_Config). Changes deploy asynchronously and apply within a few seconds.</p>
+            <div class="grid">
+                <template for:each={settings} for:item="s">
+                    <div key={s.id} class="row">
+                        <div class="row-info">
+                            <span class="row-label">{s.label}</span>
+                            <span class="row-desc">{s.description}</span>
+                            <span class="row-key">{s.key}</span>
+                        </div>
+                        <div class="row-input">
+                            <template if:true={s.isTier}>
+                                <lightning-combobox variant="label-hidden" value={s.value} options={s.tierOptions}
+                                    data-id={s.id} onchange={handleTier}></lightning-combobox>
+                            </template>
+                            <template if:true={s.isNumber}>
+                                <lightning-input type="number" variant="label-hidden" value={s.value}
+                                    data-id={s.id} onchange={handleNumber}></lightning-input>
+                            </template>
+                            <template if:true={s.isBoolean}>
+                                <lightning-input type="toggle" variant="label-hidden" checked={s.boolChecked}
+                                    message-toggle-active="On" message-toggle-inactive="Off"
+                                    data-id={s.id} onchange={handleBool}></lightning-input>
+                            </template>
+                            <template if:true={s.isText}>
+                                <lightning-input type="text" variant="label-hidden" value={s.value}
+                                    data-id={s.id} onchange={handleText}></lightning-input>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Feature toggles -->
+            <p class="section">Capabilities (Feature Toggles)</p>
+            <p class="hint">Turn DMS modules on or off for this org.</p>
+            <div class="grid">
+                <template for:each={toggles} for:item="t">
+                    <div key={t.devName} class="row">
+                        <div class="row-info">
+                            <span class="row-label">{t.label}</span>
+                            <span class="row-key">{t.code}</span>
+                        </div>
+                        <div class="row-input">
+                            <lightning-input type="toggle" variant="label-hidden" checked={t.checked}
+                                message-toggle-active="Enabled" message-toggle-inactive="Disabled"
+                                data-name={t.devName} onchange={handleToggle}></lightning-input>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

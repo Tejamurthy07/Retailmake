@@ -1,0 +1,399 @@
+<template>
+    <div class="ar-header">
+        <div class="ar-header-left">
+            <lightning-icon icon-name="standard:approval" size="small"></lightning-icon>
+            <div class="ar-header-text">
+                <h1 class="ar-header-title">Approval Rules</h1>
+                <span class="ar-header-sub">Configure who approves what, at which level — no Setup required</span>
+            </div>
+        </div>
+        <div class="ar-header-right">
+            <div class="ar-counter">
+                <span class="ar-counter-num">{activeCount}</span>
+                <span class="ar-counter-sep">/</span>
+                <span class="ar-counter-tot">{totalCount}</span>
+                <span class="ar-counter-lbl">active</span>
+            </div>
+            <button class="ar-btn-import" onclick={handleMigrate} title="Import from Approval_Matrix__mdt">
+                <lightning-icon icon-name="utility:download" size="xx-small" variant="inverse"></lightning-icon>
+                <span>Import Legacy</span>
+            </button>
+            <button class="ar-btn-new" onclick={handleNewClick}>
+                <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                <span>New Rule</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="ar-toolbar">
+        <div class="ar-search">
+            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+            <input type="search" class="ar-search-input" placeholder="Search by object, role, description..."
+                value={searchTerm} onchange={handleSearch} oninput={handleSearch} />
+        </div>
+        <lightning-button label="Simulate" icon-name="utility:preview" onclick={handleOpenSimulator}
+            title="Show who would approve a real record, without submitting it"></lightning-button>
+    </div>
+
+    <nav class="ar-filter-bar">
+        <template for:each={filterPills} for:item="pill">
+            <button key={pill.key} class={pill.cssClass} data-key={pill.key} onclick={handleFilter}>
+                <span class={pill.dotClass}></span>
+                <span>{pill.label}</span>
+            </button>
+        </template>
+    </nav>
+
+    <div class="ar-content">
+        <template if:true={hasRules}>
+            <div class="ar-list">
+                <template for:each={filteredRules} for:item="r">
+                    <div key={r.Id} class="ar-row">
+                        <div class="ar-row-level">
+                            <span class="ar-row-level-badge">{r.levelBadge}</span>
+                        </div>
+                        <div class="ar-row-main">
+                            <div class="ar-row-top">
+                                <span class="ar-row-name">{r.Name}</span>
+                                <span class={r.statusClass}>{r.statusText}</span>
+                                <span class={r.autoApproveClass}>{r.autoApproveText}</span>
+                            </div>
+                            <div class="ar-row-meta">
+                                <span class="ar-row-object">
+                                    <strong>{r.Object_Process__c}</strong>
+                                </span>
+                                <span class="ar-row-approver">
+                                    → {r.approverDisplay}
+                                </span>
+                            </div>
+                            <div class="ar-row-condition">
+                                <lightning-icon icon-name="utility:filter" size="xx-small"></lightning-icon>
+                                <span>{r.conditionDisplay}</span>
+                            </div>
+                            <div class="ar-row-condition">
+                                <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                                <span>{r.modeText} &middot; {r.escalationText} &middot; {r.windowText}</span>
+                                <template if:true={r.isExpired}>
+                                    <span class="ar-status ar-status-inactive">Expired</span>
+                                </template>
+                            </div>
+                            <template if:true={r.Description__c}>
+                                <div class="ar-row-desc">{r.Description__c}</div>
+                            </template>
+                        </div>
+                        <div class="ar-row-actions">
+                            <button class="ar-icon-btn" data-id={r.Id} onclick={handleToggleActive}
+                                title="Toggle Active">
+                                <lightning-icon icon-name="utility:toggle_off" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class="ar-icon-btn" data-id={r.Id} onclick={handleEditClick} title="Edit">
+                                <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class="ar-icon-btn ar-icon-btn-danger" data-id={r.Id} onclick={handleDelete}
+                                title="Delete">
+                                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={hasRules}>
+            <div class="ar-empty">
+                <lightning-icon icon-name="utility:approval" size="large"></lightning-icon>
+                <p>No approval rules configured.</p>
+                <button class="ar-btn-new" onclick={handleNewClick}>
+                    <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                    <span>Create First Rule</span>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <template if:true={showModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header ar-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium ar-modal-body">
+
+                    <div class="ar-form-grid">
+                        <lightning-combobox label="Object / Process" required value={form.Object_Process__c}
+                            options={objectProcessOptions} data-field="Object_Process__c"
+                            onchange={handleObjectProcessChange} placeholder="Select object..."></lightning-combobox>
+                        <lightning-input type="number" label="Approval Level" required value={form.Approval_Level__c}
+                            data-field="Approval_Level__c" onchange={handleFormChange}
+                            min="1" max="10" step="1"></lightning-input>
+                    </div>
+
+                    <div class="ar-section-divider slds-m-top_medium">
+                        <span>Approver</span>
+                    </div>
+                    <lightning-combobox label="Approver Type" required value={form.Approver_Type__c}
+                        options={approverTypeOptions} onchange={handleApproverTypeChange}
+                        placeholder="Who approves..."></lightning-combobox>
+
+                    <template if:true={isApproverUser}>
+                        <div class="ar-user-search slds-m-top_small">
+                            <label class="slds-form-element__label">Approver User</label>
+                            <div class="ar-user-input-wrapper">
+                                <input type="text" class="ar-user-input" placeholder="Type at least 2 chars..."
+                                    value={userSearch} oninput={handleUserSearch} />
+                                <template if:true={userSelectedName}>
+                                    <button class="ar-user-clear" onclick={handleUserClear} title="Clear">
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </template>
+                            </div>
+                            <template if:true={userResults.length}>
+                                <div class="ar-user-dropdown">
+                                    <template for:each={userResults} for:item="u">
+                                        <div key={u.value} class="ar-user-row" data-id={u.value}
+                                            onclick={handleUserSelect}>
+                                            <span class="ar-user-name">{u.label}</span>
+                                            <span class="ar-user-sub">{u.subtitle}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:true={isApproverRoleQueue}>
+                        <lightning-input type="text" label={approverRoleQueueLabel}
+                            value={form.Approver_Role_Queue__c} data-field="Approver_Role_Queue__c"
+                            onchange={handleFormChange} class="slds-m-top_small"></lightning-input>
+                    </template>
+
+                    <div class="ar-section-divider slds-m-top_medium">
+                        <span>Conditions (optional)</span>
+                    </div>
+                    <p class="ar-hint">Pick Field + Operator + Value rows. Leave empty to always route. Pick the object first so the field dropdowns populate.</p>
+                    <template if:true={hasMultipleConditions}>
+                        <lightning-combobox label="Combine conditions with"
+                            value={form.Criteria_Logic__c} options={criteriaLogicOptions}
+                            data-field="Criteria_Logic__c" onchange={handleStatusValueChange}
+                            class="slds-m-bottom_x-small"></lightning-combobox>
+                    </template>
+                    <template for:each={conditionRows} for:item="cond" for:index="idx">
+                        <div key={cond.key} class="ar-condition-row slds-m-top_x-small">
+                            <lightning-combobox label="Field" variant="label-hidden"
+                                placeholder="--Field--"
+                                value={cond.field} options={allFieldOptions}
+                                data-idx={idx} data-key="field"
+                                onchange={handleConditionChange} class="ar-cond-field"></lightning-combobox>
+                            <lightning-combobox label="Operator" variant="label-hidden"
+                                placeholder="--Operator--"
+                                value={cond.operator} options={operatorOptions}
+                                data-idx={idx} data-key="operator"
+                                onchange={handleConditionChange} class="ar-cond-op"></lightning-combobox>
+                            <lightning-input type="text" label="Value" variant="label-hidden"
+                                placeholder="Value"
+                                value={cond.value} data-idx={idx} data-key="value"
+                                onchange={handleConditionChange} class="ar-cond-val"></lightning-input>
+                            <button class="ar-icon-btn ar-icon-btn-danger" data-idx={idx}
+                                onclick={handleRemoveCondition} title="Remove condition">
+                                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </template>
+                    <button class="ar-btn-add-cond slds-m-top_x-small" onclick={handleAddCondition}>
+                        <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                        <span>Add Condition</span>
+                    </button>
+                    <div class="slds-m-top_small">
+                        <lightning-input type="toggle" label="Auto-Approve when conditions match"
+                            checked={form.Auto_Approve__c} data-field="Auto_Approve__c"
+                            onchange={handleFormChange}></lightning-input>
+                    </div>
+
+                    <div class="ar-section-divider slds-m-top_medium">
+                        <span>Routing &amp; Escalation</span>
+                    </div>
+                    <p class="ar-hint">Approval Mode applies when more than one rule sits at the same level. Escalation reassigns the step if the approver does not act in time.</p>
+                    <lightning-combobox label="Approval Mode"
+                        value={form.Approval_Mode__c} options={approvalModeOptions}
+                        data-field="Approval_Mode__c" onchange={handleStatusValueChange}></lightning-combobox>
+                    <div class="slds-grid slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="number" label="Escalation Hours" min="0"
+                                value={form.Escalation_Hours__c} data-field="Escalation_Hours__c"
+                                onchange={handleFormChange}
+                                field-level-help="Leave blank for no escalation."></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="text" label="Escalate To (User Id)"
+                                value={form.Escalation_Approver__c} data-field="Escalation_Approver__c"
+                                onchange={handleFormChange}
+                                field-level-help="Leave blank to escalate to the approver's manager."></lightning-input>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="Effective From"
+                                value={form.Effective_From__c} data-field="Effective_From__c"
+                                onchange={handleFormChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="Effective To"
+                                value={form.Effective_To__c} data-field="Effective_To__c"
+                                onchange={handleFormChange}></lightning-input>
+                        </div>
+                    </div>
+
+                    <div class="ar-section-divider slds-m-top_medium">
+                        <span>Status Mapping</span>
+                    </div>
+                    <p class="ar-hint">Pick the status field on the source object plus what value to stamp at each stage. Pick the field first — picklist values then appear in the three dropdowns below.</p>
+                    <lightning-combobox label="Status Field" value={form.Status_Field_API_Name__c}
+                        options={statusFieldOptions}
+                        onchange={handleStatusFieldChange}
+                        placeholder="Select status field..."
+                        field-level-help="Picklist, text, and textarea fields are listed — those are the typical homes for a status value."></lightning-combobox>
+                    <template if:true={hasStatusPicklistValues}>
+                        <div class="slds-m-top_x-small">
+                            <button type="button" class="slds-button slds-button_neutral" onclick={handleAutoFillStatusValues}>
+                                Auto-fill (Submitted / Approved / Rejected)
+                            </button>
+                        </div>
+                    </template>
+                    <template if:true={hasIncompleteStatusMapping}>
+                        <p class="ar-hint" style="color:#ea001e;">
+                            All three Status Value dropdowns must be picked before save.
+                        </p>
+                    </template>
+                    <div class="ar-form-grid-3 slds-m-top_small">
+                        <template if:true={hasStatusPicklistValues}>
+                            <lightning-combobox label="On Submit" value={form.Status_Value_On_Submit__c}
+                                options={statusValueOptions}
+                                data-field="Status_Value_On_Submit__c"
+                                onchange={handleStatusValueChange}
+                                placeholder="Submitted"></lightning-combobox>
+                            <lightning-combobox label="On Approve" value={form.Status_Value_On_Approve__c}
+                                options={statusValueOptions}
+                                data-field="Status_Value_On_Approve__c"
+                                onchange={handleStatusValueChange}
+                                placeholder="Approved"></lightning-combobox>
+                            <lightning-combobox label="On Reject" value={form.Status_Value_On_Reject__c}
+                                options={statusValueOptions}
+                                data-field="Status_Value_On_Reject__c"
+                                onchange={handleStatusValueChange}
+                                placeholder="Rejected"></lightning-combobox>
+                        </template>
+                        <template if:false={hasStatusPicklistValues}>
+                            <lightning-input type="text" label="On Submit" value={form.Status_Value_On_Submit__c}
+                                data-field="Status_Value_On_Submit__c" onchange={handleFormChange}
+                                placeholder="Submitted"></lightning-input>
+                            <lightning-input type="text" label="On Approve" value={form.Status_Value_On_Approve__c}
+                                data-field="Status_Value_On_Approve__c" onchange={handleFormChange}
+                                placeholder="Approved"></lightning-input>
+                            <lightning-input type="text" label="On Reject" value={form.Status_Value_On_Reject__c}
+                                data-field="Status_Value_On_Reject__c" onchange={handleFormChange}
+                                placeholder="Rejected"></lightning-input>
+                        </template>
+                    </div>
+
+                    <div class="ar-section-divider slds-m-top_medium">
+                        <span>Other</span>
+                    </div>
+                    <lightning-input type="text" label="Description (Internal)" value={form.Description__c}
+                        data-field="Description__c" onchange={handleFormChange}
+                        placeholder="What is this rule for?"></lightning-input>
+                    <div class="slds-m-top_small">
+                        <lightning-input type="toggle" label="Active" checked={form.Is_Active__c}
+                            data-field="Is_Active__c" onchange={handleFormChange}></lightning-input>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSave} disabled={saveDisabled}>
+                        <template if:true={isSaving}>Saving...</template>
+                        <template if:false={isSaving}>Save Rule</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Simulator: proves what the matrix would do to a real record, without
+         creating an approval request. -->
+    <template if:true={showSimulator}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header ar-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseSimulator}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">Simulate Approval Routing</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium ar-modal-body">
+                    <p class="ar-hint">Paste any record Id. Nothing is submitted — this only reports which rules would match and who would be asked to approve.</p>
+                    <lightning-input type="text" label="Record Id" value={simulateRecordId}
+                        onchange={handleSimulateIdChange} placeholder="a0X..."></lightning-input>
+                    <div class="slds-m-top_small">
+                        <lightning-button variant="brand" label="Run Simulation"
+                            onclick={handleRunSimulation} disabled={simulateDisabled}></lightning-button>
+                    </div>
+
+                    <template if:true={simulateResult}>
+                        <template if:true={simulateResult.error}>
+                            <div class="slds-box slds-theme_warning slds-m-top_medium">
+                                {simulateResult.error}
+                            </div>
+                        </template>
+
+                        <template if:false={simulateResult.error}>
+                            <div class="ar-section-divider slds-m-top_medium">
+                                <span>{simulateResult.objectType} &middot; {simulateResult.recordName}</span>
+                            </div>
+
+                            <template if:true={simulateResult.hasMatched}>
+                                <p class="ar-hint">These rules match, in the order they would run:</p>
+                                <template for:each={simulateResult.matched} for:item="m">
+                                    <div key={m.key} class={m.rowClass}>
+                                        <span class="ar-row-level-badge">L{m.level}</span>
+                                        <span class="ar-row-name">{m.ruleName}</span>
+                                        <span class="ar-row-approver">→ {m.approverLabel}</span>
+                                        <span class="ar-row-condition">{m.approverType} &middot; {m.mode}</span>
+                                        <template if:true={m.warning}>
+                                            <div class="ar-row-desc">{m.warning}</div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <template if:false={simulateResult.hasMatched}>
+                                <div class="slds-box slds-theme_warning slds-m-top_small">
+                                    No rule matches this record — submitting it would be rejected with
+                                    "No approval rules match this record's field values."
+                                </div>
+                            </template>
+
+                            <template if:true={simulateResult.hasSkipped}>
+                                <div class="ar-section-divider slds-m-top_medium">
+                                    <span>Skipped</span>
+                                </div>
+                                <template for:each={simulateResult.skipped} for:item="s">
+                                    <div key={s.key} class="ar-sim-row ar-sim-skip">
+                                        <span class="ar-row-level-badge">L{s.level}</span>
+                                        <span class="ar-row-name">{s.ruleName}</span>
+                                        <span class="ar-row-condition">{s.reason}</span>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseSimulator}>Close</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

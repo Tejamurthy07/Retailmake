@@ -1,0 +1,13 @@
+<template>
+    <header class="dms-header">
+        <div class="dms-header__titles">
+            <h1 class="dms-header__title">{title}</h1>
+            <template lwc:if={subtitle}>
+                <p class="dms-header__subtitle">{subtitle}</p>
+            </template>
+        </div>
+        <div class="dms-header__actions">
+            <slot name="actions"></slot>
+        </div>
+    </header>
+</template>

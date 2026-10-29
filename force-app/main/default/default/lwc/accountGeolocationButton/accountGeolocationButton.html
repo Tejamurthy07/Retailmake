@@ -1,0 +1,102 @@
+<template>
+    <lightning-card title="Outlet Geolocation" icon-name="utility:location">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+
+            <!-- Current saved location -->
+            <div class="agb-section">
+                <div class="agb-row">
+                    <span class="agb-label">Saved Location:</span>
+                    <span class="agb-value">{savedLatLngLabel}</span>
+                </div>
+                <template if:true={hasLocation}>
+                    <div class="agb-row">
+                        <span class="agb-label">Geofence Radius:</span>
+                        <span class="agb-value">{currentLocation.Geofence_Radius__c} m</span>
+                    </div>
+                    <div class="agb-row agb-actions">
+                        <lightning-button
+                            label="Open in Maps"
+                            icon-name="utility:open"
+                            variant="neutral"
+                            onclick={handleOpenMap}>
+                        </lightning-button>
+                        <lightning-button
+                            label="Clear"
+                            icon-name="utility:delete"
+                            variant="destructive-text"
+                            onclick={handleClearClick}
+                            disabled={isLoading}>
+                        </lightning-button>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Billing fallback -->
+            <template if:true={hasBillingFallback}>
+                <div class="agb-billing-banner">
+                    <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                    <span class="slds-m-left_x-small">
+                        Billing address has geocodes ({currentLocation.BillingLatitude}, {currentLocation.BillingLongitude}).
+                    </span>
+                    <lightning-button
+                        label="Use Billing Address"
+                        variant="brand-outline"
+                        onclick={handleUseBilling}
+                        disabled={isLoading}
+                        class="slds-m-left_small">
+                    </lightning-button>
+                </div>
+            </template>
+
+            <!-- Capture from device -->
+            <div class="agb-capture-section">
+                <h3 class="agb-section-title">Capture from this device</h3>
+                <p class="agb-help">
+                    Stand at the outlet and click below to capture the GPS coordinates from your browser.
+                </p>
+
+                <div class="agb-radius-row">
+                    <label class="agb-radius-label">Geofence radius (metres):</label>
+                    <lightning-input
+                        type="number"
+                        variant="label-hidden"
+                        min="10"
+                        max="5000"
+                        step="10"
+                        value={radiusMeters}
+                        onchange={handleRadiusChange}
+                        class="agb-radius-input">
+                    </lightning-input>
+                </div>
+
+                <div class="agb-actions">
+                    <lightning-button
+                        label="Capture Current Location"
+                        icon-name="utility:checkin"
+                        variant="brand"
+                        onclick={handleCaptureClick}
+                        disabled={isCapturing}>
+                    </lightning-button>
+                    <template if:true={isCapturing}>
+                        <lightning-spinner alternative-text="Capturing..." size="small"></lightning-spinner>
+                    </template>
+                </div>
+
+                <template if:true={hasCapture}>
+                    <div class="agb-captured-banner">
+                        <lightning-icon icon-name="utility:success" size="x-small" variant="success"></lightning-icon>
+                        <span class="slds-m-left_x-small">Captured: <strong>{capturedLabel}</strong></span>
+                        <lightning-button
+                            label="Save to Account"
+                            variant="success"
+                            onclick={handleSaveClick}
+                            disabled={isLoading}
+                            class="slds-m-left_small">
+                        </lightning-button>
+                    </div>
+                </template>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

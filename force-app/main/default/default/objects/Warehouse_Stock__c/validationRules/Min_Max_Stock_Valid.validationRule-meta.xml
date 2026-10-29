@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Min_Max_Stock_Valid</fullName>
+    <active>true</active>
+    <description>Ensures Min Stock Level is less than Max Stock Level</description>
+    <errorConditionFormula>AND(NOT(ISBLANK(Min_Stock_Level__c)), NOT(ISBLANK(Max_Stock_Level__c)), Min_Stock_Level__c &gt;= Max_Stock_Level__c)</errorConditionFormula>
+    <errorMessage>Min Stock Level must be less than Max Stock Level.</errorMessage>
+</ValidationRule>

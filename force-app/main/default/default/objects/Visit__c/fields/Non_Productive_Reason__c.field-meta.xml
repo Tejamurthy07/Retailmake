@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Non_Productive_Reason__c</fullName>
+    <label>Non Productive Reason</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>No Demand</fullName>
+                <default>false</default>
+                <label>No Demand</label>
+            </value>
+            <value>
+                <fullName>Credit Issue</fullName>
+                <default>false</default>
+                <label>Credit Issue</label>
+            </value>
+            <value>
+                <fullName>Owner Not Available</fullName>
+                <default>false</default>
+                <label>Owner Not Available</label>
+            </value>
+            <value>
+                <fullName>Visit Skipped</fullName>
+                <default>false</default>
+                <label>Visit Skipped</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+            <value>
+                <fullName>Shop Closed</fullName>
+                <default>false</default>
+                <label>Shop Closed</label>
+            </value>
+            <value>
+                <fullName>Weather Conditions</fullName>
+                <default>false</default>
+                <label>Weather Conditions</label>
+            </value>
+            <value>
+                <fullName>Vehicle Breakdown</fullName>
+                <default>false</default>
+                <label>Vehicle Breakdown</label>
+            </value>
+            <value>
+                <fullName>Access Issue</fullName>
+                <default>false</default>
+                <label>Access Issue</label>
+            </value>
+            <value>
+                <fullName>Time Constraint</fullName>
+                <default>false</default>
+                <label>Time Constraint</label>
+            </value>
+            <value>
+                <fullName>Emergency</fullName>
+                <default>false</default>
+                <label>Emergency</label>
+            </value>
+            <value>
+                <fullName>Closed</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Closed</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

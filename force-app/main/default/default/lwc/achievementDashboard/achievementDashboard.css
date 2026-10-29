@@ -1,0 +1,125 @@
+.ad-container { padding: 20px; max-width: 1400px; margin: auto; }
+
+/* Header */
+.ad-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.ad-header-left { display: flex; align-items: center; gap: 12px; }
+.ad-header h1 { font-size: 24px; font-weight: 700; }
+.ad-header-right { display: flex; align-items: center; gap: 10px; }
+.ad-period-picker { min-width: 180px; }
+.ad-year-picker { min-width: 100px; }
+
+/* Stats Row */
+.ad-stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.ad-stat {
+    background: white; border-radius: 10px; padding: 16px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex: 1; min-width: 140px;
+    display: flex; flex-direction: column; align-items: center;
+    border-top: 3px solid #d8dde6;
+}
+.ad-stat-primary { border-top-color: #0176d3; }
+.ad-stat-kpis { border-top-color: #7e5cef; }
+.ad-stat-value { font-size: 24px; font-weight: 700; color: #3e3e3c; }
+.ad-stat-label { font-size: 11px; color: #6b6d70; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* Highlight Row (Leaderboard + KPI Distribution) */
+.ad-highlight-row { display: flex; gap: 16px; margin-bottom: 20px; }
+.ad-leaderboard-card { flex: 3; }
+.ad-chart-card-sm { flex: 2; }
+.ad-chart-body-sm { padding: 16px; height: 320px; position: relative; }
+
+/* Section Title */
+.ad-section-title { font-size: 14px; font-weight: 600; color: #54698d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Cards */
+.ad-card { background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden; }
+.ad-card-header {
+    padding: 12px 16px; font-weight: 600; font-size: 14px; background: #f3f6f9;
+    display: flex; align-items: center; gap: 8px;
+}
+.ad-card-body { padding: 16px; max-height: 400px; overflow-y: auto; }
+
+/* KPI Cards */
+.ad-kpi-grid { display: flex; gap: 16px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+.ad-kpi-card {
+    background: white; border-radius: 10px; padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); min-width: 160px; flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.ad-kpi-ring { position: relative; width: 80px; height: 80px; }
+.ad-ring-svg { width: 80px; height: 80px; }
+.ad-kpi-ring > span {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); font-size: 14px; font-weight: 700;
+}
+.ad-kpi-info { text-align: center; }
+.ad-kpi-info h3 { font-size: 13px; font-weight: 600; color: #3e3e3c; margin: 0; }
+.ad-kpi-category { font-size: 10px; color: #7e5cef; background: #f0e6ff; padding: 1px 6px; border-radius: 8px; }
+.ad-kpi-values { display: flex; gap: 12px; margin-top: 6px; }
+.ad-kpi-target { font-size: 11px; color: #6b6d70; }
+.ad-kpi-actual { font-size: 11px; font-weight: 600; color: #3e3e3c; }
+
+/* Charts Row */
+.ad-charts-row { display: flex; gap: 16px; margin-bottom: 20px; }
+.ad-chart-card { background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow: hidden; }
+.ad-chart-trend { flex: 1; }
+.ad-chart-criteria { flex: 1; }
+.ad-chart-body { padding: 16px; height: 280px; position: relative; }
+
+/* Team Card */
+.ad-team-card { margin-bottom: 20px; }
+
+/* Table */
+.ad-table { width: 100%; border-collapse: collapse; }
+.ad-table th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: #54698d; text-transform: uppercase; border-bottom: 2px solid #e5e5e5; text-align: left; }
+.ad-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+.ad-name-cell { font-weight: 600; color: #3e3e3c; }
+.ad-progress-cell { display: flex; flex-direction: column; gap: 3px; }
+.ad-mini-bar { height: 4px; background: #e5e5e5; border-radius: 2px; overflow: hidden; }
+.ad-mini-fill { height: 100%; background: linear-gradient(90deg, #0176d3, #2e844a); border-radius: 2px; transition: width 0.3s; }
+
+/* Leaderboard */
+.ad-leader-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.ad-leader-row:last-child { border-bottom: none; }
+.ad-leader-info { flex: 1; }
+.ad-leader-info strong { font-size: 13px; display: block; margin-bottom: 4px; }
+.ad-leader-bar { height: 4px; background: #e5e5e5; border-radius: 2px; overflow: hidden; }
+.ad-leader-fill { height: 100%; background: linear-gradient(90deg, #0176d3, #2e844a); border-radius: 2px; transition: width 0.3s; }
+.ad-leader-stats { text-align: right; min-width: 70px; }
+.ad-leader-pct { font-size: 14px; font-weight: 700; display: block; }
+.ad-leader-val { font-size: 11px; color: #6b6d70; }
+
+/* Rank badges */
+.ad-rank-gold, .ad-rank-silver, .ad-rank-bronze, .ad-rank-default {
+    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.ad-rank-gold { background: linear-gradient(135deg, #ffd700, #ffaa00); color: white; }
+.ad-rank-silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: white; }
+.ad-rank-bronze { background: linear-gradient(135deg, #cd7f32, #a0522d); color: white; }
+.ad-rank-default { background: #f3f3f3; color: #54698d; }
+
+/* Colors */
+.ad-pct-green { color: #2e844a; }
+.ad-pct-amber { color: #e65100; }
+.ad-pct-red { color: #c23934; }
+
+/* No data */
+.ad-no-data { text-align: center; padding: 40px 16px; color: #6b6d70; font-size: 13px; }
+
+/* Spinner */
+.ad-spinner-backdrop {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: center; z-index: 99999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ad-kpi-grid { flex-wrap: wrap; }
+    .ad-kpi-card { min-width: 140px; flex-basis: 45%; }
+    .ad-charts-row { flex-direction: column; }
+    .ad-highlight-row { flex-direction: column; }
+    .ad-header { flex-direction: column; gap: 12px; }
+    .ad-header-right { flex-wrap: wrap; }
+    .ad-stats-row { flex-wrap: wrap; }
+    .ad-stat { min-width: 45%; }
+}

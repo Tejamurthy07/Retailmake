@@ -1,0 +1,422 @@
+/* Leave Approval Styles */
+:host {
+    --brand-primary: #0176d3;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+    --bg-hover: #f0f7ff;
+    --text-primary: #181818;
+    --text-secondary: #706e6b;
+    --success-color: #2e844a;
+    --error-color: #ea001e;
+    --warning-color: #dd7a01;
+}
+
+/* ── Container ───────────────────────────────────────── */
+
+.approval-container {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    min-height: 500px;
+    position: relative;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+
+.approval-header {
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-light);
+    border-radius: 12px 12px 0 0;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.pending-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--warning-color);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 20px;
+}
+
+/* ── View Tabs ───────────────────────────────────────── */
+
+.view-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border-color);
+    margin: 0 -16px -16px -16px;
+    padding: 0 16px;
+}
+
+.view-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.view-tab:hover {
+    color: var(--brand-primary);
+    background: var(--bg-hover);
+}
+
+.view-tab-active {
+    color: var(--brand-primary);
+    border-bottom-color: var(--brand-primary);
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    background: var(--error-color);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 0 6px;
+    margin-left: 8px;
+}
+
+/* ── Loading Overlay ─────────────────────────────────── */
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: 12px;
+}
+
+/* ── Table ────────────────────────────────────────────── */
+
+.table-header {
+    display: flex;
+    padding: 10px 16px;
+    background: var(--bg-light);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px 8px 0 0;
+}
+
+.approval-row {
+    border: 1px solid var(--border-color);
+    border-top: none;
+    transition: background 0.15s ease;
+}
+
+.approval-row:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.approval-row:hover {
+    background: var(--bg-hover);
+}
+
+.approval-row-expanded {
+    background: var(--bg-hover);
+    box-shadow: inset 0 0 0 1px rgba(1, 118, 211, 0.15);
+}
+
+.history-row {
+    cursor: pointer;
+}
+
+.approval-row-main {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.col-employee {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.col-type {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+}
+
+.col-dates {
+    flex: 2;
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.col-days {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.col-reason {
+    flex: 2;
+    font-size: 12px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.col-actions {
+    flex: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* ── Action Icons ────────────────────────────────────── */
+
+.approve-icon {
+    color: var(--success-color);
+}
+
+.reject-icon {
+    color: var(--error-color);
+}
+
+/* ── Expanded Detail ─────────────────────────────────── */
+
+.approval-row-detail {
+    padding: 16px 20px;
+    background: #f0f7ff;
+    border-top: 1px solid rgba(1, 118, 211, 0.15);
+}
+
+.comment-input {
+    width: 100%;
+}
+
+/* ── Leave Type Badge ────────────────────────────────── */
+
+.leave-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+/* ── Status Badges ───────────────────────────────────── */
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff8e1;
+    color: var(--warning-color);
+}
+
+.status-submitted {
+    background: #e8f4fd;
+    color: var(--brand-primary);
+}
+
+.status-approved {
+    background: #e6f7e9;
+    color: var(--success-color);
+}
+
+.status-rejected {
+    background: #fce4e4;
+    color: var(--error-color);
+}
+
+.status-cancelled {
+    background: #f3f3f3;
+    color: var(--text-secondary);
+}
+
+/* ── Detail Fields ───────────────────────────────────── */
+
+.detail-field {
+    margin-bottom: 8px;
+}
+
+.detail-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 3px;
+}
+
+.detail-field-value {
+    display: block;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.detail-reason {
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+/* ── Detail Modal ────────────────────────────────────── */
+
+.detail-modal-ref {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.detail-section {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.detail-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ── Empty States ────────────────────────────────────── */
+
+.empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-icon {
+    color: #c9c7c5;
+}
+
+/* ── Modal Overrides ─────────────────────────────────── */
+
+.slds-modal__content {
+    overflow: visible;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .col-reason {
+        display: none;
+    }
+
+    .col-actions {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-header {
+        display: none;
+    }
+
+    .approval-row-main {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .col-employee {
+        flex-basis: 60%;
+    }
+
+    .col-type {
+        flex-basis: 30%;
+        justify-content: flex-end;
+    }
+
+    .col-dates {
+        flex-basis: 50%;
+    }
+
+    .col-days {
+        flex-basis: 40%;
+        text-align: left;
+    }
+
+    .col-reason {
+        display: none;
+    }
+
+    .col-actions {
+        flex-basis: 100%;
+        justify-content: flex-end;
+        padding-top: 8px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .view-tabs {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .approval-header .slds-grid {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

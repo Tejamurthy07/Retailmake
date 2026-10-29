@@ -1,0 +1,14 @@
+{
+  "required" : [ "searchText" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "searchText" : {
+      "title" : "Outlet Name",
+      "description" : "Full or partial outlet / store name to search for.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

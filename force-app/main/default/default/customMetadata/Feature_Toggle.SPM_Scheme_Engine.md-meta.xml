@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>SPM Scheme Engine</label>
+    <protected>false</protected>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Scheme and promotion engine</value>
+    </values>
+    <values>
+        <field>Feature_Code__c</field>
+        <value xsi:type="xsd:string">SPM-001</value>
+    </values>
+    <values>
+        <field>Is_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">SPM</value>
+    </values>
+    <values>
+        <field>Package_Tier__c</field>
+        <value xsi:type="xsd:string">Base</value>
+    </values>
+</CustomMetadata>

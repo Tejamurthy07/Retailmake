@@ -1,0 +1,149 @@
+/* ── Hierarchy Node ─────────────────────────────────────── */
+.hierarchy-node {
+    position: relative;
+}
+
+.hierarchy-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    background: #fff;
+    cursor: default;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.hierarchy-card:hover {
+    background: #f3f3f3;
+}
+
+/* Level-based left border colors */
+.hierarchy-level-0 { border-left-color: #0176d3; background: #f0f7ff; }
+.hierarchy-level-1 { border-left-color: #2e844a; background: #f5fbf7; }
+.hierarchy-level-2 { border-left-color: #7b61ff; background: #f8f5ff; }
+.hierarchy-level-3 { border-left-color: #dd7a01; background: #fff9f0; }
+.hierarchy-level-4 { border-left-color: #939393; }
+
+.hierarchy-card-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.hierarchy-card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* Toggle */
+.hierarchy-toggle {
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.hierarchy-toggle:hover {
+    background: #e5e5e5;
+}
+
+.hierarchy-toggle-spacer {
+    width: 20px;
+    flex-shrink: 0;
+}
+
+/* Avatar */
+.hierarchy-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0176d3, #7b61ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.hierarchy-level-1 .hierarchy-avatar { background: linear-gradient(135deg, #2e844a, #45b97c); }
+.hierarchy-level-2 .hierarchy-avatar { background: linear-gradient(135deg, #7b61ff, #b197ff); }
+.hierarchy-level-3 .hierarchy-avatar { background: linear-gradient(135deg, #dd7a01, #f5a623); }
+.hierarchy-level-4 .hierarchy-avatar { background: linear-gradient(135deg, #939393, #b5b5b5); }
+
+.hierarchy-initials {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+/* Info */
+.hierarchy-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.hierarchy-info:hover .hierarchy-name {
+    color: #0176d3;
+    text-decoration: underline;
+}
+
+.hierarchy-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #181818;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s;
+}
+
+.hierarchy-meta {
+    font-size: 11px;
+    color: #706e6b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hierarchy-code {
+    font-size: 11px;
+    color: #706e6b;
+    background: #f3f3f3;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: monospace;
+}
+
+.hierarchy-child-count {
+    font-size: 11px;
+    color: #0176d3;
+    font-weight: 500;
+}
+
+/* Children indentation */
+.hierarchy-children {
+    margin-left: 24px;
+    padding-left: 12px;
+    border-left: 1px dashed #d8d8d8;
+}
+
+/* Highlighted node */
+.hierarchy-node-highlighted > .hierarchy-card {
+    box-shadow: 0 0 0 2px #0176d3;
+    background: #eef4ff;
+}

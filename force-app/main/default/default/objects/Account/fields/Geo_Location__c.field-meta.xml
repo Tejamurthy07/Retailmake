@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Geo_Location__c</fullName>
+    <displayLocationInDecimal>true</displayLocationInDecimal>
+    <label>Geo Location</label>
+    <required>false</required>
+    <scale>6</scale>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Location</type>
+</CustomField>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Open_Indents</fullName>
+    <columns>NAME</columns>
+    <columns>Account__c</columns>
+    <columns>Status__c</columns>
+    <columns>Indent_Date__c</columns>
+    <columns>Source_Warehouse__c</columns>
+    <columns>Invoice__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>notEqual</operation>
+        <value>Cancelled</value>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>notEqual</operation>
+        <value>Received</value>
+    </filters>
+    <label>Open Indents</label>
+</ListView>

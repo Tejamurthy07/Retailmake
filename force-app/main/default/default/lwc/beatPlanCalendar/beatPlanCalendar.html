@@ -1,0 +1,478 @@
+<template>
+    <lightning-card title="Journey Plan Calendar" icon-name="standard:date_input">
+        <div slot="actions">
+            <div class="slds-grid slds-grid_vertical-align-center slds-gutters_xx-small">
+                <div class="slds-col">
+                    <span class={pjpStatusBadgeClass}>{pjpStatus}</span>
+                </div>
+                <template if:true={noPlan}>
+                    <div class="slds-col">
+                        <lightning-button variant="brand" label="Generate Plan"
+                            icon-name="utility:magicwand" onclick={handleOpenGenerateModal}></lightning-button>
+                    </div>
+                </template>
+                <template if:true={hasPlan}>
+                    <template if:true={isPlanEditable}>
+                        <div class="slds-col">
+                            <lightning-button variant="neutral" label="Regenerate Plan"
+                                icon-name="utility:refresh" onclick={handleOpenRegenerateModal}></lightning-button>
+                        </div>
+                    </template>
+                    <div class="slds-col">
+                        <lightning-button variant="brand" label="Submit for Approval"
+                            icon-name="utility:approval" onclick={handleSubmitApproval}
+                            disabled={isApprovalDisabled}></lightning-button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <!-- Executive Picker -->
+            <template if:true={showExecutivePicker}>
+                <div class="executive-picker-row slds-m-bottom_medium">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-gutters_xx-small">
+                        <div class="slds-col">
+                            <span class="executive-label">Executive</span>
+                        </div>
+                        <div class="slds-col executive-picker-field">
+                            <lightning-record-edit-form object-api-name="Journey_Plan__c">
+                                <lightning-input-field field-name="Salesperson__c"
+                                    value={selectedExecutiveId}
+                                    onchange={handleExecutiveChange}
+                                    variant="label-hidden"></lightning-input-field>
+                            </lightning-record-edit-form>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-button label="Reset to Me" variant="neutral"
+                                onclick={handleResetExecutive}></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Controls Row -->
+            <div class="controls-row slds-m-bottom_medium">
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                    <div class="slds-col">
+                        <div class="slds-grid slds-gutters_xx-small slds-grid_vertical-align-center">
+                            <div class="slds-col">
+                                <lightning-button-icon icon-name="utility:chevronleft"
+                                    alternative-text="Previous" onclick={handlePrevious}></lightning-button-icon>
+                            </div>
+                            <div class="slds-col">
+                                <h2 class="calendar-title">{calendarTitle}</h2>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button-icon icon-name="utility:chevronright"
+                                    alternative-text="Next" onclick={handleNext}></lightning-button-icon>
+                            </div>
+                            <div class="slds-col slds-m-left_small">
+                                <lightning-button variant="neutral" label="Today"
+                                    onclick={handleToday} class="today-btn"></lightning-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col bpc-view-toggle-desktop">
+                        <lightning-button-group>
+                            <lightning-button label="Week" variant={weekBtnVariant}
+                                onclick={switchToWeekView}></lightning-button>
+                            <lightning-button label="Month" variant={monthBtnVariant}
+                                onclick={switchToMonthView}></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                    <div class="slds-col bpc-view-toggle-mobile">
+                        <lightning-button-group>
+                            <lightning-button label="Cards" variant={cardBtnVariant}
+                                onclick={switchToCardView}></lightning-button>
+                            <lightning-button label="Calendar" variant={calendarBtnVariant}
+                                onclick={switchToCalendarView}></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Panel -->
+            <div class="summary-panel slds-m-bottom_medium">
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="stat-card">
+                            <span class="stat-label">Total Planned</span>
+                            <span class="stat-value stat-primary">{summaryStats.totalPlannedVisits}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="stat-card">
+                            <span class="stat-label">Coverage %</span>
+                            <span class="stat-value stat-success">{summaryStats.coveragePercent}%</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="stat-card">
+                            <span class="stat-label">Assigned Beats</span>
+                            <span class="stat-value stat-primary">{summaryStats.assignedBeats}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="stat-card">
+                            <span class="stat-label">Total Outlets</span>
+                            <span class="stat-value stat-primary">{summaryStats.totalOutlets}</span>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-5">
+                        <div class="stat-card">
+                            <span class="stat-label">Avg Visits/Day</span>
+                            <span class="stat-value stat-primary">{summaryStats.avgVisitsPerDay}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Plan State -->
+            <template if:true={noPlan}>
+                <div class="no-plan-state">
+                    <lightning-icon icon-name="utility:event" size="large" class="no-plan-icon"></lightning-icon>
+                    <h3 class="slds-text-heading_small slds-m-top_medium">No Journey Plan for this period</h3>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                        Click "Generate Plan" to auto-create a plan from your beat assignments.
+                    </p>
+                </div>
+            </template>
+
+            <!-- Mobile Card View -->
+            <template if:true={mobileCardView}>
+                <template if:true={hasPlan}>
+                    <div class="bpc-card-list">
+                        <template if:true={mobileCardDays.length}>
+                            <template for:each={mobileCardDays} for:item="day">
+                                <div class={day.cardClass} key={day.dateKey}
+                                    data-date={day.dateKey} onclick={selectDay}>
+                                    <div class="bpc-day-card-left">
+                                        <span class="bpc-day-card-date">{day.dateNumber}</span>
+                                        <span class="bpc-day-card-dow">{day.shortDay}</span>
+                                    </div>
+                                    <div class="bpc-day-card-right">
+                                        <template for:each={day.beats} for:item="beat">
+                                            <div class="bpc-card-beat" key={beat.planDayId} style={beat.colorStyle}>
+                                                <span class="bpc-card-beat-name">{beat.name}</span>
+                                                <span class="bpc-card-beat-count">{beat.outletCount} outlets</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="bpc-day-card-visits">
+                                        <span class="bpc-visits-num">{day.totalVisits}</span>
+                                        <span class="bpc-visits-label">visits</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={mobileCardDays.length}>
+                            <div class="bpc-card-empty">
+                                <p>No beats planned for this month</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Calendar Grid - Week View -->
+            <template if:true={showCalendarGrid}>
+            <template if:true={weekView}>
+                <template if:true={hasPlan}>
+                    <div class="calendar-grid week-grid">
+                        <div class="slds-grid day-headers">
+                            <template for:each={weekDays} for:item="day">
+                                <div class={day.headerClass} key={day.dateKey}>
+                                    <span class="day-name">{day.dayName}</span>
+                                    <span class="day-date">{day.dateDisplay}</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="slds-grid day-content-row">
+                            <template for:each={weekDays} for:item="day">
+                                <div class={day.cellClass} key={day.dateKey}
+                                    data-date={day.dateKey} onclick={selectDay}>
+                                    <template if:true={day.beats}>
+                                        <template for:each={day.beats} for:item="beat">
+                                            <div class="beat-chip" key={beat.planDayId} style={beat.colorStyle}>
+                                                <span class="beat-name">{beat.name}</span>
+                                                <span class="beat-outlet-count">{beat.outletCount} outlets</span>
+                                            </div>
+                                        </template>
+                                    </template>
+                                    <template if:false={day.hasBeats}>
+                                        <div class="empty-day">
+                                            <span class="slds-text-body_small slds-text-color_weak">No plan</span>
+                                        </div>
+                                    </template>
+                                    <template if:true={day.hasBeats}>
+                                        <div class="day-visit-count">
+                                            <span class="visit-count-badge">{day.totalVisits} visits</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Calendar Grid - Month View -->
+            <template if:false={weekView}>
+                <template if:true={hasPlan}>
+                    <div class="calendar-grid month-grid">
+                        <div class="slds-grid month-headers">
+                            <div class="month-header-cell">Sun</div>
+                            <div class="month-header-cell">Mon</div>
+                            <div class="month-header-cell">Tue</div>
+                            <div class="month-header-cell">Wed</div>
+                            <div class="month-header-cell">Thu</div>
+                            <div class="month-header-cell">Fri</div>
+                            <div class="month-header-cell">Sat</div>
+                        </div>
+                        <template for:each={monthWeeks} for:item="week">
+                            <div class="slds-grid month-week-row" key={week.id}>
+                                <template for:each={week.days} for:item="day">
+                                    <div class={day.monthCellClass} key={day.dateKey}
+                                        data-date={day.dateKey} onclick={selectDay}>
+                                        <span class={day.dateNumberClass}>{day.dateNumber}</span>
+                                        <template if:true={day.beats}>
+                                            <template for:each={day.beats} for:item="beat">
+                                                <div class="month-beat-chip" key={beat.planDayId} style={beat.colorStyle}>
+                                                    <span class="month-beat-name">{beat.name}</span>
+                                                    <span class="month-beat-count">{beat.outletCount}</span>
+                                                </div>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </template>
+            </template>
+
+            <!-- Selected Day Detail Panel -->
+            <template if:true={selectedDayDetail}>
+                <div class="selected-day-panel slds-m-top_medium">
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">
+                        {selectedDayDetail.dateDisplay}
+                    </h3>
+                    <div class="slds-grid slds-gutters">
+                        <!-- Assigned Beats -->
+                        <div class="slds-col slds-size_1-of-2">
+                            <h4 class="slds-text-title_caps slds-m-bottom_x-small">Assigned Beats</h4>
+                            <template if:true={hasSelectedBeats}>
+                                <template for:each={selectedDayDetail.beats} for:item="beat">
+                                    <div class="assigned-beat-item" key={beat.planDayId}>
+                                        <div class="beat-color-dot" style={beat.colorStyle}></div>
+                                        <span class="beat-detail-name">{beat.name}</span>
+                                        <span class="beat-detail-count">{beat.outletCount} outlets</span>
+                                        <template if:true={isSelectedDayEditable}>
+                                            <lightning-button-icon icon-name="utility:close"
+                                                alternative-text="Remove from this day" title="Remove from this day"
+                                                size="small" variant="bare"
+                                                data-plan-day-id={beat.planDayId}
+                                                onclick={handleRemoveBeat}
+                                                class="remove-beat-btn"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete"
+                                                alternative-text="Remove from entire plan" title="Remove from entire plan"
+                                                size="small" variant="bare"
+                                                data-beat-id={beat.id}
+                                                onclick={handleRemoveBeatFromPlan}
+                                                class="remove-beat-plan-btn"></lightning-button-icon>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={hasSelectedBeats}>
+                                <p class="slds-text-body_small slds-text-color_weak slds-p-around_small">
+                                    No beats assigned to this day.
+                                </p>
+                            </template>
+                        </div>
+                        <!-- Available Beats -->
+                        <template if:true={isSelectedDayEditable}>
+                            <div class="slds-col slds-size_1-of-2">
+                                <h4 class="slds-text-title_caps slds-m-bottom_x-small">Available Beats</h4>
+                                <template if:true={hasAvailableBeats}>
+                                    <template for:each={availableBeats} for:item="beat">
+                                        <div class="available-beat-item" key={beat.id}
+                                            data-beat-id={beat.id} onclick={assignBeatToDay}>
+                                            <div class="beat-color-dot" style={beat.colorStyle}></div>
+                                            <span class="beat-detail-name">{beat.name}</span>
+                                            <span class="beat-detail-count">{beat.outletCount} outlets</span>
+                                            <lightning-icon icon-name="utility:add" size="xx-small"
+                                                class="add-beat-icon"></lightning-icon>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template if:false={hasAvailableBeats}>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-p-around_small">
+                                        All beats are already assigned.
+                                    </p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Generate Plan Modal -->
+    <template if:true={showGenerateModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close"
+                        alternative-text="Close" size="large" variant="bare-inverse"
+                        class="slds-modal__close" onclick={handleCloseGenerateModal}></lightning-button-icon>
+                    <h2 class="slds-text-heading_medium">Generate Journey Plan</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+                        Generate a journey plan starting from today. Select the end date for the plan.
+                    </p>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="From Date"
+                                value={generateFromDate} disabled></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="To Date"
+                                value={generateToDate} onchange={handleToDateChange}
+                                min={generateFromDate}
+                                required></lightning-input>
+                        </div>
+                    </div>
+                    <template if:true={generateDateInfo}>
+                        <div class="slds-m-top_small">
+                            <p class="generate-info-text">{generateDateInfo}</p>
+                        </div>
+                    </template>
+
+                    <!-- Exclusion Options -->
+                    <div class="slds-m-top_medium">
+                        <h3 class="slds-text-title_caps slds-m-bottom_x-small">Exclusion Options</h3>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                            Select which types of non-working days to exclude from the journey plan.
+                        </p>
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Holidays"
+                                    checked={excludeHolidays}
+                                    onchange={handleExcludeHolidaysChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Leaves"
+                                    checked={excludeLeaves}
+                                    onchange={handleExcludeLeavesChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Week Offs"
+                                    checked={excludeWeekOffs}
+                                    onchange={handleExcludeWeekOffsChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" variant="neutral"
+                        onclick={handleCloseGenerateModal}></lightning-button>
+                    <lightning-button label="Generate" variant="brand"
+                        onclick={handleConfirmGenerate}
+                        disabled={generateDisabled}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Regenerate Plan Modal -->
+    <template if:true={showRegenerateModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close"
+                        alternative-text="Close" size="large" variant="bare-inverse"
+                        class="slds-modal__close" onclick={handleCloseRegenerateModal}></lightning-button-icon>
+                    <h2 class="slds-text-heading_medium">Regenerate Journey Plan</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                        <p class="slds-text-body_small">
+                            This will delete all future plan days (from today onwards) and recreate them using your current beat assignments.
+                            Past plan days will be preserved.
+                        </p>
+                    </div>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="From Date (Today)"
+                                value={todayFormatted} disabled></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input type="date" label="To Date"
+                                value={regenerateToDate} onchange={handleRegenerateToDateChange}
+                                min={todayFormatted}
+                                required></lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- Exclusion Options -->
+                    <div class="slds-m-top_medium">
+                        <h3 class="slds-text-title_caps slds-m-bottom_x-small">Exclusion Options</h3>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                            Select which types of non-working days to exclude from the regenerated plan.
+                        </p>
+                        <div class="slds-grid slds-wrap slds-gutters_small">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Holidays"
+                                    checked={excludeHolidays}
+                                    onchange={handleExcludeHolidaysChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Leaves"
+                                    checked={excludeLeaves}
+                                    onchange={handleExcludeLeavesChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input type="toggle" label="Exclude Week Offs"
+                                    checked={excludeWeekOffs}
+                                    onchange={handleExcludeWeekOffsChange}
+                                    message-toggle-active="Yes"
+                                    message-toggle-inactive="No"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" variant="neutral"
+                        onclick={handleCloseRegenerateModal}></lightning-button>
+                    <lightning-button label="Regenerate" variant="brand"
+                        onclick={handleConfirmRegenerate}
+                        disabled={regenerateDisabled}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

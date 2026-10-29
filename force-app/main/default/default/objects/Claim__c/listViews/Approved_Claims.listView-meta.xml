@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Approved_Claims</fullName>
+    <columns>NAME</columns>
+    <columns>Account__c</columns>
+    <columns>Claim_Type__c</columns>
+    <columns>Approved_Amount__c</columns>
+    <columns>Credit_Note_Number__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Approved</value>
+    </filters>
+    <label>Approved Claims</label>
+</ListView>

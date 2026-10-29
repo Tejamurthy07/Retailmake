@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sub_Category_Requires_Parent</fullName>
+    <active>true</active>
+    <description>If Level is Sub-Category or Brand, then Parent Category must not be blank.</description>
+    <errorConditionFormula>AND(
+    OR(
+        ISPICKVAL(Level__c, &quot;Sub-Category&quot;),
+        ISPICKVAL(Level__c, &quot;Brand&quot;)
+    ),
+    ISBLANK(Parent_Category__c)
+)</errorConditionFormula>
+    <errorDisplayField>Parent_Category__c</errorDisplayField>
+    <errorMessage>A parent category is required for Sub-Category and Brand level entries.</errorMessage>
+</ValidationRule>

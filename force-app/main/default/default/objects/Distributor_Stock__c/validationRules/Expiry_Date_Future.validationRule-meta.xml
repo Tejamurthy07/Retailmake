@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Expiry_Date_Future</fullName>
+    <active>true</active>
+    <description>Ensures current stock entries do not have a past expiry date. Historical (non-current) records are allowed to have past expiry dates.</description>
+    <errorConditionFormula>NOT(ISBLANK(Expiry_Date__c)) &amp;&amp; Is_Current__c = true &amp;&amp; Expiry_Date__c &lt; TODAY()</errorConditionFormula>
+    <errorDisplayField>Expiry_Date__c</errorDisplayField>
+    <errorMessage>Current stock entries cannot have a past expiry date. Mark as non-current or correct the expiry date.</errorMessage>
+</ValidationRule>

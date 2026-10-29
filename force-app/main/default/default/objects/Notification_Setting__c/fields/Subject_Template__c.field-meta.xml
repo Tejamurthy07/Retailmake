@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Subject_Template__c</fullName>
+    <description>Subject line. Supports merge fields like {!Name}, {!Status__c}</description>
+    <externalId>false</externalId>
+    <label>Subject Template</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RSP_Snapshot__c</fullName>
+    <description>Retail Suggested Price (product MRP) at capture time, so compliance is auditable even if the MRP later changes.</description>
+    <label>RSP</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

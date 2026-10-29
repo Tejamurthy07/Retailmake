@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>FMCG_Notification</customNotifTypeName>
+    <description>Bell / in-app notifications raised by the approval engine and the notification dispatcher.</description>
+    <desktop>true</desktop>
+    <masterLabel>FMCG Notification</masterLabel>
+    <mobile>true</mobile>
+    <slack>false</slack>
+</CustomNotificationType>

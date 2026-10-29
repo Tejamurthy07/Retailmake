@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Adjusted_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Adjusted By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Adjustments Made</relationshipLabel>
+    <relationshipName>Adjustments_Made</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

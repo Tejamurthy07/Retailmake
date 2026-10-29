@@ -1,0 +1,100 @@
+<template>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="large" class="slds-is-fixed"></lightning-spinner>
+    </template>
+
+    <div class="dms-card">
+        <div class="dms-card__head">
+            <h2 class="dms-card__title">Stock Adjustment</h2>
+        </div>
+        <div class="dms-card__body">
+            <!-- Error / Success banners -->
+            <template if:true={errorMessage}>
+                <div class="dms-banner dms-banner_error" role="alert">{errorMessage}</div>
+            </template>
+            <template if:true={successMessage}>
+                <div class="dms-banner dms-banner_success" role="alert">{successMessage}</div>
+            </template>
+
+            <!-- Step 1: Location & Product -->
+            <p class="dms-step">1. Select Location &amp; Product</p>
+            <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                    <lightning-combobox name="warehouse" label="Warehouse" required
+                        placeholder="Select a warehouse" value={selectedWarehouseId} options={warehouseOptions}
+                        onchange={handleWarehouseChange}></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                    <lightning-record-picker label="Product" placeholder="Search for a product..."
+                        object-api-name="Product_Extension__c" onchange={handleProductChange}></lightning-record-picker>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-p-bottom_x-small">
+                    <lightning-input label="Batch Number" value={batchNumber} onchange={handleBatchChange} placeholder="Optional"></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-grid slds-grid_vertical-align-end slds-p-bottom_x-small">
+                    <lightning-button label="Check Stock" variant="brand-outline" onclick={handleCheckStock} disabled={isCheckStockDisabled} icon-name="utility:search"></lightning-button>
+                </div>
+            </div>
+
+            <template if:true={stockChecked}>
+                <div class="dms-callout">
+                    <span class="dms-callout__label">Current System Stock</span>
+                    <span class="dms-callout__value">{formattedSystemQty} units</span>
+                </div>
+
+                <!-- Step 2: Adjustment Details -->
+                <p class="dms-step">2. Adjustment Details</p>
+                <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-combobox name="adjustmentType" label="Adjustment Type" required
+                            placeholder="Select a type" value={adjustmentType} options={adjustmentTypeOptions} onchange={handleTypeChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                        <lightning-input type="date" label="Adjustment Date" value={adjustmentDate} onchange={handleDateChange}></lightning-input>
+                    </div>
+                </div>
+
+                <template if:true={isPhysicalCount}>
+                    <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                            <lightning-input type="number" label="Actual Physical Count" value={actualQty} min="0" onchange={handleActualQtyChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-grid slds-grid_vertical-align-end">
+                            <div class="dms-callout dms-callout_tight">
+                                <span class="dms-callout__label">Variance</span>
+                                <span class={adjustmentDirectionClass}>{formattedAdjQty}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={isManualAdjustment}>
+                    <div class="slds-grid slds-gutters_small slds-wrap dms-row">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                            <lightning-input type="number" label="Adjustment Quantity" value={adjustmentQty} onchange={handleAdjustmentQtyChange} required message-when-value-missing="Quantity is required"></lightning-input>
+                            <p class="dms-hint">Positive = Add, Negative = Deduct</p>
+                        </div>
+                    </div>
+                </template>
+
+                <template if:true={adjustmentType}>
+                    <div class="dms-projected">
+                        <div><span class="dms-projected__label">System Qty</span><span class="dms-projected__val">{formattedSystemQty}</span></div>
+                        <div><span class="dms-projected__label">Adjustment</span><span class={adjustmentDirectionClass}>{formattedAdjQty}</span></div>
+                        <div><span class="dms-projected__label">Projected Qty</span><span class="dms-projected__val">{projectedQty}</span></div>
+                    </div>
+                </template>
+
+                <!-- Step 3: Reason -->
+                <p class="dms-step">3. Reason</p>
+                <lightning-textarea label="Reason for Adjustment" value={reason} onchange={handleReasonChange} required
+                    placeholder="Provide a detailed reason for this stock adjustment..." class="slds-m-bottom_medium"></lightning-textarea>
+
+                <div class="slds-grid slds-grid_align-end dms-actions">
+                    <lightning-button label="Reset" variant="neutral" onclick={handleReset} class="slds-m-right_small"></lightning-button>
+                    <lightning-button label="Create Adjustment" variant="brand" onclick={handleSubmit}></lightning-button>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,86 @@
+<template>
+    <lightning-card title="E-Invoice (GST)" icon-name="standard:document">
+        <template if:true={enabled}>
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <template if:true={error}>
+                    <div class="slds-text-color_error slds-p-vertical_x-small">{error}</div>
+                </template>
+
+                <!-- Not yet registered -->
+                <template if:false={generated}>
+                    <p class="slds-text-body_regular slds-p-bottom_small">
+                        No IRN registered for this invoice yet.
+                    </p>
+                    <lightning-button variant="brand" label="Generate E-Invoice"
+                        onclick={generate} disabled={busy}></lightning-button>
+                </template>
+
+                <!-- Registered -->
+                <template if:true={generated}>
+                    <div class="slds-p-bottom_x-small">
+                        <span class={statusPillClass}>{view.status}</span>
+                    </div>
+                    <div class="slds-grid slds-wrap slds-gutters_x-small">
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                            <span class="lbl">IRN</span>
+                            <div class="mono wrap">{view.irn}</div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <span class="lbl">Ack No</span>
+                            <div>{view.ackNo}</div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <span class="lbl">Ack Date</span>
+                            <div><lightning-formatted-date-time value={view.ackDate}></lightning-formatted-date-time></div>
+                        </div>
+                        <template if:true={hasEway}>
+                            <div class="slds-col slds-size_1-of-2">
+                                <span class="lbl">E-Way Bill No</span>
+                                <div>{view.ewbNo}</div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <span class="lbl">Valid Until</span>
+                                <div><lightning-formatted-date-time value={view.ewbValidUntil}></lightning-formatted-date-time></div>
+                            </div>
+                        </template>
+                        <div class="slds-col slds-size_1-of-1 slds-p-top_xx-small">
+                            <span class="lbl">Signed QR (payload)</span>
+                            <pre class="qr">{view.signedQr}</pre>
+                        </div>
+                    </div>
+                    <div class="slds-p-top_small">
+                        <lightning-button variant="destructive-text" label="Cancel E-Invoice"
+                            onclick={openCancel} disabled={busy}></lightning-button>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <template if:false={enabled}>
+            <div class="slds-p-around_medium slds-text-color_weak">
+                E-invoicing is disabled for this org.
+            </div>
+        </template>
+
+        <!-- Cancel dialog -->
+        <template if:true={cancelOpen}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-modal__title">Cancel E-Invoice</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-combobox label="Reason" value={cancelReason}
+                            options={cancelReasons} onchange={handleReason}></lightning-combobox>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Close" onclick={closeCancel}></lightning-button>
+                        <lightning-button variant="destructive" label="Cancel E-Invoice"
+                            onclick={doCancel} disabled={busy} class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </lightning-card>
+</template>

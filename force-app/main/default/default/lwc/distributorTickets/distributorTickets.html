@@ -1,0 +1,84 @@
+<template>
+    <div class="dms-tickets">
+        <div class="dms-body">
+            <div class="dms-toolbar">
+                <span class="dms-toolbar__title">Support Tickets</span>
+                <button class="dms-btn" type="button" onclick={openModal}>
+                    <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Ticket
+                </button>
+            </div>
+
+            <div class="dms-cards">
+                <template for:each={cards} for:item="c">
+                    <div key={c.id} class="dms-card">
+                        <span class="dms-card__label">{c.label}</span>
+                        <span class={c.cls}>{c.value}</span>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={error}>
+                <div class="dms-empty" style="color:var(--dms-danger)">{error}</div>
+            </template>
+            <template if:true={hasRows}>
+                <div class="dms-tbl dms-tbl_tickets">
+                    <div class="dms-thead">
+                        <span>Subject</span><span>Category</span><span>Priority</span><span>Status</span><span>Date</span>
+                    </div>
+                    <template for:each={rows} for:item="t">
+                        <div key={t.key} class="dms-trow">
+                            <span class="dms-strong" data-label="Subject">{t.subject}</span>
+                            <span data-label="Category">{t.category}</span>
+                            <span data-label="Priority"><c-dms-status-badge label={t.priority} theme={t.priorityTheme}></c-dms-status-badge></span>
+                            <span data-label="Status"><c-dms-status-badge label={t.status}></c-dms-status-badge></span>
+                            <span data-label="Date"><lightning-formatted-date-time value={t.ticketDate}></lightning-formatted-date-time></span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <template if:false={hasRows}>
+                <p class="dms-empty">No support tickets yet.</p>
+            </template>
+        </div>
+
+        <!-- ===================== New Ticket ===================== -->
+        <template if:true={modalOpen}>
+            <div class="dms-modal__overlay" onclick={closeModal}></div>
+            <div class="dms-modal" role="dialog">
+                <header class="dms-modal__head">
+                    <h2>New Support Ticket</h2>
+                    <button class="dms-iconbtn" type="button" onclick={closeModal} title="Close">
+                        <svg class="dms-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </header>
+                <div class="dms-modal__body">
+                    <label class="dms-flabel">Subject *</label>
+                    <lightning-input variant="label-hidden" value={subject} onchange={handleSubject}></lightning-input>
+                    <div class="dms-form2">
+                        <div>
+                            <label class="dms-flabel">Category</label>
+                            <lightning-combobox variant="label-hidden" value={category} options={categoryOptions} onchange={handleCategory}></lightning-combobox>
+                        </div>
+                        <div>
+                            <label class="dms-flabel">Priority</label>
+                            <lightning-combobox variant="label-hidden" value={priority} options={priorityOptions} onchange={handlePriority}></lightning-combobox>
+                        </div>
+                    </div>
+                    <label class="dms-flabel">Description</label>
+                    <lightning-textarea variant="label-hidden" value={description} onchange={handleDescription}></lightning-textarea>
+                </div>
+                <footer class="dms-modal__foot">
+                    <button class="dms-btn dms-btn_outline" type="button" onclick={closeModal}>Cancel</button>
+                    <button class="dms-btn" type="button" onclick={submit} disabled={submitDisabled}>Submit Ticket</button>
+                </footer>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Gross_Salary__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>Monthly gross salary for incentive calculation. For quarterly payouts, this is multiplied by 3. For annual, multiplied by 12.</description>
+    <inlineHelpText>Monthly gross salary used for PBIS incentive calculation. Incentive = Slab % x Gross Salary x Multiplier.</inlineHelpText>
+    <label>Gross Salary</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

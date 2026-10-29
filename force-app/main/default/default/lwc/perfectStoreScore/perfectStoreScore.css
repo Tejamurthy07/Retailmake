@@ -1,0 +1,104 @@
+.pss-container { position: relative; min-height: 8rem; }
+
+/* Filters in the card actions slot */
+.pss-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+.pss-filter-survey { min-width: 12rem; }
+.pss-filter-date { width: 9rem; }
+
+/* KPI tiles */
+.pss-kpi-row { margin: 0.25rem 0 0.75rem; }
+.pss-kpi {
+    background: #f3f6f9;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    text-align: center;
+    border-left: 4px solid #c9d2dc;
+    height: 100%;
+}
+.pss-kpi__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #16325c;
+}
+.pss-kpi__label {
+    font-size: 0.72rem;
+    color: #5c6b7a;
+    margin-top: 0.15rem;
+}
+.pss-kpi_score .pss-kpi__value { font-size: 1.9rem; }
+
+/* Semantic bands (reused by tiles and bars) */
+.pss-band_healthy { border-left-color: #2e844a; }
+.pss-band_healthy.pss-kpi .pss-kpi__value,
+.pss-kpi_score.pss-band_healthy .pss-kpi__value { color: #2e844a; }
+.pss-band_warning { border-left-color: #fe9339; }
+.pss-kpi_score.pss-band_warning .pss-kpi__value { color: #a86403; }
+.pss-band_danger { border-left-color: #ea001e; }
+.pss-kpi_score.pss-band_danger .pss-kpi__value { color: #ea001e; }
+
+/* Leaderboard rows */
+.pss-tabs { margin-top: 0.25rem; }
+.pss-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.25rem;
+    border-bottom: 1px solid #eef1f6;
+}
+.pss-row:last-child { border-bottom: none; }
+.pss-rank {
+    flex: 0 0 1.6rem;
+    height: 1.6rem;
+    width: 1.6rem;
+    border-radius: 50%;
+    background: #e5eaf0;
+    color: #44546a;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pss-rank_gold { background: #f5c542; color: #5b4600; }
+.pss-rank_silver { background: #cbd2d9; color: #33404d; }
+.pss-rank_bronze { background: #e0a06b; color: #4a2a10; }
+.pss-row-main { flex: 1 1 auto; min-width: 0; }
+.pss-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+.pss-row-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #16325c;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pss-row-score { font-weight: 700; font-size: 0.85rem; color: #16325c; }
+.pss-row-sub { font-size: 0.7rem; color: #7c8b9a; margin: 0.1rem 0 0.3rem; }
+.pss-bar {
+    height: 0.4rem;
+    background: #eef1f6;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+.pss-bar-fill { height: 100%; border-radius: 0.25rem; background: #0176d3; }
+.pss-bar-fill.pss-band_healthy { background: #2e844a; }
+.pss-bar-fill.pss-band_warning { background: #fe9339; }
+.pss-bar-fill.pss-band_danger { background: #ea001e; }
+
+.pss-empty {
+    text-align: center;
+    color: #7c8b9a;
+    font-size: 0.85rem;
+    padding: 1.5rem 0;
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Discount_Type__c</fullName>
+    <label>Discount Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Percent</fullName>
+                <default>true</default>
+                <label>Percent</label>
+            </value>
+            <value>
+                <fullName>Amount</fullName>
+                <default>false</default>
+                <label>Amount</label>
+            </value>
+            <value>
+                <fullName>Free Product</fullName>
+                <default>false</default>
+                <label>Free Product</label>
+            </value>
+            <value>
+                <fullName>Price Discount</fullName>
+                <default>false</default>
+                <label>Price Discount</label>
+            </value>
+            <value>
+                <fullName>Reward Points</fullName>
+                <default>false</default>
+                <label>Reward Points</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

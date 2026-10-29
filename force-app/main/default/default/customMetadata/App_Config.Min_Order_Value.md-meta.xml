@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Min Order Value</label>
+    <protected>false</protected>
+    <values>
+        <field>Config_Key__c</field>
+        <value xsi:type="xsd:string">MIN_ORDER_VALUE</value>
+    </values>
+    <values>
+        <field>Config_Value__c</field>
+        <value xsi:type="xsd:string">500</value>
+    </values>
+    <values>
+        <field>Data_Type__c</field>
+        <value xsi:type="xsd:string">Number</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Minimum order value required for order submission</value>
+    </values>
+    <values>
+        <field>Module__c</field>
+        <value xsi:type="xsd:string">OMS</value>
+    </values>
+</CustomMetadata>

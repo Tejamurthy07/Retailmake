@@ -1,0 +1,25 @@
+<apex:page showHeader="true" sidebar="false" standardStylesheets="false"
+           title="Sauda Demo" applyHtmlTag="true" docType="html-5.0">
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <style>
+            html, body { margin: 0; padding: 0; height: 100%; }
+            .sauda-demo-frame {
+                width: 100%;
+                height: 85vh;
+                min-height: 600px;
+                border: none;
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <iframe class="sauda-demo-frame"
+                src="{!URLFOR($Resource.SaudaDemo, 'index.html')}"
+                title="Sauda Agreement Demo">
+        </iframe>
+    </body>
+    </html>
+</apex:page>

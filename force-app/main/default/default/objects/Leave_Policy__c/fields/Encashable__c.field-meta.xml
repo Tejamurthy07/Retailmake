@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Encashable__c</fullName>
+    <defaultValue>false</defaultValue>
+    <inlineHelpText>If checked, unused days of this leave type can be encashed at year end.</inlineHelpText>
+    <label>Encashable</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

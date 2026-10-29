@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>INV_StockManagementController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>INV_StockTransferController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>INV_WarehouseStockController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Access to the internal Stock Management dashboard (Overview + Adjustments + Transfers): the tab and its Apex controllers. Assign to internal stock/back-office users.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Stock Management Access</label>
+    <tabSettings>
+        <tab>Stock_Management</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

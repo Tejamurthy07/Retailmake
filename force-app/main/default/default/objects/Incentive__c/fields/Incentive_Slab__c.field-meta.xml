@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Incentive_Slab__c</fullName>
+    <description>Legacy text field. Use Incentive_Slab_Ref__c lookup instead.</description>
+    <externalId>false</externalId>
+    <label>Incentive Slab (Legacy)</label>
+    <length>100</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

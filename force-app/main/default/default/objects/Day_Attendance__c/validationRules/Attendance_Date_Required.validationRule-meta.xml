@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Attendance_Date_Required</fullName>
+    <active>true</active>
+    <description>Attendance date is required</description>
+    <errorConditionFormula>ISBLANK(Attendance_Date__c)</errorConditionFormula>
+    <errorDisplayField>Attendance_Date__c</errorDisplayField>
+    <errorMessage>Attendance Date is required.</errorMessage>
+</ValidationRule>

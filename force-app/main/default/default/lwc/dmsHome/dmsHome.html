@@ -1,0 +1,183 @@
+<template>
+    <div class="home">
+        <!-- Tier tabs -->
+        <div class="tier-tabs">
+            <template for:each={tabs} for:item="t">
+                <button key={t.value} class={t.css} data-value={t.value} onclick={selectTier}>{t.label}</button>
+            </template>
+        </div>
+
+        <template if:true={error}>
+            <div class="err">{error}</div>
+        </template>
+
+        <!-- Period selector -->
+        <div class="period-row">
+            <span class="period-label">Period:</span>
+            <template for:each={periods} for:item="p">
+                <button key={p.value} class={p.css} data-value={p.value} onclick={selectPeriod}>{p.label}</button>
+            </template>
+            <span class="tier-sub">{activeSub}</span>
+        </div>
+
+        <template if:true={data}>
+            <!-- KPI cards -->
+            <div class="kpis">
+                <div class="kpi">
+                    <span class="kpi-label">Total Order Value</span>
+                    <span class="kpi-val">{data.orderValueFmt}</span>
+                </div>
+                <div class="kpi">
+                    <span class="kpi-label">Total Invoice Value</span>
+                    <span class="kpi-val">{data.invoiceValueFmt}</span>
+                </div>
+                <div class="kpi">
+                    <span class="kpi-label">No. of Orders</span>
+                    <span class="kpi-val">{data.orderCount}</span>
+                </div>
+                <template if:false={isSecondary}>
+                    <div class="kpi">
+                        <span class="kpi-label">GRN Pending</span>
+                        <span class="kpi-val orange">{data.grnPending}</span>
+                    </div>
+                </template>
+                <template if:true={isSecondary}>
+                    <div class="kpi">
+                        <span class="kpi-label">Pending Orders</span>
+                        <span class="kpi-val orange">{data.grnPending}</span>
+                    </div>
+                </template>
+                <div class="kpi">
+                    <span class="kpi-label">No. of Invoices</span>
+                    <span class="kpi-val">{data.invoiceCount}</span>
+                </div>
+                <div class="kpi">
+                    <span class="kpi-label">No. of Returns</span>
+                    <span class="kpi-val red">{data.returnsCount}</span>
+                </div>
+            </div>
+
+            <!-- Secondary KPI strip -->
+            <div class="mini-strip">
+                <div class="mini"><span class="mini-label">Avg Order Value</span><span class="mini-val">{data.avgOrderValueFmt}</span></div>
+                <div class="mini"><span class="mini-label">Outstanding</span><span class="mini-val red">{data.outstandingFmt}</span></div>
+                <div class="mini"><span class="mini-label">Collections</span><span class="mini-val green">{data.collectionFmt}</span></div>
+                <div class="mini"><span class="mini-label">Stock Value</span><span class="mini-val blue">{data.stockValueFmt}</span></div>
+                <div class="mini"><span class="mini-label">Near-Expiry SKUs</span><span class="mini-val orange">{data.nearExpirySkus}</span></div>
+                <div class="mini"><span class="mini-label">Active Partners</span><span class="mini-val">{data.activeParties}</span></div>
+                <div class="mini"><span class="mini-label">Credit Available</span><span class="mini-val">{data.creditAvailableFmt}</span></div>
+                <div class="mini"><span class="mini-label">Open Claims</span><span class="mini-val">{data.claimsOpen}</span></div>
+            </div>
+
+            <!-- Order Analysis -->
+            <div class="panel">
+                <div class="panel-head">
+                    <span class="panel-title">Order Analysis</span>
+                    <div class="seg">
+                        <template for:each={dimensions} for:item="dm">
+                            <button key={dm.id} class={dm.css} data-dim={dm.id} onclick={selectDim} type="button">{dm.label}</button>
+                        </template>
+                    </div>
+                </div>
+                <div class="charts">
+                    <div class="chart">
+                        <p class="chart-title">No. of Orders</p>
+                        <template if:true={hasBrandOrders}>
+                            <template for:each={data.brandOrders} for:item="b">
+                                <div key={b.brand} class="bar-row">
+                                    <span class="bar-label" title={b.brand}>{b.brand}</span>
+                                    <div class="bar-track"><div class="bar-fill bar-blue" style={b.barStyle}></div></div>
+                                    <span class="bar-val">{b.display}</span>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasBrandOrders}>
+                            <p class="empty">No orders in this period.</p>
+                        </template>
+                    </div>
+                    <div class="chart">
+                        <p class="chart-title">Order Value</p>
+                        <template if:true={hasBrandValue}>
+                            <template for:each={data.brandValue} for:item="b">
+                                <div key={b.brand} class="bar-row">
+                                    <span class="bar-label" title={b.brand}>{b.brand}</span>
+                                    <div class="bar-track"><div class="bar-fill bar-green" style={b.barStyle}></div></div>
+                                    <span class="bar-val">{b.display}</span>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasBrandValue}>
+                            <p class="empty">No order value in this period.</p>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AR Aging + Top Products -->
+            <div class="two-col">
+                <div class="panel">
+                    <span class="panel-title">Outstanding by Age</span>
+                    <div class="aging">
+                        <template for:each={data.aging} for:item="a">
+                            <div key={a.bucket} class="bar-row">
+                                <span class="bar-label">{a.bucket}</span>
+                                <div class="bar-track"><div class={a.tone} style={a.barStyle}></div></div>
+                                <span class="bar-val">{a.amount}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="panel">
+                    <span class="panel-title">Top Products</span>
+                    <template if:true={hasTopProducts}>
+                        <div class="top-list">
+                            <template for:each={data.topProducts} for:item="p">
+                                <div key={p.name} class="top-row">
+                                    <div class="top-info">
+                                        <span class="top-name" title={p.name}>{p.name}</span>
+                                        <span class="top-sub">{p.brand} &middot; {p.qtyFmt} units</span>
+                                    </div>
+                                    <div class="top-bar"><div class="bar-fill bar-blue" style={p.barStyle}></div></div>
+                                    <span class="top-val">{p.valueFmt}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasTopProducts}>
+                        <p class="empty">No product sales in this period.</p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Recent invoices -->
+            <div class="panel">
+                <span class="panel-title">Recent Invoices</span>
+                <template if:true={hasRecent}>
+                    <table class="recent">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th><th>Date</th><th>Party</th>
+                                <th class="num">Amount</th><th class="num">Balance</th><th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={data.recentInvoices} for:item="r">
+                                <tr key={r.invoiceNumber}>
+                                    <td>{r.invoiceNumber}</td>
+                                    <td><lightning-formatted-date-time value={r.invoiceDate}></lightning-formatted-date-time></td>
+                                    <td>{r.party}</td>
+                                    <td class="num">{r.amountFmt}</td>
+                                    <td class="num">{r.balanceFmt}</td>
+                                    <td><span class={r.statusClass}>{r.status}</span></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+                <template if:false={hasRecent}>
+                    <p class="empty">No invoices in this tier yet.</p>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

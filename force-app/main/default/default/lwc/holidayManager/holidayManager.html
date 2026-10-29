@@ -1,0 +1,419 @@
+<template>
+    <div class="holiday-manager-container">
+
+        <!-- ── Main Content Area ─────────────────────────────────────── -->
+        <div class="main-layout">
+
+            <!-- ── Left: Calendar / List Area (70%) ──────────────────── -->
+            <div class="calendar-section">
+
+                <!-- ── Header Bar ────────────────────────────────────── -->
+                <div class="header-bar">
+                    <div class="header-left">
+                        <div class="title-row">
+                            <lightning-icon icon-name="standard:event" size="medium" class="title-icon"></lightning-icon>
+                            <h1 class="page-title">Holiday Calendar</h1>
+                        </div>
+                        <div class="year-nav">
+                            <button class="year-nav-btn" onclick={handlePreviousYear} aria-label="Previous year">
+                                <lightning-icon icon-name="utility:chevronleft" size="xx-small" alternative-text="Previous"></lightning-icon>
+                            </button>
+                            <span class="year-display">{yearDisplay}</span>
+                            <button class="year-nav-btn" onclick={handleNextYear} aria-label="Next year">
+                                <lightning-icon icon-name="utility:chevronright" size="xx-small" alternative-text="Next"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <lightning-button-group>
+                            <lightning-button label="Calendar View" variant={calendarViewButtonVariant}
+                                icon-name="utility:monthlyview" onclick={handleCalendarView}></lightning-button>
+                            <lightning-button label="List View" variant={listViewButtonVariant}
+                                icon-name="utility:list" onclick={handleListView}></lightning-button>
+                        </lightning-button-group>
+                        <lightning-button label="Add Holiday" variant="brand"
+                            icon-name="utility:add" onclick={handleAddHoliday}
+                            class="slds-m-left_small"></lightning-button>
+                        <lightning-button label="Bulk Import" variant="neutral"
+                            icon-name="utility:upload" onclick={handleOpenBulkModal}
+                            class="slds-m-left_x-small"></lightning-button>
+                    </div>
+                </div>
+
+                <!-- ── Filter Bar ──────────────────────────────────── -->
+                <div class="filter-bar">
+                    <div class="filter-bar-left">
+                        <span class="filter-label">Filter by type:</span>
+                        <template for:each={typeFilterChips} for:item="chip">
+                            <button key={chip.key} class={chip.chipClass}
+                                data-type={chip.key} onclick={handleFilterChipClick}>
+                                <span class={chip.dotClass}></span>
+                                <span class="chip-label">{chip.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="filter-bar-right">
+                        <c-searchable-combobox
+                            label="Territory"
+                            value={selectedTerritoryFilter}
+                            options={territoryFilterOptions}
+                            placeholder="Filter by Territory"
+                            variant="label-hidden"
+                            onchange={handleTerritoryFilterChange}
+                            class="territory-filter-combobox">
+                        </c-searchable-combobox>
+                    </div>
+                </div>
+
+                <!-- ── Calendar View ─────────────────────────────────── -->
+                <template if:true={isCalendarViewActive}>
+                    <div class="calendar-grid-12">
+                        <template for:each={calendarMonths} for:item="month">
+                            <div class="mini-month-card" key={month.key}>
+                                <div class="mini-month-header">
+                                    <span class="mini-month-name">{month.monthFullName}</span>
+                                </div>
+                                <div class="mini-month-body">
+                                    <!-- Day of week headers -->
+                                    <div class="mini-day-headers">
+                                        <template for:each={dayHeaders} for:item="dh">
+                                            <span class="mini-day-header" key={dh.key}>{dh.label}</span>
+                                        </template>
+                                    </div>
+                                    <!-- Week rows -->
+                                    <template for:each={month.weeks} for:item="week">
+                                        <div class="mini-week-row" key={week.key}>
+                                            <template for:each={week.days} for:item="day">
+                                                <template if:true={day.isEmpty}>
+                                                    <div class={day.cellClass} key={day.key}>
+                                                        <span class="mini-day-number">&nbsp;</span>
+                                                    </div>
+                                                </template>
+                                                <template if:false={day.isEmpty}>
+                                                    <div class={day.cellClass} key={day.key}
+                                                        data-date={day.dateKey} onclick={handleDayClick}>
+                                                        <span class="mini-day-number">{day.dayNumber}</span>
+                                                        <template if:true={day.hasHolidays}>
+                                                            <div class="dot-container">
+                                                                <template for:each={day.dots} for:item="dot">
+                                                                    <span class={dot.dotClass} key={dot.key}></span>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="legend-bar">
+                        <template for:each={legendItems} for:item="item">
+                            <div class="legend-item" key={item.key}>
+                                <span class={item.dotClass}></span>
+                                <span class="legend-label">{item.label}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- ── List View ─────────────────────────────────────── -->
+                <template if:true={isListViewActive}>
+                    <div class="list-view-container">
+                        <table class="holiday-table">
+                            <thead>
+                                <tr>
+                                    <th class="th-date" onclick={handleSort}>
+                                        <span class="th-content">
+                                            Date
+                                            <lightning-icon icon-name={sortDirectionIcon} size="xx-small"
+                                                alternative-text={sortLabel} class="sort-icon"></lightning-icon>
+                                        </span>
+                                    </th>
+                                    <th>Holiday Name</th>
+                                    <th>Type</th>
+                                    <th>Territory</th>
+                                    <th>Status</th>
+                                    <th class="th-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={sortedListHolidays} for:item="holiday">
+                                    <tr key={holiday.Id} class="holiday-row">
+                                        <td class="td-date">{holiday.formattedDate}</td>
+                                        <td class="td-name">{holiday.Name}</td>
+                                        <td>
+                                            <span class={holiday.typeBadgeClass}>{holiday.Type__c}</span>
+                                        </td>
+                                        <td class="td-territory">{holiday.territoryDisplay}</td>
+                                        <td>
+                                            <span class={holiday.statusClass}>{holiday.statusLabel}</span>
+                                        </td>
+                                        <td class="td-actions">
+                                            <lightning-button-icon icon-name="utility:edit"
+                                                alternative-text="Edit" variant="border-filled"
+                                                size="small" data-id={holiday.Id}
+                                                onclick={handleEditHoliday}
+                                                class="action-btn"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete"
+                                                alternative-text="Delete" variant="border-filled"
+                                                size="small" data-id={holiday.Id}
+                                                onclick={handleDeleteHoliday}
+                                                class="action-btn action-btn-delete"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <template if:false={sortedListHolidays.length}>
+                            <div class="empty-list-state">
+                                <lightning-icon icon-name="utility:event" size="large" class="empty-icon"></lightning-icon>
+                                <p class="empty-text">No holidays found for {yearDisplay}</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+
+            <!-- ── Right: Upcoming Holidays Sidebar (30%) ────────────── -->
+            <div class="sidebar-section">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <lightning-icon icon-name="utility:date_time" size="small" class="sidebar-icon"></lightning-icon>
+                        <h2 class="sidebar-title">Upcoming Holidays</h2>
+                    </div>
+                    <div class="sidebar-body">
+                        <template if:true={hasUpcomingHolidays}>
+                            <template for:each={upcomingHolidays} for:item="holiday">
+                                <div class="upcoming-item" key={holiday.Id}>
+                                    <div class="upcoming-date-badge">
+                                        <span class="upcoming-day">{holiday.formattedDate}</span>
+                                    </div>
+                                    <div class="upcoming-details">
+                                        <span class="upcoming-name">{holiday.Name}</span>
+                                        <span class={holiday.typeBadgeClass}>{holiday.Type__c}</span>
+                                    </div>
+                                    <div class={holiday.daysUntilClass}>
+                                        {holiday.daysUntil}
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasUpcomingHolidays}>
+                            <div class="sidebar-empty">
+                                <p>No upcoming holidays</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Holiday Detail Popover ────────────────────────────────── -->
+        <template if:true={showPopover}>
+            <div class="popover-backdrop" onclick={handleBackdropClick}></div>
+            <div class="holiday-popover" style={popoverStyle}>
+                <div class="popover-header">
+                    <span class="popover-title">Holiday Details</span>
+                    <lightning-button-icon icon-name="utility:close"
+                        alternative-text="Close" size="small" variant="bare"
+                        onclick={handlePopoverClose} class="popover-close"></lightning-button-icon>
+                </div>
+                <div class="popover-body">
+                    <template for:each={popoverHoliday} for:item="h">
+                        <div class="popover-item" key={h.Id}>
+                            <div class="popover-item-header">
+                                <span class="popover-holiday-name">{h.Name}</span>
+                                <span class={h.typeBadgeClass}>{h.Type__c}</span>
+                            </div>
+                            <div class="popover-item-detail">
+                                <lightning-icon icon-name="utility:event" size="xx-small" class="popover-detail-icon"></lightning-icon>
+                                <span>{h.formattedDate}</span>
+                            </div>
+                            <div class="popover-item-detail">
+                                <lightning-icon icon-name="utility:location" size="xx-small" class="popover-detail-icon"></lightning-icon>
+                                <span>{h.territoryDisplay}</span>
+                            </div>
+                            <template if:true={h.Description__c}>
+                                <div class="popover-item-desc">{h.Description__c}</div>
+                            </template>
+                            <div class="popover-item-actions">
+                                <lightning-button label="Edit" variant="neutral" size="small"
+                                    icon-name="utility:edit" data-id={h.Id}
+                                    onclick={handleEditFromPopover}></lightning-button>
+                                <lightning-button label="Delete" variant="text-destructive" size="small"
+                                    icon-name="utility:delete" data-id={h.Id}
+                                    onclick={handleDeleteFromPopover}
+                                    class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- ── Add/Edit Holiday Modal ────────────────────────────────── -->
+        <template if:true={showEditModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close"
+                            alternative-text="Close" size="large" variant="bare-inverse"
+                            class="slds-modal__close" onclick={handleCloseEditModal}></lightning-button-icon>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">{editModalTitle}</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium modal-content">
+                        <div class="slds-grid slds-gutters slds-wrap">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                                <lightning-input label="Holiday Name" value={editHoliday.Name}
+                                    data-field="Name" onchange={handleEditFieldChange}
+                                    required></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                                <lightning-input type="date" label="Date" value={editHoliday.Holiday_Date__c}
+                                    data-field="Holiday_Date__c" onchange={handleEditFieldChange}
+                                    required></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                                <lightning-combobox label="Type" value={editHoliday.Type__c}
+                                    options={typeComboboxOptions} data-field="Type__c"
+                                    onchange={handleEditFieldChange}
+                                    required placeholder="Select type..."></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                                <c-searchable-combobox
+                                    label="Territory"
+                                    value={editHoliday.Territory__c}
+                                    options={territoryComboboxOptions}
+                                    placeholder="Search territory..."
+                                    data-field="Territory__c"
+                                    onchange={handleEditTerritoryChange}>
+                                </c-searchable-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                                <lightning-textarea label="Description" value={editHoliday.Description__c}
+                                    data-field="Description__c" onchange={handleEditFieldChange}
+                                    max-length="500"></lightning-textarea>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-input type="toggle" label="Active" checked={editHoliday.Is_Active__c}
+                                    data-field="Is_Active__c" onchange={handleEditFieldChange}
+                                    message-toggle-active="Active"
+                                    message-toggle-inactive="Inactive"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" variant="neutral"
+                            onclick={handleCloseEditModal}></lightning-button>
+                        <lightning-button label={editModalSaveLabel} variant="brand"
+                            onclick={handleSaveHoliday}
+                            class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- ── Bulk Import Modal ─────────────────────────────────────── -->
+        <template if:true={showBulkModal}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon icon-name="utility:close"
+                            alternative-text="Close" size="large" variant="bare-inverse"
+                            class="slds-modal__close" onclick={handleCloseBulkModal}></lightning-button-icon>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Bulk Import Holidays</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium modal-content">
+                        <p class="bulk-info-text slds-m-bottom_medium">
+                            Add multiple holidays at once. Fill in the details for each row and click "Save All".
+                        </p>
+                        <div class="bulk-table-wrapper">
+                            <table class="bulk-table">
+                                <thead>
+                                    <tr>
+                                        <th class="bulk-th">#</th>
+                                        <th class="bulk-th">Holiday Name *</th>
+                                        <th class="bulk-th">Date *</th>
+                                        <th class="bulk-th">Type *</th>
+                                        <th class="bulk-th">Territory</th>
+                                        <th class="bulk-th bulk-th-action"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={bulkRows} for:item="row" for:index="idx">
+                                        <tr key={row.key} class="bulk-row">
+                                            <td class="bulk-td bulk-td-num">{idx}</td>
+                                            <td class="bulk-td">
+                                                <lightning-input variant="label-hidden" value={row.Name}
+                                                    data-key={row.key} data-field="Name"
+                                                    onchange={handleBulkFieldChange}
+                                                    placeholder="Holiday name"></lightning-input>
+                                            </td>
+                                            <td class="bulk-td">
+                                                <lightning-input type="date" variant="label-hidden"
+                                                    value={row.Holiday_Date__c}
+                                                    data-key={row.key} data-field="Holiday_Date__c"
+                                                    onchange={handleBulkFieldChange}></lightning-input>
+                                            </td>
+                                            <td class="bulk-td">
+                                                <lightning-combobox variant="label-hidden"
+                                                    value={row.Type__c} options={typeComboboxOptions}
+                                                    data-key={row.key} data-field="Type__c"
+                                                    onchange={handleBulkFieldChange}
+                                                    placeholder="Select..."></lightning-combobox>
+                                            </td>
+                                            <td class="bulk-td bulk-td-territory">
+                                                <c-searchable-combobox
+                                                    variant="label-hidden"
+                                                    value={row.Territory__c}
+                                                    options={territoryComboboxOptions}
+                                                    data-key={row.key}
+                                                    data-field="Territory__c"
+                                                    onchange={handleBulkTerritoryChange}
+                                                    placeholder="Search...">
+                                                </c-searchable-combobox>
+                                            </td>
+                                            <td class="bulk-td bulk-td-action">
+                                                <lightning-button-icon icon-name="utility:delete"
+                                                    alternative-text="Remove row" variant="bare"
+                                                    size="small" data-key={row.key}
+                                                    onclick={handleRemoveBulkRow}></lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bulk-actions-row slds-m-top_small">
+                            <lightning-button label="Add Row" variant="neutral"
+                                icon-name="utility:add" onclick={handleAddBulkRow}></lightning-button>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" variant="neutral"
+                            onclick={handleCloseBulkModal}></lightning-button>
+                        <lightning-button label="Save All" variant="brand"
+                            onclick={handleSaveBulk}
+                            class="slds-m-left_x-small"></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- ── Loading Spinner ────────────────────────────────────────── -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"
+                class="loading-spinner"></lightning-spinner>
+        </template>
+
+    </div>
+</template>

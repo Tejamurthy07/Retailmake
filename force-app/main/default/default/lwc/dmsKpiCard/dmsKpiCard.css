@@ -1,0 +1,58 @@
+/* Generic DMS portal design tokens — inherit the site/theme brand, neutral fallback. */
+:host {
+    --dms-navy: #16202c;
+    --dms-brand: var(--dxp-g-brand, var(--lwc-brandPrimary, #0b5cab));
+    --dms-accent: #6d28d9;
+    --dms-warning: #c47d00;
+    --dms-danger: #ba0517;
+    --dms-surface: #ffffff;
+    --dms-text-muted: #5c6b7a;
+    --dms-border: #e1e5eb;
+    --dms-radius: 0.75rem;
+    --dms-shadow: 0 1px 3px rgba(22, 32, 44, 0.08), 0 1px 2px rgba(22, 32, 44, 0.06);
+    display: block;
+    height: 100%;
+}
+
+.dms-kpi {
+    background: var(--dms-surface);
+    border: 1px solid var(--dms-border);
+    border-radius: var(--dms-radius);
+    box-shadow: var(--dms-shadow);
+    padding: 1.1rem 1.2rem;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.dms-kpi__label {
+    font-size: 0.8rem;
+    color: var(--dms-text-muted);
+    margin: 0 0 0.55rem;
+}
+
+.dms-kpi__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.dms-kpi__value_default {
+    color: var(--dms-navy);
+}
+
+.dms-kpi__value_brand {
+    color: var(--dms-brand);
+}
+
+.dms-kpi__value_accent {
+    color: var(--dms-accent);
+}
+
+.dms-kpi__value_warning {
+    color: var(--dms-warning);
+}
+
+.dms-kpi__value_danger {
+    color: var(--dms-danger);
+}

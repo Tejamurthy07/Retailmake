@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Automate common business tasks and assist users in their flow of work. Agentforce Employee Agent can search knowledge articles and other data sources. Customize it further to meet your employees&apos; business needs.</description>
+    <localTopicLinks>
+        <genAiPluginName>GeneralFAQ_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>Order_Assistant_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>Outlet_Insights_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>agent_router_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>off_topic_16jdN000000GBqj</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>Outlet_Insights_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answer a field rep&apos;s questions about a specific outlet — its profile, credit limit, outstanding balance and aging, what to sell there, and what it owes. Only report values the actions return; never invent figures.</description>
+        <developerName>Outlet_Insights_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {{state.currentAppName}}
+Current Object Name: {{state.currentObjectApiName}}
+Current Page Type: {{state.currentPageType}}
+Current Record ID: {{state.currentRecordId}}</description>
+            <developerName>instruction0_179dN000000SvHy</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHy</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>Get_Outlet_Briefing_179dN000000SvHy</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>Find_Outlet_179dN000000SvHy</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>Find_Outlet_179dN000000SvHy</fullName>
+            <description>If the rep names an outlet but no Account Id is in context, call Find Outlet first, then use the returned Account Id for the outlet actions. If more than one outlet matches, show the matches and ask which one.</description>
+            <developerName>Find_Outlet_179dN000000SvHy</developerName>
+            <invocationTarget>ftretailmake__SFA_FindOutletAction</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>Find_Outlet</localDeveloperName>
+            <masterLabel>Find Outlet</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>Get_Outlet_Briefing_179dN000000SvHy</fullName>
+            <description>Use to summarise an outlet&apos;s profile, credit, outstanding balance and last order.</description>
+            <developerName>Get_Outlet_Briefing_179dN000000SvHy</developerName>
+            <invocationTarget>ftretailmake__SFA_OutletBriefingAction</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Get_Outlet_Briefing</localDeveloperName>
+            <masterLabel>Get Outlet Briefing</masterLabel>
+            <progressIndicatorMessage>Searching..</progressIndicatorMessage>
+            <source>ftretailmake__Get_Outlet_Briefing</source>
+        </localActions>
+        <localDeveloperName>Outlet_Insights</localDeveloperName>
+        <masterLabel>Outlet Insights</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>Order_Assistant_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Help reps place orders in plain language. Always preview and get explicit confirmation before creating an order. Warn on credit or must-sell issues.</description>
+        <developerName>Order_Assistant_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {{state.currentAppName}}
+Current Object Name: {{state.currentObjectApiName}}
+Current Page Type: {{state.currentPageType}}
+Current Record ID: {{state.currentRecordId}}</description>
+            <developerName>instruction0_179dN000000SvHx</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHx</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>Draft_Order_179dN000000SvHx</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>Find_Outlet_179dN000000SvHx</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>Place_Order_179dN000000SvHx</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>Find_Outlet_179dN000000SvHx</fullName>
+            <description>If the rep names an outlet but no Account Id is in context, call Find Outlet first, then use the returned Account Id for the outlet actions. If more than one outlet matches, show the matches and ask which one.</description>
+            <developerName>Find_Outlet_179dN000000SvHx</developerName>
+            <invocationTarget>ftretailmake__SFA_FindOutletAction</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>Find_Outlet</localDeveloperName>
+            <masterLabel>Find Outlet</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>Draft_Order_179dN000000SvHx</fullName>
+            <description>Prices a proposed order for an outlet without creating anything: resolves each product, applies schemes and tax, and checks credit, stock and must-sell compliance. Returns the draft for the rep to review. Read-only — does not place the order.</description>
+            <developerName>Draft_Order_179dN000000SvHx</developerName>
+            <invocationTarget>ftretailmake__SFA_OrderDraftAction</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Draft_Order</localDeveloperName>
+            <masterLabel>Draft Order</masterLabel>
+            <progressIndicatorMessage>Drafting order...</progressIndicatorMessage>
+        </localActions>
+        <localActions>
+            <fullName>Place_Order_179dN000000SvHx</fullName>
+            <description>Creates the sales order for an outlet from a confirmed draft. WRITE action — Only call this after Draft Order has been shown and the rep has said yes. If the rep has not confirmed, ask them to confirm instead of calling this.</description>
+            <developerName>Place_Order_179dN000000SvHx</developerName>
+            <invocationTarget>ftretailmake__SFA_OrderPlaceAction</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>true</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>Place_Order</localDeveloperName>
+            <masterLabel>Place Order</masterLabel>
+            <progressIndicatorMessage>Saving order...</progressIndicatorMessage>
+        </localActions>
+        <localDeveloperName>Order_Assistant</localDeveloperName>
+        <masterLabel>Order Assistant</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>ambiguous_question_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to relevant topics when user request is too ambiguous</description>
+        <developerName>ambiguous_question_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {{state.currentAppName}}
+Current Object Name: {{state.currentObjectApiName}}
+Current Page Type: {{state.currentPageType}}
+Current Record ID: {{state.currentRecordId}}</description>
+            <developerName>instruction0_179dN000000SvHw</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHw</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>ambiguous_question</localDeveloperName>
+        <masterLabel>Ambiguous Question</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>off_topic_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to relevant topics when user request goes off-topic</description>
+        <developerName>off_topic_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {{state.currentAppName}}
+Current Object Name: {{state.currentObjectApiName}}
+Current Page Type: {{state.currentPageType}}
+Current Record ID: {{state.currentRecordId}}</description>
+            <developerName>instruction0_179dN000000SvHv</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHv</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>GeneralFAQ_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Answers customer questions about company products, specifications, policies, or business procedures by searching knowledge articles or other data sources.</description>
+        <developerName>GeneralFAQ_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {{state.currentAppName}}
+Current Object Name: {{state.currentObjectApiName}}
+Current Page Type: {{state.currentPageType}}
+Current Record ID: {{state.currentRecordId}}</description>
+            <developerName>instruction0_179dN000000SvHu</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHu</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>AnswerQuestionsWithKnowledge_179dN000000SvHu</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>AnswerQuestionsWithKnowledge_179dN000000SvHu</fullName>
+            <description>Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: &apos;What is your return policy?&apos; &apos;How do I fix an issue?&apos; or &apos;What features does a product have?&apos;</description>
+            <developerName>AnswerQuestionsWithKnowledge_179dN000000SvHu</developerName>
+            <invocationTarget>streamKnowledgeSearch</invocationTarget>
+            <invocationTargetType>standardInvocableAction</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>AnswerQuestionsWithKnowledge</localDeveloperName>
+            <masterLabel>Answer Questions with Knowledge</masterLabel>
+            <progressIndicatorMessage>Getting answers</progressIndicatorMessage>
+            <source>EmployeeCopilot__AnswerQuestionsWithKnowledge</source>
+        </localActions>
+        <localDeveloperName>GeneralFAQ</localDeveloperName>
+        <masterLabel>General FAQ</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>agent_router_16jdN000000GBqj</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Welcome the user and determine the appropriate subagent based on user input</description>
+        <developerName>agent_router_16jdN000000GBqj</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI Agent.
+
+The user&apos;s current context is:
+Current App Name: {!@variables.currentAppName}
+Current Object Name: {!@variables.currentObjectApiName}
+Current Page Type: {!@variables.currentPageType}
+Current Record ID: {!@variables.currentRecordId}
+
+{{state.AgentScriptInternal_agent_instructions}}</description>
+            <developerName>instruction0_179dN000000SvHt</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179dN000000SvHt</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>agent_router</localDeveloperName>
+        <masterLabel>Agent Router</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Field Rep Copilot</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>

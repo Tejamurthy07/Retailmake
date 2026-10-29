@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Exclude_Holidays__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>When checked, holidays applicable to the employee&apos;s territory/region are excluded from plan day generation.</description>
+    <label>Exclude Holidays</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

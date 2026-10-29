@@ -1,0 +1,676 @@
+<template>
+    <div class={containerClass}>
+        <!-- ─── Sidebar Navigation (hidden when locked to a section) ─────── -->
+        <template if:false={isLocked}>
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Category Mappings</h2>
+                </div>
+                <nav class="sidebar-nav">
+                    <a class={dashboardNavClass} data-section="dashboard" onclick={handleSectionChange}>
+                        <lightning-icon icon-name="standard:dashboard" size="x-small"></lightning-icon>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class={accountCategoriesNavClass} data-section="accountCategories" onclick={handleSectionChange}>
+                        <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
+                        <span>Customer Categories</span>
+                    </a>
+                    <a class={employeeCategoriesNavClass} data-section="employeeCategories" onclick={handleSectionChange}>
+                        <lightning-icon icon-name="standard:people" size="x-small"></lightning-icon>
+                        <span>User Categories</span>
+                    </a>
+                    <div class="sidebar-divider"></div>
+                    <a class={categoryProductsNavClass} data-section="categoryProducts" onclick={handleSectionChange}>
+                        <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                        <span>Category Products</span>
+                    </a>
+                </nav>
+            </div>
+        </template>
+
+        <!-- ─── Tabs nav (only shown in standalone non-locked mode as fallback) ── -->
+        <!-- When locked to a section, no tabs are shown -->
+
+        <!-- ─── Main Content Area ───────────────────────────────────────── -->
+        <div class={contentClass}>
+            <template if:false={isLocked}>
+                <div class="content-header">
+                    <h1>{sectionTitle}</h1>
+                </div>
+            </template>
+
+            <template if:true={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- ─── Dashboard Section ───────────────────────────────────── -->
+            <template if:true={showDashboard}>
+                <div class="dashboard-grid">
+                    <div class="stat-card stat-blue" data-section="accountCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalAccounts}</div>
+                        <div class="stat-label">Total Customers</div>
+                    </div>
+                    <div class="stat-card stat-green" data-section="accountCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.accountsWithCategories}</div>
+                        <div class="stat-label">Customers with Categories</div>
+                    </div>
+                    <div class="stat-card stat-purple" data-section="employeeCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalEmployees}</div>
+                        <div class="stat-label">Total Employees</div>
+                    </div>
+                    <div class="stat-card stat-teal" data-section="employeeCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.employeesWithCategories}</div>
+                        <div class="stat-label">Employees with Categories</div>
+                    </div>
+                    <div class="stat-card stat-orange" data-section="categoryProducts" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalCategories}</div>
+                        <div class="stat-label">Total Categories</div>
+                    </div>
+                    <div class="stat-card stat-indigo" data-section="accountCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activeAccountMappings}</div>
+                        <div class="stat-label">Active Customer Mappings</div>
+                    </div>
+                    <div class="stat-card stat-pink" data-section="employeeCategories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activeEmployeeMappings}</div>
+                        <div class="stat-label">Active Employee Mappings</div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ─── Customer Categories Section ─────────────────────────── -->
+            <template if:true={showAccountCategories}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search"
+                            placeholder="Search by customer or category..."
+                            value={accountSearchTerm} onchange={handleAccountSearch}
+                            variant="label-hidden"
+                            class="toolbar-search"></lightning-input>
+                        <lightning-combobox label="Category" variant="label-hidden"
+                            placeholder="All Categories"
+                            value={accountCategoryFilter}
+                            options={categoryFilterOptions}
+                            onchange={handleAccountCategoryFilter}
+                            class="toolbar-filter"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only"
+                            checked={accountActiveOnly}
+                            onchange={handleAccountActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="Bulk Assign" variant="neutral"
+                            icon-name="utility:multi_select_checkbox"
+                            onclick={handleOpenBulkAccountAssign}></lightning-button>
+                        <lightning-button label="New Mapping" variant="brand"
+                            icon-name="utility:add"
+                            onclick={handleNewAccountCategory}></lightning-button>
+                    </div>
+                </div>
+
+                <div class="info-banner">
+                    <lightning-icon icon-name="utility:info" size="x-small" class="info-banner-icon"></lightning-icon>
+                    <span>Customers with <strong>no category mappings</strong> can see and order <strong>all products</strong>. Only assign categories if you want to restrict a customer to specific product categories.</span>
+                </div>
+
+                <template if:true={hasAccountCategoryMappings}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Account Name</th>
+                                    <th>Category</th>
+                                    <th>Level</th>
+                                    <th>Active</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Assigned By</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={accountCategoryMappings} for:item="mapping">
+                                    <tr key={mapping.Id}>
+                                        <td>{mapping.accountName}</td>
+                                        <td>{mapping.categoryName}</td>
+                                        <td>{mapping.categoryLevel}</td>
+                                        <td>
+                                            <template if:true={mapping.isActive}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={mapping.isActive}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-mono">{mapping.Effective_From__c}</td>
+                                        <td class="cell-mono">{mapping.Effective_To__c}</td>
+                                        <td>{mapping.assignedBy}</td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={mapping.Id} onclick={handleEditAccountCategory}
+                                                variant="border-filled" size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={mapping.Id} onclick={handleDeleteAccountCategory}
+                                                variant="border-filled" size="small"
+                                                class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasAccountCategoryMappings}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:empty" size="large"></lightning-icon>
+                        <p>No customer category mappings found. Click "New Mapping" to create one.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── User Categories Section ─────────────────────────────── -->
+            <template if:true={showEmployeeCategories}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search"
+                            placeholder="Search by employee or category..."
+                            value={employeeSearchTerm} onchange={handleEmployeeSearch}
+                            variant="label-hidden"
+                            class="toolbar-search"></lightning-input>
+                        <lightning-combobox label="Category" variant="label-hidden"
+                            placeholder="All Categories"
+                            value={employeeCategoryFilter}
+                            options={categoryFilterOptions}
+                            onchange={handleEmployeeCategoryFilter}
+                            class="toolbar-filter"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only"
+                            checked={employeeActiveOnly}
+                            onchange={handleEmployeeActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="Bulk Assign" variant="neutral"
+                            icon-name="utility:multi_select_checkbox"
+                            onclick={handleOpenBulkEmployeeAssign}></lightning-button>
+                        <lightning-button label="New Mapping" variant="brand"
+                            icon-name="utility:add"
+                            onclick={handleNewEmployeeCategory}></lightning-button>
+                    </div>
+                </div>
+
+                <div class="info-banner">
+                    <lightning-icon icon-name="utility:info" size="x-small" class="info-banner-icon"></lightning-icon>
+                    <span>Users with <strong>no category mappings</strong> can sell <strong>all products</strong>. Only assign categories if you want to restrict a user to specific product categories.</span>
+                </div>
+
+                <template if:true={hasEmployeeCategoryMappings}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <th>Category</th>
+                                    <th>Level</th>
+                                    <th>Responsibility</th>
+                                    <th>Active</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Assigned By</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={employeeCategoryMappings} for:item="mapping">
+                                    <tr key={mapping.Id}>
+                                        <td>{mapping.employeeName}</td>
+                                        <td>{mapping.categoryName}</td>
+                                        <td>{mapping.categoryLevel}</td>
+                                        <td>
+                                            <template if:true={mapping.responsibilityType}>
+                                                <span class="badge badge-purple">{mapping.responsibilityType}</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={mapping.isActive}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={mapping.isActive}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-mono">{mapping.Effective_From__c}</td>
+                                        <td class="cell-mono">{mapping.Effective_To__c}</td>
+                                        <td>{mapping.assignedBy}</td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={mapping.Id} onclick={handleEditEmployeeCategory}
+                                                variant="border-filled" size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={mapping.Id} onclick={handleDeleteEmployeeCategory}
+                                                variant="border-filled" size="small"
+                                                class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasEmployeeCategoryMappings}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:empty" size="large"></lightning-icon>
+                        <p>No user category mappings found. Click "New Mapping" to create one.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Category Products Section ───────────────────────────── -->
+            <template if:true={showCategoryProducts}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-combobox label="Select Category" variant="label-hidden"
+                            placeholder="Select a category..."
+                            value={categoryProductFilter}
+                            options={categorySelectOptions}
+                            onchange={handleCategoryProductFilter}
+                            class="toolbar-filter-wide"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Include Sub-Categories"
+                            checked={includeSubCategories}
+                            onchange={handleIncludeSubCategories}></lightning-input>
+                    </div>
+                </div>
+
+                <template if:true={hasCategoryProducts}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>SKU</th>
+                                    <th>Brand</th>
+                                    <th class="cell-number">MRP</th>
+                                    <th>Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={categoryProducts} for:item="product">
+                                    <tr key={product.Id}>
+                                        <td>{product.Name}</td>
+                                        <td class="cell-mono">{product.SKU_Code__c}</td>
+                                        <td>{product.brandName}</td>
+                                        <td class="cell-number">{product.MRP__c}</td>
+                                        <td>
+                                            <template if:true={product.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={product.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasCategoryProducts}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+                        <template if:true={categoryProductFilter}>
+                            <p>No products found in the selected category.</p>
+                        </template>
+                        <template if:false={categoryProductFilter}>
+                            <p>Select a category above to view its products.</p>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+
+    <!-- ─── Account Category Modal ──────────────────────────────────────── -->
+    <template if:true={showAccountCategoryModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseAccountCategoryModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{accountCategoryModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- Account Lookup -->
+                    <div class="slds-form-element slds-m-bottom_small">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required">*</abbr> Customer (Account)
+                        </label>
+                        <div class="product-lookup-container">
+                            <template if:true={hasSelectedAccount}>
+                                <div class="product-lookup-pill">
+                                    <span class="pill-label">{selectedAccountName}</span>
+                                    <button class="pill-remove" onclick={handleClearAccountSelection} title="Clear">
+                                        <lightning-icon icon-name="utility:close" size="xx-small"
+                                            alternative-text="Clear"></lightning-icon>
+                                    </button>
+                                </div>
+                            </template>
+                            <template if:false={hasSelectedAccount}>
+                                <lightning-input type="search" variant="label-hidden"
+                                    placeholder="Search customers..."
+                                    value={accountLookupSearchTerm}
+                                    onchange={handleAccountLookupSearch}></lightning-input>
+                                <template if:true={showAccountLookup}>
+                                    <ul class="product-lookup-dropdown">
+                                        <template for:each={accountLookupResults} for:item="acc">
+                                            <li key={acc.Id} class="lookup-option"
+                                                data-id={acc.Id} data-name={acc.Name}
+                                                onclick={handleSelectLookupAccount}>
+                                                <span class="lookup-option-name">{acc.Name}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Categories (multi-select) -->
+                    <template if:true={isNewAccountCategory}>
+                        <lightning-dual-listbox label="Categories" required
+                            source-label="Available"
+                            selected-label="Selected"
+                            options={categoryMultiOptions}
+                            value={selectedAccountCategoryIds}
+                            data-field="categoryIds"
+                            onchange={handleAccountCategoryMultiChange}
+                            class="slds-m-bottom_small"></lightning-dual-listbox>
+                    </template>
+                    <template if:false={isNewAccountCategory}>
+                        <lightning-combobox label="Category" required
+                            placeholder="Select a category..."
+                            value={editAccountCategory.Category__c}
+                            options={categorySelectOptions}
+                            data-field="Category__c"
+                            onchange={handleAccountCategoryFieldChange}
+                            class="slds-m-bottom_small"></lightning-combobox>
+                    </template>
+
+                    <!-- Effective From -->
+                    <lightning-input type="date" label="Effective From"
+                        value={editAccountCategory.Effective_From__c}
+                        data-field="Effective_From__c"
+                        onchange={handleAccountCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-input>
+
+                    <!-- Effective To -->
+                    <lightning-input type="date" label="Effective To"
+                        value={editAccountCategory.Effective_To__c}
+                        data-field="Effective_To__c"
+                        onchange={handleAccountCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-input>
+
+                    <!-- Notes -->
+                    <lightning-textarea label="Notes"
+                        value={editAccountCategory.Notes__c}
+                        data-field="Notes__c"
+                        onchange={handleAccountCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseAccountCategoryModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand"
+                        onclick={handleSaveAccountCategory}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Employee Category Modal ─────────────────────────────────────── -->
+    <template if:true={showEmployeeCategoryModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseEmployeeCategoryModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{employeeCategoryModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- Employee Lookup -->
+                    <div class="slds-form-element slds-m-bottom_small">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required">*</abbr> Employee (User)
+                        </label>
+                        <div class="product-lookup-container">
+                            <template if:true={hasSelectedEmployee}>
+                                <div class="product-lookup-pill">
+                                    <span class="pill-label">{selectedEmployeeName}</span>
+                                    <button class="pill-remove" onclick={handleClearEmployeeSelection} title="Clear">
+                                        <lightning-icon icon-name="utility:close" size="xx-small"
+                                            alternative-text="Clear"></lightning-icon>
+                                    </button>
+                                </div>
+                            </template>
+                            <template if:false={hasSelectedEmployee}>
+                                <lightning-input type="search" variant="label-hidden"
+                                    placeholder="Search employees..."
+                                    value={employeeLookupSearchTerm}
+                                    onchange={handleEmployeeLookupSearch}></lightning-input>
+                                <template if:true={showEmployeeLookup}>
+                                    <ul class="product-lookup-dropdown">
+                                        <template for:each={employeeLookupResults} for:item="emp">
+                                            <li key={emp.Id} class="lookup-option"
+                                                data-id={emp.Id} data-name={emp.employeeFullName}
+                                                onclick={handleSelectLookupEmployee}>
+                                                <span class="lookup-option-name">{emp.employeeFullName}</span>
+                                                <span class="lookup-option-meta">{emp.Employee_Code__c} - {emp.Designation__c}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Categories (multi-select) -->
+                    <template if:true={isNewEmployeeCategory}>
+                        <lightning-dual-listbox label="Categories" required
+                            source-label="Available"
+                            selected-label="Selected"
+                            options={categoryMultiOptions}
+                            value={selectedEmployeeCategoryIds}
+                            data-field="categoryIds"
+                            onchange={handleEmployeeCategoryMultiChange}
+                            class="slds-m-bottom_small"></lightning-dual-listbox>
+                    </template>
+                    <template if:false={isNewEmployeeCategory}>
+                        <lightning-combobox label="Category" required
+                            placeholder="Select a category..."
+                            value={editEmployeeCategory.Category__c}
+                            options={categorySelectOptions}
+                            data-field="Category__c"
+                            onchange={handleEmployeeCategoryFieldChange}
+                            class="slds-m-bottom_small"></lightning-combobox>
+                    </template>
+
+                    <!-- Responsibility Type -->
+                    <lightning-combobox label="Responsibility Type"
+                        placeholder="Select type..."
+                        value={editEmployeeCategory.Responsibility_Type__c}
+                        options={responsibilityTypeOptions}
+                        data-field="Responsibility_Type__c"
+                        onchange={handleEmployeeCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-combobox>
+
+                    <!-- Effective From -->
+                    <lightning-input type="date" label="Effective From"
+                        value={editEmployeeCategory.Effective_From__c}
+                        data-field="Effective_From__c"
+                        onchange={handleEmployeeCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-input>
+
+                    <!-- Effective To -->
+                    <lightning-input type="date" label="Effective To"
+                        value={editEmployeeCategory.Effective_To__c}
+                        data-field="Effective_To__c"
+                        onchange={handleEmployeeCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-input>
+
+                    <!-- Notes -->
+                    <lightning-textarea label="Notes"
+                        value={editEmployeeCategory.Notes__c}
+                        data-field="Notes__c"
+                        onchange={handleEmployeeCategoryFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseEmployeeCategoryModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand"
+                        onclick={handleSaveEmployeeCategory}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Bulk Assign Account Categories Modal ────────────────────────── -->
+    <template if:true={showBulkAccountModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseBulkAccountModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">Bulk Assign Customer Categories</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="priority-info-box slds-m-bottom_small">
+                        <lightning-icon icon-name="utility:info" size="x-small" alternative-text="Info"></lightning-icon>
+                        <span>Enter Account IDs (one per line or comma/semicolon separated) and select the categories to assign. A mapping will be created for each Account-Category combination.</span>
+                    </div>
+
+                    <lightning-textarea label="Account IDs" required
+                        placeholder="Paste Account IDs here (one per line, or comma/semicolon separated)..."
+                        value={bulkAccountIds}
+                        data-field="accountIds"
+                        onchange={handleBulkAccountFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+
+                    <lightning-dual-listbox label="Categories" required
+                        source-label="Available"
+                        selected-label="Selected"
+                        options={categoryMultiOptions}
+                        value={bulkAccountCategoryIds}
+                        data-field="categoryIds"
+                        onchange={handleBulkAccountFieldChange}
+                        class="slds-m-bottom_small"></lightning-dual-listbox>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective From"
+                                value={bulkAccountEffectiveFrom}
+                                data-field="effectiveFrom"
+                                onchange={handleBulkAccountFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective To"
+                                value={bulkAccountEffectiveTo}
+                                data-field="effectiveTo"
+                                onchange={handleBulkAccountFieldChange}></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseBulkAccountModal}></lightning-button>
+                    <lightning-button label="Assign" variant="brand"
+                        onclick={handleBulkAssignAccounts}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Bulk Assign Employee Categories Modal ───────────────────────── -->
+    <template if:true={showBulkEmployeeModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseBulkEmployeeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">Bulk Assign User Categories</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="priority-info-box slds-m-bottom_small">
+                        <lightning-icon icon-name="utility:info" size="x-small" alternative-text="Info"></lightning-icon>
+                        <span>Enter Employee IDs (one per line or comma/semicolon separated) and select the categories to assign. A mapping will be created for each Employee-Category combination.</span>
+                    </div>
+
+                    <lightning-textarea label="Employee IDs" required
+                        placeholder="Paste Employee IDs here (one per line, or comma/semicolon separated)..."
+                        value={bulkEmployeeIds}
+                        data-field="employeeIds"
+                        onchange={handleBulkEmployeeFieldChange}
+                        class="slds-m-bottom_small"></lightning-textarea>
+
+                    <lightning-dual-listbox label="Categories" required
+                        source-label="Available"
+                        selected-label="Selected"
+                        options={categoryMultiOptions}
+                        value={bulkEmployeeCategoryIds}
+                        data-field="categoryIds"
+                        onchange={handleBulkEmployeeFieldChange}
+                        class="slds-m-bottom_small"></lightning-dual-listbox>
+
+                    <lightning-combobox label="Responsibility Type"
+                        placeholder="Select type..."
+                        value={bulkEmployeeResponsibilityType}
+                        options={responsibilityTypeOptions}
+                        data-field="responsibilityType"
+                        onchange={handleBulkEmployeeFieldChange}
+                        class="slds-m-bottom_small"></lightning-combobox>
+
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective From"
+                                value={bulkEmployeeEffectiveFrom}
+                                data-field="effectiveFrom"
+                                onchange={handleBulkEmployeeFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-input type="date" label="Effective To"
+                                value={bulkEmployeeEffectiveTo}
+                                data-field="effectiveTo"
+                                onchange={handleBulkEmployeeFieldChange}></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseBulkEmployeeModal}></lightning-button>
+                    <lightning-button label="Assign" variant="brand"
+                        onclick={handleBulkAssignEmployees}
+                        disabled={isSaving}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

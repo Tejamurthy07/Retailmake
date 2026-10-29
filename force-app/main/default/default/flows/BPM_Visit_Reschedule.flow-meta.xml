@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <name>Check_Reschedule_Date</name>
+        <label>Has Reschedule Date?</label>
+        <locationX>176</locationX>
+        <locationY>335</locationY>
+        <defaultConnectorLabel>No Reschedule Date</defaultConnectorLabel>
+        <rules>
+            <name>Has_Date</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Reschedule_Date__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_Follow_Up_Visit</targetReference>
+            </connector>
+            <label>Has Reschedule Date</label>
+        </rules>
+    </decisions>
+    <description>Automatically handles visit rescheduling when a visit is marked as Rescheduled. Updates the original visit status and creates a follow-up visit record.</description>
+    <interviewLabel>Visit Reschedule {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Visit Reschedule</label>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Create_Follow_Up_Visit</name>
+        <label>Create Follow-Up Visit</label>
+        <locationX>176</locationX>
+        <locationY>575</locationY>
+        <inputAssignments>
+            <field>Account__c</field>
+            <value>
+                <elementReference>$Record.Account__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Beat__c</field>
+            <value>
+                <elementReference>$Record.Beat__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Is_Planned__c</field>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Is_Rescheduled__c</field>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Salesperson__c</field>
+            <value>
+                <elementReference>$Record.Salesperson__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Visit_Date__c</field>
+            <value>
+                <elementReference>$Record.Reschedule_Date__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Visit_Status__c</field>
+            <value>
+                <stringValue>Planned</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Visit__c</object>
+    </recordCreates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Reschedule_Date</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Visit_Status__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Rescheduled</stringValue>
+            </value>
+        </filters>
+        <object>Visit__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

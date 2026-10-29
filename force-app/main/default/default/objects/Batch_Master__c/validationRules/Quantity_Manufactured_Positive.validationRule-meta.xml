@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Quantity_Manufactured_Positive</fullName>
+    <active>true</active>
+    <description>Ensures Quantity Manufactured is greater than zero when provided.</description>
+    <errorConditionFormula>NOT(ISBLANK(Quantity_Manufactured__c)) &amp;&amp; Quantity_Manufactured__c &lt;= 0</errorConditionFormula>
+    <errorDisplayField>Quantity_Manufactured__c</errorDisplayField>
+    <errorMessage>Quantity Manufactured must be greater than zero.</errorMessage>
+</ValidationRule>

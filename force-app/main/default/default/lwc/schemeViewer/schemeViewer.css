@@ -1,0 +1,344 @@
+/* Scheme Viewer Styles */
+:host {
+    --brand-primary: #0176d3;
+    --success-color: #2e844a;
+    --warning-color: #dd7a01;
+    --error-color: #ea001e;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+}
+
+/* Filter Section */
+.filter-section {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+/* Schemes List Panel */
+.schemes-list-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.schemes-scroll-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.scheme-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.scheme-card:hover {
+    border-color: var(--brand-primary);
+    box-shadow: 0 2px 8px rgba(1, 118, 211, 0.12);
+    transform: translateX(2px);
+}
+
+.scheme-card-selected {
+    border-color: var(--brand-primary);
+    border-width: 2px;
+    background: #f0f7ff;
+    box-shadow: 0 2px 12px rgba(1, 118, 211, 0.15);
+}
+
+.scheme-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.scheme-type-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.scheme-info {
+    flex: 1;
+}
+
+.scheme-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #181818;
+    line-height: 1.3;
+}
+
+.scheme-type-label {
+    display: block;
+    font-size: 11px;
+    color: #706e6b;
+}
+
+.scheme-card-body {
+    padding-left: 48px;
+}
+
+.scheme-benefit {
+    font-size: 12px;
+    color: #2e844a;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.scheme-trigger {
+    font-size: 11px;
+    color: #706e6b;
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.scheme-dates {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: #706e6b;
+}
+
+.scheme-products {
+    padding-left: 48px;
+    margin-top: 6px;
+}
+
+.product-badge {
+    --sds-c-badge-color-background: #eef4ff;
+    --sds-c-badge-text-color: #0b5cab;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+/* Scheme Detail Panel */
+.scheme-detail-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--brand-primary);
+}
+
+.detail-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.detail-type-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.detail-body {
+    padding: 4px 0;
+}
+
+.detail-row {
+    display: flex;
+    padding: 8px 0;
+    border-bottom: 1px dotted #e0e0e0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    width: 120px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #706e6b;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #181818;
+    flex: 1;
+}
+
+.detail-value.benefit-highlight {
+    color: #2e844a;
+    font-weight: 700;
+}
+
+.result-value.reward-pts {
+    color: #9b59b6;
+}
+
+/* Slabs Table */
+.slab-table {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.slab-table thead th {
+    background: #fafbfc;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #706e6b;
+}
+
+/* Product List */
+.product-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #181818;
+}
+
+.product-sku {
+    color: #706e6b;
+}
+
+/* Calculator Panel */
+.calculator-panel {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.calculator-form {
+    padding: 4px 0;
+}
+
+.calculator-placeholder {
+    text-align: center;
+    padding: 30px;
+}
+
+.calculator-result {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+    border: 1px solid #d0e5fb;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.result-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.result-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dotted #c0d8ef;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item.highlight {
+    background: rgba(46, 132, 74, 0.06);
+    border-radius: 4px;
+    padding: 6px 8px;
+}
+
+.result-item.net {
+    border-top: 2px solid var(--brand-primary);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.result-label {
+    font-size: 12px;
+    color: #706e6b;
+    font-weight: 500;
+}
+
+.result-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.result-value.discount {
+    color: var(--success-color);
+}
+
+.result-value.free-qty {
+    color: var(--brand-primary);
+}
+
+.result-value.net-value {
+    font-size: 16px;
+    color: var(--brand-primary);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #706e6b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .slds-grid.slds-gutters {
+        flex-direction: column;
+    }
+
+    .slds-col {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .schemes-scroll-container {
+        max-height: 400px;
+    }
+}

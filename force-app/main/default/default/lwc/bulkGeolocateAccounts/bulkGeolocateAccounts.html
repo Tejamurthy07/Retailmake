@@ -1,0 +1,92 @@
+<template>
+    <lightning-card title="Outlet Geolocation Coverage" icon-name="utility:map">
+        <div class="slds-p-around_medium">
+
+            <template if:true={isLoading}>
+                <div class="bga-loading">
+                    <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <!-- Coverage bar -->
+                <div class="bga-coverage">
+                    <div class="bga-coverage-row">
+                        <span class="bga-coverage-label">Geolocation Coverage</span>
+                        <span class="bga-coverage-pct">{coveragePercent}%</span>
+                    </div>
+                    <div class="bga-coverage-bar">
+                        <div class="bga-coverage-fill" style={coverageBarStyle}></div>
+                    </div>
+                    <div class="bga-coverage-detail">
+                        {stats.withLocation} of {stats.total} active accounts have coordinates set
+                    </div>
+                </div>
+
+                <!-- Stats grid -->
+                <div class="bga-stats-grid">
+                    <div class="bga-stat bga-stat-green">
+                        <span class="bga-stat-num">{stats.withLocation}</span>
+                        <span class="bga-stat-label">With Geolocation</span>
+                    </div>
+                    <div class="bga-stat bga-stat-amber">
+                        <span class="bga-stat-num">{stats.withBilling}</span>
+                        <span class="bga-stat-label">Billing Geocoded Only</span>
+                    </div>
+                    <div class="bga-stat bga-stat-red">
+                        <span class="bga-stat-num">{stats.missing}</span>
+                        <span class="bga-stat-label">Missing Geolocation</span>
+                    </div>
+                </div>
+
+                <!-- Bulk copy action -->
+                <div class="bga-action-section">
+                    <h3 class="bga-section-title">Bulk Copy from Billing Address</h3>
+                    <p class="bga-help">
+                        Salesforce can geocode billing addresses automatically (Setup → Data Integration Rules).
+                        This action copies any populated <code>BillingLatitude</code>/<code>BillingLongitude</code>
+                        into the outlet geolocation fields.
+                    </p>
+                    <div class="bga-radius-row">
+                        <label class="bga-radius-label">Default geofence radius (metres):</label>
+                        <lightning-input
+                            type="number"
+                            variant="label-hidden"
+                            min="10"
+                            max="5000"
+                            step="10"
+                            value={radiusMeters}
+                            onchange={handleRadiusChange}
+                            class="bga-radius-input">
+                        </lightning-input>
+                    </div>
+                    <div class="bga-actions">
+                        <lightning-button
+                            label="Copy from Billing Address"
+                            icon-name="utility:copy"
+                            variant="brand"
+                            onclick={handleBulkCopy}
+                            disabled={canBulkCopy}>
+                        </lightning-button>
+                        <lightning-button
+                            label="Refresh"
+                            icon-name="utility:refresh"
+                            variant="neutral"
+                            onclick={handleRefresh}>
+                        </lightning-button>
+                    </div>
+                    <template if:true={isProcessing}>
+                        <lightning-spinner alternative-text="Processing..." size="small"></lightning-spinner>
+                    </template>
+                </div>
+
+                <p class="bga-note">
+                    <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                    For accounts without billing geocodes, salespeople should visit the outlet
+                    and use the "Capture Outlet Geolocation" button on the account record page.
+                </p>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

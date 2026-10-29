@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>L1_Approver__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Designated L1 approver for this expense, auto-populated from Employee record</description>
+    <label>L1 Approver (Manager)</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>L1 Approver Expenses</relationshipLabel>
+    <relationshipName>L1_Approver_Expenses</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,239 @@
+/* Collection Entry Styles */
+:host {
+    --brand-primary: #0176d3;
+    --success-color: #2e844a;
+    --warning-color: #dd7a01;
+    --error-color: #ea001e;
+    --border-color: #e5e5e5;
+    --bg-light: #f8f9fa;
+}
+
+/* Aging Summary Cards */
+.aging-section {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.aging-card {
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.aging-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+
+.aging-total::before { background: var(--brand-primary); }
+.aging-current::before { background: var(--success-color); }
+.aging-30::before { background: var(--warning-color); }
+.aging-60::before { background: #e67e22; }
+.aging-90::before { background: var(--error-color); }
+
+.aging-total { background: #f0f7ff; }
+.aging-current { background: #e6f7e9; }
+.aging-30 { background: #fff8e1; }
+.aging-60 { background: #fff3e0; }
+.aging-90 { background: #fce4e4; }
+
+.aging-label {
+    display: block;
+    font-size: 10px;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.aging-value {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    color: #181818;
+    margin-top: 4px;
+}
+
+/* Invoice Table */
+.invoices-section {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.invoice-table-container {
+    max-height: 350px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.balance-due {
+    font-weight: 700;
+    color: var(--error-color);
+}
+
+.allocate-col {
+    min-width: 120px;
+}
+
+.selected-row {
+    background-color: #f0f7ff !important;
+}
+
+.overdue-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-current {
+    background: #e6f7e9;
+    color: var(--success-color);
+}
+
+.badge-30 {
+    background: #fff8e1;
+    color: var(--warning-color);
+}
+
+.badge-60 {
+    background: #fff3e0;
+    color: #e67e22;
+}
+
+.badge-90 {
+    background: #fce4e4;
+    color: var(--error-color);
+}
+
+.badge-90plus {
+    background: #c0392b;
+    color: #ffffff;
+}
+
+/* Collection Form */
+.collection-form {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.form-container {
+    padding: 8px 0;
+}
+
+.allocation-summary {
+    background: #f0f7ff;
+    border: 1px solid #d0e5fb;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+}
+
+.text-danger {
+    color: var(--error-color);
+}
+
+.text-normal {
+    color: var(--success-color);
+}
+
+/* History Table */
+.history-section {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.history-table-container {
+    max-height: 300px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.collection-amount {
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-confirmed {
+    background: #e6f7e9;
+    color: var(--success-color);
+}
+
+.badge-pending {
+    background: #fff8e1;
+    color: var(--warning-color);
+}
+
+.badge-bounced {
+    background: #fce4e4;
+    color: var(--error-color);
+}
+
+.badge-cancelled {
+    background: #f3f3f3;
+    color: #706e6b;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #706e6b;
+}
+
+.empty-state-small {
+    text-align: center;
+    padding: 20px;
+}
+
+/* Table Styles */
+table.slds-table thead th {
+    background: #fafbfc;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #706e6b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .aging-section .slds-grid {
+        flex-wrap: wrap;
+    }
+
+    .aging-section .slds-col {
+        flex-basis: 50% !important;
+        max-width: 50% !important;
+        margin-bottom: 8px;
+    }
+
+    .invoice-table-container,
+    .history-table-container {
+        overflow-x: auto;
+    }
+}

@@ -1,0 +1,442 @@
+<template>
+    <!-- Loading Spinner Overlay -->
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="large" class="slds-is-fixed"></lightning-spinner>
+    </template>
+
+    <lightning-card title="Stock Management Dashboard" icon-name="standard:product_item">
+        <!-- Top Bar: Account Selector & Refresh -->
+        <div slot="actions">
+            <div class="slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
+                <div class="slds-col" style="min-width: 280px;">
+                    <lightning-combobox
+                        name="accountSelector"
+                        label="Distributor"
+                        value={selectedAccountId}
+                        placeholder="Select Distributor"
+                        options={distributorOptions}
+                        onchange={handleAccountChange}
+                        variant="label-hidden"
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col">
+                    <lightning-button-icon
+                        icon-name="utility:refresh"
+                        alternative-text="Refresh"
+                        title="Refresh Dashboard"
+                        onclick={handleRefresh}
+                        variant="border-filled"
+                    ></lightning-button-icon>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <!-- KPI Cards Row -->
+            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                <!-- Total SKUs -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class="kpi-card kpi-card_default">
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="standard:product_item" size="small"></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiTotalSkus}</p>
+                            <p class="kpi-card__label">Total SKUs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Closing Stock -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class="kpi-card kpi-card_default">
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="standard:product_required" size="small"></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiTotalClosingStock}</p>
+                            <p class="kpi-card__label">Closing Stock</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Sold -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class="kpi-card kpi-card_default">
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="standard:sales_path" size="small"></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiTotalSold}</p>
+                            <p class="kpi-card__label">Total Sold</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Items -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class={kpiLowStockClass}>
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="utility:warning" size="small" variant={kpiLowStockIconVariant}></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiLowStockCount}</p>
+                            <p class="kpi-card__label">Low Stock</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zero Stock Items -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class={kpiZeroStockClass}>
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="utility:error" size="small" variant={kpiZeroStockIconVariant}></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiZeroStockCount}</p>
+                            <p class="kpi-card__label">Zero Stock</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Near Expiry Batches -->
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3 slds-large-size_1-of-6 slds-p-bottom_small">
+                    <div class={kpiNearExpiryClass}>
+                        <div class="kpi-card__icon">
+                            <lightning-icon icon-name="utility:clock" size="small" variant={kpiNearExpiryIconVariant}></lightning-icon>
+                        </div>
+                        <div class="kpi-card__content">
+                            <p class="kpi-card__value">{kpiNearExpiryCount}</p>
+                            <p class="kpi-card__label">Near Expiry</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <template if:true={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                    <span class="slds-assistive-text">error</span>
+                    <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" class="slds-m-right_x-small"></lightning-icon>
+                    <h2>{errorMessage}</h2>
+                </div>
+            </template>
+
+            <!-- Tabset -->
+            <lightning-tabset variant="scoped" active-tab-value={activeTab} onactive={handleTabChange}>
+
+                <!-- Tab 1: Current Stock -->
+                <lightning-tab label="Current Stock" value="currentStock" icon-name="standard:product_item">
+                    <div class="slds-p-top_small">
+                        <!-- Filter Bar -->
+                        <div class="slds-grid slds-grid_vertical-align-end slds-gutters_small slds-wrap slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                                <lightning-input
+                                    type="search"
+                                    label="Search Product"
+                                    placeholder="Search by product name or code..."
+                                    value={productSearch}
+                                    onchange={handleProductSearch}
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-p-bottom_x-small">
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label">Stock Filter</label>
+                                    <div class="slds-form-element__control">
+                                        <lightning-button-group>
+                                            <lightning-button
+                                                label="All"
+                                                variant={filterAllVariant}
+                                                onclick={handleStockFilterAll}
+                                            ></lightning-button>
+                                            <lightning-button
+                                                label="Low Stock"
+                                                variant={filterLowVariant}
+                                                onclick={handleStockFilterLow}
+                                                icon-name="utility:warning"
+                                            ></lightning-button>
+                                            <lightning-button
+                                                label="Zero Stock"
+                                                variant={filterZeroVariant}
+                                                onclick={handleStockFilterZero}
+                                                icon-name="utility:error"
+                                            ></lightning-button>
+                                            <lightning-button
+                                                label="Healthy"
+                                                variant={filterHealthyVariant}
+                                                onclick={handleStockFilterHealthy}
+                                                icon-name="utility:success"
+                                            ></lightning-button>
+                                        </lightning-button-group>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Data Table -->
+                        <template if:true={hasStockRecords}>
+                            <div class="table-container">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col"><div class="slds-truncate" title="Stock Entry #">Stock #</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Account">Account</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Product">Product</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Product Code">Code</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Opening">Opening</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Received">Received</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Sold">Sold</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Damaged">Damaged</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Closing">Closing</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Batch No">Batch</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Expiry Date">Expiry</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Stock Date">Stock Date</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={stockTableRows} for:item="row">
+                                            <tr key={row.id}>
+                                                <td><div class="slds-truncate">{row.name}</div></td>
+                                                <td><div class="slds-truncate">{row.accountName}</div></td>
+                                                <td><div class="slds-truncate">{row.productName}</div></td>
+                                                <td><div class="slds-truncate">{row.productCode}</div></td>
+                                                <td class="slds-text-align_right">{row.opening}</td>
+                                                <td class="slds-text-align_right">{row.received}</td>
+                                                <td class="slds-text-align_right">{row.sold}</td>
+                                                <td class="slds-text-align_right">{row.damaged}</td>
+                                                <td class="slds-text-align_right">
+                                                    <span class={row.closingClass}>{row.closing}</span>
+                                                </td>
+                                                <td><div class="slds-truncate">{row.batchNo}</div></td>
+                                                <td>{row.expiryDate}</td>
+                                                <td>{row.stockDate}</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template if:false={hasStockRecords}>
+                            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+                                <p class="slds-text-body_regular slds-text-color_weak">No stock records found matching the current filters.</p>
+                            </div>
+                        </template>
+
+                        <!-- Pagination -->
+                        <template if:true={hasStockRecords}>
+                            <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-p-top_small">
+                                <div class="slds-col">
+                                    <lightning-button
+                                        label="Previous"
+                                        icon-name="utility:chevronleft"
+                                        onclick={handlePreviousPage}
+                                        disabled={isPreviousDisabled}
+                                        variant="neutral"
+                                    ></lightning-button>
+                                </div>
+                                <div class="slds-col slds-p-horizontal_medium">
+                                    <span class="slds-text-body_small">
+                                        Page {currentPage} of {totalPages} ({stockTotalCount} records)
+                                    </span>
+                                </div>
+                                <div class="slds-col">
+                                    <lightning-button
+                                        label="Next"
+                                        icon-name="utility:chevronright"
+                                        icon-position="right"
+                                        onclick={handleNextPage}
+                                        disabled={isNextDisabled}
+                                        variant="neutral"
+                                    ></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-tab>
+
+                <!-- Tab 2: Near Expiry Batches -->
+                <lightning-tab label="Near Expiry Batches" value="nearExpiry" icon-name="utility:clock">
+                    <div class="slds-p-top_small">
+                        <!-- Days Threshold Selector -->
+                        <div class="slds-grid slds-grid_vertical-align-end slds-gutters_small slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12">
+                                <lightning-combobox
+                                    name="daysThreshold"
+                                    label="Expiry Within"
+                                    value={nearExpiryDays}
+                                    options={daysThresholdOptions}
+                                    onchange={handleDaysThresholdChange}
+                                ></lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- Near Expiry Data Table -->
+                        <template if:true={hasNearExpiryRecords}>
+                            <div class="table-container">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col"><div class="slds-truncate" title="Batch Number">Batch #</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Product">Product</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Product Code">Code</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Manufacturing Date">Mfg Date</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Expiry Date">Expiry Date</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Days Remaining">Days Left</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Shelf Life Remaining %">Shelf Life %</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Status">Status</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Qty Manufactured">Qty Mfg</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={nearExpiryTableRows} for:item="batch">
+                                            <tr key={batch.id}>
+                                                <td><div class="slds-truncate">{batch.batchNumber}</div></td>
+                                                <td><div class="slds-truncate">{batch.productName}</div></td>
+                                                <td><div class="slds-truncate">{batch.productCode}</div></td>
+                                                <td>{batch.mfgDate}</td>
+                                                <td>{batch.expiryDate}</td>
+                                                <td>
+                                                    <span class={batch.daysLeftClass}>{batch.daysLeft}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                                        <div class="shelf-life-bar slds-m-right_x-small">
+                                                            <div class={batch.shelfLifeBarClass} style={batch.shelfLifeBarStyle}></div>
+                                                        </div>
+                                                        <span class={batch.shelfLifeClass}>{batch.shelfLifePct}%</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <lightning-badge label={batch.status} class={batch.statusBadgeClass}></lightning-badge>
+                                                </td>
+                                                <td class="slds-text-align_right">{batch.qtyManufactured}</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template if:false={hasNearExpiryRecords}>
+                            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+                                <p class="slds-text-body_regular slds-text-color_weak">No near-expiry batches found within the selected threshold.</p>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-tab>
+
+                <!-- Tab 3: Stock Movement -->
+                <lightning-tab label="Stock Movement" value="stockMovement" icon-name="utility:trending">
+                    <div class="slds-p-top_small">
+                        <!-- Selectors -->
+                        <div class="slds-grid slds-grid_vertical-align-end slds-gutters_small slds-wrap slds-m-bottom_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                                <lightning-combobox
+                                    name="movementAccount"
+                                    label="Distributor"
+                                    value={movementAccountId}
+                                    placeholder="Select Distributor"
+                                    options={distributorOptions}
+                                    onchange={handleMovementAccountChange}
+                                ></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                                <lightning-combobox
+                                    name="movementProduct"
+                                    label="Product"
+                                    value={movementProductId}
+                                    placeholder="Select Product"
+                                    options={movementProductOptions}
+                                    onchange={handleMovementProductChange}
+                                    disabled={isMovementProductDisabled}
+                                ></lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-bottom_x-small">
+                                <lightning-button
+                                    label="Load Movement"
+                                    variant="brand"
+                                    onclick={handleLoadMovement}
+                                    disabled={isLoadMovementDisabled}
+                                    icon-name="utility:refresh"
+                                ></lightning-button>
+                            </div>
+                        </div>
+
+                        <!-- Movement History Table -->
+                        <template if:true={hasMovementRecords}>
+                            <!-- Trend Summary -->
+                            <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small">
+                                <p class="slds-text-body_small">
+                                    <lightning-icon icon-name="utility:trending" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    <strong>Trend Summary:</strong> {movementTrendSummary}
+                                </p>
+                            </div>
+
+                            <div class="table-container">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col"><div class="slds-truncate" title="Stock Date">Date</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Opening">Opening</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Received">Received</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Sold">Sold</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Damaged">Damaged</div></th>
+                                            <th scope="col" class="slds-text-align_right"><div class="slds-truncate" title="Closing">Closing</div></th>
+                                            <th scope="col"><div class="slds-truncate" title="Current">Current</div></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={movementTableRows} for:item="row">
+                                            <tr key={row.id} class={row.rowClass}>
+                                                <td>{row.stockDate}</td>
+                                                <td class="slds-text-align_right">{row.opening}</td>
+                                                <td class="slds-text-align_right">
+                                                    <template if:true={row.receivedPositive}>
+                                                        <span class="stock-level_healthy">+{row.received}</span>
+                                                    </template>
+                                                    <template if:false={row.receivedPositive}>
+                                                        <span>{row.received}</span>
+                                                    </template>
+                                                </td>
+                                                <td class="slds-text-align_right">{row.sold}</td>
+                                                <td class="slds-text-align_right">
+                                                    <template if:true={row.damagedPositive}>
+                                                        <span class="stock-level_danger">{row.damaged}</span>
+                                                    </template>
+                                                    <template if:false={row.damagedPositive}>
+                                                        <span>{row.damaged}</span>
+                                                    </template>
+                                                </td>
+                                                <td class="slds-text-align_right">
+                                                    <span class={row.closingClass}><strong>{row.closing}</strong></span>
+                                                </td>
+                                                <td>
+                                                    <template if:true={row.isCurrent}>
+                                                        <lightning-badge label="Current" class="slds-badge_inverse"></lightning-badge>
+                                                    </template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template if:true={showMovementPlaceholder}>
+                            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+                                <p class="slds-text-body_regular slds-text-color_weak">Select a distributor and product, then click "Load Movement" to view stock movement history.</p>
+                            </div>
+                        </template>
+
+                        <template if:true={showMovementEmpty}>
+                            <div class="slds-illustration slds-illustration_small slds-p-around_large slds-text-align_center">
+                                <p class="slds-text-body_regular slds-text-color_weak">No stock movement history found for the selected distributor and product.</p>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

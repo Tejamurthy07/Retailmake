@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Expense_Type__c</fullName>
+    <label>Expense Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Daily Allowance</fullName>
+                <default>false</default>
+                <label>Daily Allowance</label>
+            </value>
+            <value>
+                <fullName>Travelling Allowance</fullName>
+                <default>false</default>
+                <label>Travelling Allowance</label>
+            </value>
+            <value>
+                <fullName>Fuel</fullName>
+                <default>false</default>
+                <label>Fuel</label>
+            </value>
+            <value>
+                <fullName>Toll</fullName>
+                <default>false</default>
+                <label>Toll</label>
+            </value>
+            <value>
+                <fullName>Lodging</fullName>
+                <default>false</default>
+                <label>Lodging</label>
+            </value>
+            <value>
+                <fullName>Food</fullName>
+                <default>false</default>
+                <label>Food</label>
+            </value>
+            <value>
+                <fullName>Mobile</fullName>
+                <default>false</default>
+                <label>Mobile</label>
+            </value>
+            <value>
+                <fullName>Printing</fullName>
+                <default>false</default>
+                <label>Printing</label>
+            </value>
+            <value>
+                <fullName>Stationery</fullName>
+                <default>false</default>
+                <label>Stationery</label>
+            </value>
+            <value>
+                <fullName>Miscellaneous</fullName>
+                <default>false</default>
+                <label>Miscellaneous</label>
+            </value>
+            <value>
+                <fullName>Hotel</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Hotel</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

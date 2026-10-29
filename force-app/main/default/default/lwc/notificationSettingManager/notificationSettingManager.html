@@ -1,0 +1,339 @@
+<template>
+    <!-- HEADER -->
+    <div class="ns-header">
+        <div class="ns-header-left">
+            <lightning-icon icon-name="standard:announcement" size="small"></lightning-icon>
+            <div class="ns-header-text">
+                <h1 class="ns-header-title">Notification Settings</h1>
+                <span class="ns-header-sub">Configure dynamic notification rules — no Setup required</span>
+            </div>
+        </div>
+        <div class="ns-header-right">
+            <div class="ns-counter">
+                <span class="ns-counter-num">{activeCount}</span>
+                <span class="ns-counter-sep">/</span>
+                <span class="ns-counter-tot">{totalCount}</span>
+                <span class="ns-counter-lbl">active</span>
+            </div>
+            <button class="ns-btn-new" onclick={handleNewClick}>
+                <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                <span>New Rule</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="ns-toolbar">
+        <div class="ns-search">
+            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+            <input type="search" class="ns-search-input" placeholder="Search rules, subject, description..."
+                value={searchTerm} onchange={handleSearch} oninput={handleSearch} />
+        </div>
+        <lightning-button label="Delivery Log" icon-name="utility:list" onclick={handleOpenLogs}
+            title="Recent sends, skips and failures with their reason"></lightning-button>
+    </div>
+
+    <!-- FILTER PILLS -->
+    <nav class="ns-filter-bar">
+        <template for:each={filterPills} for:item="pill">
+            <button key={pill.key} class={pill.cssClass} data-key={pill.key} onclick={handleFilter}>
+                <span class={pill.dotClass}></span>
+                <span>{pill.label}</span>
+            </button>
+        </template>
+    </nav>
+
+    <!-- LIST -->
+    <div class="ns-content">
+        <template if:true={hasSettings}>
+            <div class="ns-list">
+                <template for:each={filteredSettings} for:item="s">
+                    <div key={s.Id} class="ns-row">
+                        <div class="ns-row-main">
+                            <div class="ns-row-top">
+                                <span class="ns-row-name">{s.Name}</span>
+                                <span class={s.statusClass}>{s.statusText}</span>
+                            </div>
+                            <div class="ns-row-meta">
+                                <span class="ns-row-event">
+                                    <strong>{s.Event_Object__c}</strong> &middot; {s.Event_Type__c}
+                                </span>
+                                <span class="ns-row-recipient">
+                                    → {s.recipientDisplay}
+                                </span>
+                            </div>
+                            <template if:true={s.Subject_Template__c}>
+                                <div class="ns-row-subject">{s.Subject_Template__c}</div>
+                            </template>
+                            <div class="ns-row-subject">
+                                <lightning-icon icon-name="utility:filter" size="xx-small"></lightning-icon>
+                                <span>&nbsp;{s.criteriaDisplay}</span>
+                            </div>
+                            <div class="ns-row-channels">
+                                <template for:each={s.channels} for:item="c">
+                                    <span key={c.key} class={c.cls}>{c.label}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="ns-row-actions">
+                            <button class="ns-icon-btn ns-icon-btn-test" data-id={s.Id} onclick={handleTestFire}
+                                title="Test now — fire this rule using the latest record">
+                                <lightning-icon icon-name="utility:flow" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class="ns-icon-btn" data-id={s.Id} onclick={handleToggleActive}
+                                title="Toggle Active">
+                                <lightning-icon icon-name="utility:toggle_off" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class="ns-icon-btn" data-id={s.Id} onclick={handleEditClick} title="Edit">
+                                <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                            </button>
+                            <button class="ns-icon-btn ns-icon-btn-danger" data-id={s.Id} onclick={handleDelete}
+                                title="Delete">
+                                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={hasSettings}>
+            <div class="ns-empty">
+                <lightning-icon icon-name="utility:notification" size="large"></lightning-icon>
+                <p>No notification rules configured.</p>
+                <button class="ns-btn-new" onclick={handleNewClick}>
+                    <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                    <span>Create First Rule</span>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- MODAL: New / Edit -->
+    <template if:true={showModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header ns-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium ns-modal-body">
+
+                    <div class="ns-form-grid">
+                        <lightning-combobox label="Event Object" required value={form.Event_Object__c}
+                            options={eventObjectOptions} data-field="Event_Object__c"
+                            onchange={handleEventObjectChange} placeholder="Select object..."></lightning-combobox>
+                        <lightning-combobox label="Event Type" required value={form.Event_Type__c}
+                            options={eventTypeOptions} data-field="Event_Type__c"
+                            onchange={handleFormChange} placeholder="When to fire..."></lightning-combobox>
+                    </div>
+
+                    <lightning-combobox label="Recipient Type" required value={form.Recipient_Type__c}
+                        options={recipientTypeOptions} onchange={handleRecipientTypeChange}
+                        placeholder="Who to notify..." class="slds-m-top_small"></lightning-combobox>
+
+                    <template if:true={isRecipientUser}>
+                        <div class="ns-user-search slds-m-top_small">
+                            <label class="slds-form-element__label">Recipient User</label>
+                            <div class="ns-user-input-wrapper">
+                                <input type="text" class="ns-user-input" placeholder="Click to browse users, or type to filter..."
+                                    value={userSearch} oninput={handleUserSearch} onfocus={handleUserFocus} onblur={handleUserBlur} />
+                                <template if:true={userSelectedName}>
+                                    <button class="ns-user-clear" onclick={handleUserClear} title="Clear">
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </template>
+                            </div>
+                            <template if:true={userResults.length}>
+                                <div class="ns-user-dropdown">
+                                    <template for:each={userResults} for:item="u">
+                                        <div key={u.value} class="ns-user-row" data-id={u.value}
+                                            onclick={handleUserSelect}>
+                                            <span class="ns-user-name">{u.label}</span>
+                                            <span class="ns-user-sub">{u.subtitle}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:true={isRecipientReference}>
+                        <lightning-input type="text" label={recipientReferenceLabel} required
+                            value={form.Recipient_Reference__c} data-field="Recipient_Reference__c"
+                            onchange={handleFormChange} class="slds-m-top_small"></lightning-input>
+                    </template>
+
+                    <template if:true={isRecipientField}>
+                        <lightning-combobox label="Recipient Field" required
+                            value={form.Recipient_Field__c} options={userLookupFieldOptions}
+                            data-field="Recipient_Field__c" onchange={handleComboChange}
+                            placeholder="Pick a User lookup on the record..."
+                            field-level-help="Only lookups that can hold a User are listed."
+                            class="slds-m-top_small"></lightning-combobox>
+                    </template>
+
+                    <lightning-input type="text" label="Additional Emails"
+                        value={form.Additional_Emails__c} data-field="Additional_Emails__c"
+                        onchange={handleFormChange} class="slds-m-top_small"
+                        placeholder="ops@example.com, finance@example.com"
+                        field-level-help="Comma-separated addresses that always receive this, on top of the resolved recipients."></lightning-input>
+
+                    <div class="ns-section-divider slds-m-top_medium">
+                        <span>Record Filter (optional)</span>
+                    </div>
+                    <p class="ns-hint">Leave blank to notify for every record. Add a filter to fire only when the record matches — for example Total Amount greater than 50000.</p>
+                    <template if:true={hasNoObjectSelected}>
+                        <p class="ns-hint">Select an Event Object first so the field list can load.</p>
+                    </template>
+                    <div class="ns-form-grid">
+                        <lightning-combobox label="Field" value={form.Criteria_Field__c}
+                            options={allFieldOptions} data-field="Criteria_Field__c"
+                            onchange={handleComboChange} placeholder="--Field--"
+                            disabled={hasNoObjectSelected}></lightning-combobox>
+                        <lightning-combobox label="Operator" value={form.Criteria_Operator__c}
+                            options={criteriaOperatorOptions} data-field="Criteria_Operator__c"
+                            onchange={handleComboChange} placeholder="--Operator--"
+                            disabled={hasNoObjectSelected}></lightning-combobox>
+                    </div>
+                    <template if:true={criteriaNeedsValue}>
+                        <lightning-input type="text" label="Value" value={form.Criteria_Value__c}
+                            data-field="Criteria_Value__c" onchange={handleFormChange}
+                            class="slds-m-top_small"></lightning-input>
+                    </template>
+
+                    <div class="ns-section-divider slds-m-top_medium">
+                        <span>Delivery Channels</span>
+                    </div>
+                    <div class="ns-channel-grid">
+                        <label class="ns-channel-toggle">
+                            <input type="checkbox" data-field="Channel_Email__c" checked={form.Channel_Email__c}
+                                onchange={handleFormChange} />
+                            <span class="ns-channel-icon ns-channel-icon-email">
+                                <lightning-icon icon-name="utility:email" size="xx-small"></lightning-icon>
+                            </span>
+                            <span class="ns-channel-name">Email</span>
+                        </label>
+                        <label class="ns-channel-toggle">
+                            <input type="checkbox" data-field="Channel_InApp__c" checked={form.Channel_InApp__c}
+                                onchange={handleFormChange} />
+                            <span class="ns-channel-icon ns-channel-icon-inapp">
+                                <lightning-icon icon-name="utility:notification" size="xx-small"></lightning-icon>
+                            </span>
+                            <span class="ns-channel-name">In-App</span>
+                        </label>
+                        <label class="ns-channel-toggle">
+                            <input type="checkbox" data-field="Channel_WhatsApp__c" checked={form.Channel_WhatsApp__c}
+                                onchange={handleFormChange} />
+                            <span class="ns-channel-icon ns-channel-icon-wa">
+                                <lightning-icon icon-name="utility:chat" size="xx-small"></lightning-icon>
+                            </span>
+                            <span class="ns-channel-name">WhatsApp</span>
+                            <span class="ns-channel-tag">soon</span>
+                        </label>
+                        <label class="ns-channel-toggle">
+                            <input type="checkbox" data-field="Channel_SMS__c" checked={form.Channel_SMS__c}
+                                onchange={handleFormChange} />
+                            <span class="ns-channel-icon ns-channel-icon-sms">
+                                <lightning-icon icon-name="utility:sms" size="xx-small"></lightning-icon>
+                            </span>
+                            <span class="ns-channel-name">SMS</span>
+                            <span class="ns-channel-tag">soon</span>
+                        </label>
+                    </div>
+
+                    <div class="ns-section-divider slds-m-top_medium">
+                        <span>Message</span>
+                    </div>
+                    <lightning-input type="text" label="Subject" value={form.Subject_Template__c}
+                        data-field="Subject_Template__c" onchange={handleFormChange}
+                        required message-when-value-missing="Subject is required"
+                        placeholder="e.g., Leave Request {!Name} submitted"></lightning-input>
+                    <lightning-textarea label="Body" value={form.Body_Template__c}
+                        data-field="Body_Template__c" onchange={handleFormChange}
+                        placeholder="Use merge fields like {!Name}, {!Status__c}, {!Owner.Name}"
+                        class="slds-m-top_small"></lightning-textarea>
+
+                    <div class="ns-section-divider slds-m-top_medium">
+                        <span>Other</span>
+                    </div>
+                    <lightning-input type="text" label="Description (Internal)" value={form.Description__c}
+                        data-field="Description__c" onchange={handleFormChange}
+                        placeholder="What is this rule for?"></lightning-input>
+                    <div class="slds-m-top_small">
+                        <lightning-input type="toggle" label="Active" checked={form.Is_Active__c}
+                            data-field="Is_Active__c" onchange={handleFormChange}></lightning-input>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSave} disabled={saveDisabled}>
+                        <template if:true={isSaving}>Saving...</template>
+                        <template if:false={isSaving}>Save Rule</template>
+                    </button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Delivery log: skips and failures are recorded with their reason, which
+         is what makes "why didn't my alert arrive?" answerable. -->
+    <template if:true={showLogs}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header ns-modal-header">
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={handleCloseLogs}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">Recent Deliveries</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium ns-modal-body">
+                    <template if:true={isLoadingLogs}>
+                        <lightning-spinner alternative-text="Loading"></lightning-spinner>
+                    </template>
+                    <template if:true={hasLogs}>
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col"><div class="slds-truncate">Sent</div></th>
+                                    <th scope="col"><div class="slds-truncate">Rule</div></th>
+                                    <th scope="col"><div class="slds-truncate">Event</div></th>
+                                    <th scope="col"><div class="slds-truncate">Channel</div></th>
+                                    <th scope="col"><div class="slds-truncate">Recipient</div></th>
+                                    <th scope="col"><div class="slds-truncate">Status</div></th>
+                                    <th scope="col"><div class="slds-truncate">Detail</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={logs} for:item="l">
+                                    <tr key={l.id} class="slds-hint-parent">
+                                        <td><lightning-formatted-date-time value={l.sentAt}
+                                            year="numeric" month="short" day="2-digit"
+                                            hour="2-digit" minute="2-digit"></lightning-formatted-date-time></td>
+                                        <td><div class="slds-truncate">{l.ruleName}</div></td>
+                                        <td><div class="slds-truncate">{l.eventType}</div></td>
+                                        <td><div class="slds-truncate">{l.channel}</div></td>
+                                        <td><div class="slds-truncate">{l.recipient}</div></td>
+                                        <td><span class={l.statusClass}>{l.status}</span></td>
+                                        <td><div class="slds-truncate" title={l.error}>{l.error}</div></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template if:false={hasLogs}>
+                        <template if:false={isLoadingLogs}>
+                            <p class="ns-hint">No notifications have been dispatched yet.</p>
+                        </template>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={handleCloseLogs}>Close</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

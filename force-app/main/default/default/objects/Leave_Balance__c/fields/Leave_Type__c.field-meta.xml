@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Leave_Type__c</fullName>
+    <label>Leave Type</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Casual Leave</fullName>
+                <default>true</default>
+                <label>Casual Leave</label>
+            </value>
+            <value>
+                <fullName>Sick Leave</fullName>
+                <default>false</default>
+                <label>Sick Leave</label>
+            </value>
+            <value>
+                <fullName>Earned Leave</fullName>
+                <default>false</default>
+                <label>Earned Leave</label>
+            </value>
+            <value>
+                <fullName>Compensatory Off</fullName>
+                <default>false</default>
+                <label>Compensatory Off</label>
+            </value>
+            <value>
+                <fullName>Maternity Leave</fullName>
+                <default>false</default>
+                <label>Maternity Leave</label>
+            </value>
+            <value>
+                <fullName>Paternity Leave</fullName>
+                <default>false</default>
+                <label>Paternity Leave</label>
+            </value>
+            <value>
+                <fullName>Loss of Pay</fullName>
+                <default>false</default>
+                <label>Loss of Pay</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,28 @@
+{
+  "required" : [ "accountId", "confirmed", "items" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "accountId" : {
+      "title" : "Account Id",
+      "description" : "The outlet Account the order is for.",
+      "lightning:type" : "lightning__recordIdType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "confirmed" : {
+      "title" : "Confirmed",
+      "description" : "Must be true. Set only after the rep has seen the draft and explicitly agreed to place the order.",
+      "lightning:type" : "lightning__booleanType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "items" : {
+      "title" : "Items",
+      "description" : "The same products and quantities the rep confirmed.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

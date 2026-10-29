@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Active_Priorities</fullName>
+    <columns>MasterLabel</columns>
+    <columns>DeveloperName</columns>
+    <columns>Priority_Order__c</columns>
+    <columns>Has_Customer__c</columns>
+    <columns>Has_Category__c</columns>
+    <columns>Has_Territory__c</columns>
+    <columns>Has_Channel__c</columns>
+    <columns>Is_Active__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Is_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>Active Priorities</label>
+</ListView>

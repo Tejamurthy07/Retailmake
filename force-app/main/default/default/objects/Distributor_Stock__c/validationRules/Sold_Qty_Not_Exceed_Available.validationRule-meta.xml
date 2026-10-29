@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sold_Qty_Not_Exceed_Available</fullName>
+    <active>true</active>
+    <description>Ensures Sold Quantity does not exceed the available stock (Opening Stock + Received Qty).</description>
+    <errorConditionFormula>Sold_Qty__c &gt; (Opening_Stock__c + Received_Qty__c)</errorConditionFormula>
+    <errorDisplayField>Sold_Qty__c</errorDisplayField>
+    <errorMessage>Sold Quantity cannot exceed available stock (Opening Stock + Received Qty).</errorMessage>
+</ValidationRule>

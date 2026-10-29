@@ -1,0 +1,271 @@
+<template>
+    <!-- Header Section -->
+    <lightning-card>
+        <div slot="title" class="header-container">
+            <lightning-icon icon-name="utility:groups" size="small" class="slds-m-right_small"></lightning-icon>
+            <span class="header-title">Team Visit Dashboard</span>
+        </div>
+        <div slot="actions" class="header-actions">
+            <lightning-input
+                type="date"
+                label="Visit Date"
+                value={selectedDate}
+                onchange={handleDateChange}
+                variant="label-hidden"
+                class="date-picker slds-m-right_small"
+            ></lightning-input>
+            <lightning-button
+                label="Refresh"
+                icon-name="utility:refresh"
+                variant="neutral"
+                onclick={handleRefresh}
+                class="slds-m-right_x-small"
+            ></lightning-button>
+            <span class="auto-refresh-label" if:true={autoRefreshActive}>
+                <lightning-icon icon-name="utility:sync" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                Auto-refresh ON
+            </span>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-container">
+                <lightning-spinner alternative-text="Loading team visit data" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Main Content -->
+        <template if:false={isLoading}>
+            <!-- KPI Cards Row -->
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <div class="slds-grid slds-wrap slds-gutters_small kpi-row">
+                    <!-- Total Visits -->
+                    <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_2-of-12 slds-p-bottom_small kpi-col">
+                        <div class="kpi-card kpi-card-blue">
+                            <div class="kpi-icon-wrapper kpi-icon-blue">
+                                <lightning-icon icon-name="utility:travel_and_places" size="small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="kpi-content">
+                                <p class="kpi-value">{kpiTotalVisits}</p>
+                                <p class="kpi-label">Total Visits</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avg Duration -->
+                    <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_2-of-12 slds-p-bottom_small kpi-col">
+                        <div class="kpi-card kpi-card-purple">
+                            <div class="kpi-icon-wrapper kpi-icon-purple">
+                                <lightning-icon icon-name="utility:clock" size="small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="kpi-content">
+                                <p class="kpi-value">{kpiAvgDuration}<span class="kpi-unit">min</span></p>
+                                <p class="kpi-label">Avg Duration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Productive % -->
+                    <div class="slds-col slds-size_12-of-12 slds-medium-size_4-of-12 slds-large-size_2-of-12 slds-p-bottom_small kpi-col">
+                        <div class="kpi-card kpi-card-green">
+                            <div class="kpi-icon-wrapper kpi-icon-green">
+                                <lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="kpi-content">
+                                <p class="kpi-value">{kpiProductivePercent}<span class="kpi-unit">%</span></p>
+                                <p class="kpi-label">Productive %</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Value -->
+                    <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-p-bottom_small kpi-col">
+                        <div class="kpi-card kpi-card-orange">
+                            <div class="kpi-icon-wrapper kpi-icon-orange">
+                                <lightning-icon icon-name="utility:money" size="small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="kpi-content">
+                                <p class="kpi-value kpi-value-currency">{kpiOrdersValue}</p>
+                                <p class="kpi-label">Orders Value</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collections -->
+                    <div class="slds-col slds-size_12-of-12 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-p-bottom_small kpi-col">
+                        <div class="kpi-card kpi-card-teal">
+                            <div class="kpi-icon-wrapper kpi-icon-teal">
+                                <lightning-icon icon-name="utility:currency" size="small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="kpi-content">
+                                <p class="kpi-value kpi-value-currency">{kpiCollections}</p>
+                                <p class="kpi-label">Collections</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <template if:true={hasNoData}>
+                <div class="empty-state slds-p-around_large">
+                    <div class="empty-state-content">
+                        <lightning-icon icon-name="utility:info" size="large" variant="bare" class="empty-icon"></lightning-icon>
+                        <h3 class="slds-text-heading_medium slds-m-top_medium">No visit data for selected date</h3>
+                        <p class="slds-text-body_regular slds-m-top_small slds-text-color_weak">
+                            There are no team visits recorded for the selected date. Please select a different date or check back later.
+                        </p>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Data Table - Desktop View -->
+            <template if:true={hasData}>
+                <div class="desktop-table slds-p-horizontal_medium">
+                    <div class="slds-col slds-large-size_12-of-12">
+                        <div class="table-wrapper">
+                            <lightning-datatable
+                                key-field="userId"
+                                data={tableData}
+                                columns={columns}
+                                hide-checkbox-column
+                                onrowaction={handleRowAction}
+                                sorted-by={sortedBy}
+                                sorted-direction={sortedDirection}
+                                onsort={handleSort}
+                                class="team-table"
+                            ></lightning-datatable>
+
+                            <!-- Team Totals Summary Row -->
+                            <div class="totals-row">
+                                <div class="slds-grid slds-wrap totals-grid">
+                                    <div class="totals-cell totals-label">
+                                        <strong>Team Totals</strong>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Total Visits</span>
+                                        <span class="totals-field-value">{teamTotals.totalVisits}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Productive</span>
+                                        <span class="totals-field-value">{teamTotals.productiveVisits}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Non-Productive</span>
+                                        <span class="totals-field-value">{teamTotals.nonProductiveVisits}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Skipped</span>
+                                        <span class="totals-field-value">{teamTotals.skippedVisits}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Avg Duration</span>
+                                        <span class="totals-field-value">{teamTotals.avgDurationMinutes} min</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Orders Value</span>
+                                        <span class="totals-field-value">{teamTotals.totalOrderValueFormatted}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Collections</span>
+                                        <span class="totals-field-value">{teamTotals.totalCollectionsFormatted}</span>
+                                    </div>
+                                    <div class="totals-cell">
+                                        <span class="totals-field-label">Productivity</span>
+                                        <span class={teamTotals.productivityClass}>{teamTotals.productivity}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="mobile-cards slds-p-horizontal_medium">
+                    <div class="slds-col slds-size_12-of-12">
+                        <template for:each={tableData} for:item="member">
+                            <div key={member.userId} class="mobile-card slds-m-bottom_small">
+                                <div class="mobile-card-header">
+                                    <div class="mobile-card-name">
+                                        <lightning-icon icon-name="standard:user" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        <span class="mobile-card-title">{member.userName}</span>
+                                    </div>
+                                    <span class={member.productivityBadgeClass}>{member.productivity}%</span>
+                                </div>
+                                <div class="mobile-card-body">
+                                    <div class="slds-grid slds-wrap mobile-card-stats">
+                                        <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                            <span class="mobile-stat-label">Total Visits</span>
+                                            <span class="mobile-stat-value">{member.totalVisits}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                            <span class="mobile-stat-label">Productive</span>
+                                            <span class="mobile-stat-value mobile-stat-productive">{member.productiveVisits}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                            <span class="mobile-stat-label">Orders Value</span>
+                                            <span class="mobile-stat-value">{member.totalOrderValueFormatted}</span>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                            <span class="mobile-stat-label">Collections</span>
+                                            <span class="mobile-stat-value">{member.totalCollectionsFormatted}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mobile-card-footer">
+                                    <lightning-button
+                                        label="View Visits"
+                                        variant="base"
+                                        icon-name="utility:chevronright"
+                                        icon-position="right"
+                                        onclick={handleMobileViewVisits}
+                                        data-user-id={member.userId}
+                                        class="mobile-view-btn"
+                                    ></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Mobile Totals Card -->
+                        <div class="mobile-card mobile-totals-card slds-m-bottom_small">
+                            <div class="mobile-card-header mobile-totals-header">
+                                <div class="mobile-card-name">
+                                    <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                    <span class="mobile-card-title">Team Totals</span>
+                                </div>
+                                <span class={teamTotals.productivityClass}>{teamTotals.productivity}%</span>
+                            </div>
+                            <div class="mobile-card-body">
+                                <div class="slds-grid slds-wrap mobile-card-stats">
+                                    <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                        <span class="mobile-stat-label">Total Visits</span>
+                                        <span class="mobile-stat-value">{teamTotals.totalVisits}</span>
+                                    </div>
+                                    <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                        <span class="mobile-stat-label">Productive</span>
+                                        <span class="mobile-stat-value mobile-stat-productive">{teamTotals.productiveVisits}</span>
+                                    </div>
+                                    <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                        <span class="mobile-stat-label">Orders Value</span>
+                                        <span class="mobile-stat-value">{teamTotals.totalOrderValueFormatted}</span>
+                                    </div>
+                                    <div class="slds-col slds-size_6-of-12 mobile-stat">
+                                        <span class="mobile-stat-label">Collections</span>
+                                        <span class="mobile-stat-value">{teamTotals.totalCollectionsFormatted}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </template>
+
+        <!-- Footer with last refreshed time -->
+        <div class="footer-bar slds-p-horizontal_medium slds-p-vertical_x-small" if:true={lastRefreshedDisplay}>
+            <span class="slds-text-body_small slds-text-color_weak">
+                Last refreshed: {lastRefreshedDisplay}
+            </span>
+        </div>
+    </lightning-card>
+</template>

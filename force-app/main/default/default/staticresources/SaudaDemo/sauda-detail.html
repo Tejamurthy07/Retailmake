@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sauda Detail · Gem Edible CRM</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="topbar"></div>
+
+  <main class="wrap" id="main">
+    <!-- rendered by JS -->
+  </main>
+
+  <!-- ===================== Modals host ===================== -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modal"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    mountTopbar("");
+
+    const id = qs("id");
+    let sauda = getSauda(id);
+    const main = document.getElementById("main");
+
+    if (!sauda) {
+      main.innerHTML = `<div class="card"><div class="empty">
+        <div class="big">🔍</div>
+        <div>Sauda <strong>${id || ""}</strong> not found.</div>
+        <p><a class="btn btn-primary" href="sauda-list.html" style="margin-top:12px">Back to list</a></p>
+      </div></div>`;
+      throw new Error("not found");
+    }
+
+    /* Which actions are allowed in the current status */
+    function allowed() {
+      const open = ["Active", "Extended"].includes(sauda.status);
+      return {
+        extend:  open,
+        cancel:  ["Draft", "Active", "Extended"].includes(sauda.status),
+        buyback: open,
+        convert: open,
+        indent:  open,
+      };
+    }
+
+    // Compact flow-stage indicator for the page header
+    function flowStageBadge() {
+      const stage = (sauda.indent && sauda.indent.stage) || 0;
+      const labels = ["Sauda (Agreement)", "Indent raised", "Order confirmed", "Invoice created", "Delivered"];
+      const icons  = ["🤝", "📋", "✅", "🧾", "🚚"];
+      return `<span class="badge badge-extended" title="Indent → Delivery progress">${icons[stage]} ${labels[stage]}</span>`;
+    }
+
+    function flowSteps() {
+      const stage = (sauda.indent && sauda.indent.stage) || 0;
+      const steps = [
+        { lbl: "Sauda", desc: "Agreement", ico: "🤝" },
+        { lbl: "Indent", desc: "Order raised", ico: "📋" },
+        { lbl: "Confirmed", desc: "By company", ico: "✅" },
+        { lbl: "Invoice", desc: "Created", ico: "🧾" },
+        { lbl: "Delivery", desc: "FOR / Ex", ico: "🚚" },
+      ];
+      return steps.map((s, i) => {
+        let cls = "";
+        if (i === 0) cls = "done";
+        else if (i <= stage) cls = (i === stage) ? "current" : "done";
+        return `<div class="step ${cls}">
+          <div class="bubble">${s.ico}</div>
+          <div class="lbl">${s.lbl}</div>
+          <div class="desc">${s.desc}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function render() {
+      const a = allowed();
+      const lines = sauda.lines || [];
+      main.innerHTML = `
+        <div class="page-head">
+          <div>
+            <div class="breadcrumb"><a href="sauda-list.html">Sauda</a> / ${sauda.id}</div>
+            <h1>${sauda.id} &nbsp; ${statusBadge(sauda.status)} &nbsp; ${flowStageBadge()}</h1>
+            <div class="sub">${sauda.party}</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-warn"   ${a.extend  ? "" : "disabled"} id="btnExtend"><span class="ico">📅</span> Extend Sauda</button>
+            <button class="btn btn-danger" ${a.cancel  ? "" : "disabled"} id="btnCancel"><span class="ico">✕</span> Cancel Sauda</button>
+            <button class="btn btn-gold"   ${a.buyback ? "" : "disabled"} id="btnBuyback"><span class="ico">↩</span> BuyBack Sauda</button>
+            <button class="btn btn-info"   ${a.convert ? "" : "disabled"} id="btnConvert"><span class="ico">⟳</span> Convert</button>
+          </div>
+        </div>
+
+        ${statusAlert()}
+
+        <!-- summary -->
+        <div class="card">
+          <div class="card-head"><h2>📄 Agreement Summary</h2>
+            <span class="right">
+              <button class="btn btn-light btn-sm" ${a.indent ? "" : "disabled"} id="btnIndent"><span class="ico">📋</span> Raise Indent (Order)</button>
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="summary-grid">
+              <div class="item"><div class="k">Party / Customer</div><div class="v">${sauda.party}</div></div>
+              <div class="item"><div class="k">Broker</div><div class="v">${sauda.broker || "—"}</div></div>
+              <div class="item"><div class="k">Sauda Date</div><div class="v">${fmtDate(sauda.saudaDate)}</div></div>
+              <div class="item"><div class="k">Payment Terms</div><div class="v">${sauda.paymentTerms || "—"}</div></div>
+
+              <div class="item"><div class="k">Effective From</div><div class="v">${fmtDate(sauda.effectiveFrom)}</div></div>
+              <div class="item"><div class="k">Effective To</div><div class="v">${fmtDate(sauda.effectiveTo)}</div></div>
+              <div class="item"><div class="k">Delivery Type</div><div class="v">${deliveryPill(sauda.deliveryType)} ${sauda.deliveryType === "Ex" ? "Ex-works" : "FOR"}</div></div>
+              <div class="item"><div class="k">From Location</div><div class="v">${locationName(sauda.location)} <span class="note-line">${locationType(sauda.location)}</span></div></div>
+
+              <div class="item"><div class="k">Total Quantity</div><div class="v big">${num(saudaQty(sauda))}</div></div>
+              <div class="item"><div class="k">Sauda Value (Sell)</div><div class="v big">${inr(saudaSellValue(sauda))}</div></div>
+              <div class="item"><div class="k">Total Margin</div><div class="v big">${inr(saudaMargin(sauda))}</div></div>
+              <div class="item"><div class="k">Line Items</div><div class="v big">${lines.length}</div></div>
+            </div>
+            ${sauda.remarks ? `<div class="note-line" style="margin-top:12px"><strong>Remarks:</strong> ${sauda.remarks}</div>` : ""}
+          </div>
+        </div>
+
+        <!-- line items -->
+        <div class="card">
+          <div class="card-head"><h2>🛒 Sauda Line Items</h2></div>
+          <div class="card-body line-table-wrap">
+            <table class="line-table stack">
+              <thead>
+                <tr>
+                  <th>#</th><th style="min-width:220px">Product</th>
+                  <th class="cell-num">Qty</th><th>UOM</th>
+                  <th class="cell-num">Buy Price</th><th class="cell-num">Sell Price</th>
+                  <th class="cell-num">Margin/Unit</th><th class="cell-num">Line Value</th>
+                  <th>Eff. From</th><th>Eff. To</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${lines.map((l, i) => `
+                  <tr>
+                    <td class="rownum" data-label="Line" data-line="${i + 1}">${i + 1}</td>
+                    <td data-label="Product">${productName(l.product)}</td>
+                    <td data-label="Qty" class="cell-num">${num(l.qty)}</td>
+                    <td data-label="UOM">${l.uom}</td>
+                    <td data-label="Buy Price" class="cell-num">${inr(l.buyPrice)}</td>
+                    <td data-label="Sell Price" class="cell-num">${inr(l.sellPrice)}</td>
+                    <td data-label="Margin / Unit" class="cell-num" style="color:${(l.sellPrice - l.buyPrice) < 0 ? 'var(--danger)' : 'var(--green-700)'}">${inr(l.sellPrice - l.buyPrice)}</td>
+                    <td data-label="Line Value" class="cell-num">${inr(lineSellTotal(l))}</td>
+                    <td data-label="Eff. From">${fmtDate(l.effFrom)}</td>
+                    <td data-label="Eff. To">${fmtDate(l.effTo)}</td>
+                  </tr>`).join("")}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" data-label="">Totals</td>
+                  <td data-label="Total Qty" class="cell-num">${num(saudaQty(sauda))}</td>
+                  <td colspan="3" class="cell-hide-mobile"></td>
+                  <td data-label="Total Margin" class="cell-num muted-margin">${inr(saudaMargin(sauda))}</td>
+                  <td data-label="Sauda Value" class="cell-num">${inr(saudaSellValue(sauda))}</td>
+                  <td colspan="2" class="cell-hide-mobile"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- flow -->
+        <div class="card">
+          <div class="card-head"><h2>🔄 Indent → Delivery Flow (against this Sauda)</h2></div>
+          <div class="card-body">
+            <div class="flow">${flowSteps()}</div>
+          </div>
+        </div>
+
+        <!-- history -->
+        <div class="card">
+          <div class="card-head"><h2>🕘 Activity / History</h2></div>
+          <div class="card-body">
+            <ul class="timeline">
+              ${(sauda.history || []).slice().reverse().map(h => `
+                <li>
+                  <div class="t-title">${h.action}</div>
+                  <div class="t-meta">${h.ts} · ${h.by}</div>
+                  ${h.note ? `<div class="t-note">${h.note}</div>` : ""}
+                </li>`).join("")}
+            </ul>
+          </div>
+        </div>
+      `;
+
+      // wire buttons
+      bind("btnExtend", openExtend);
+      bind("btnCancel", openCancel);
+      bind("btnBuyback", openBuyback);
+      bind("btnConvert", openConvert);
+      bind("btnIndent", advanceIndent);
+    }
+
+    function statusAlert() {
+      switch (sauda.status) {
+        case "Cancelled": return `<div class="alert alert-danger"><span class="ico">✕</span><div>This sauda has been <strong>cancelled</strong>. No further actions can be taken.</div></div>`;
+        case "Buyback":   return `<div class="alert alert-warn"><span class="ico">↩</span><div>This sauda was <strong>bought back</strong> by the company. ${sauda.buyback ? `${num(sauda.buyback.qty)} unit(s) @ ${inr(sauda.buyback.price)}.` : ""}</div></div>`;
+        case "Converted": return `<div class="alert alert-info"><span class="ico">⟳</span><div>This sauda has been <strong>converted</strong>${sauda.conversion ? ` — ${sauda.conversion.types.join(", ")}` : ""}. A revised sauda was generated${sauda.conversion && sauda.conversion.newId ? ` (<a href="sauda-detail.html?id=${sauda.conversion.newId}">${sauda.conversion.newId}</a>)` : ""}.</div></div>`;
+        case "Extended":  return `<div class="alert alert-success"><span class="ico">📅</span><div>Validity extended to <strong>${fmtDate(sauda.effectiveTo)}</strong>.</div></div>`;
+        case "Draft":     return `<div class="alert alert-warn"><span class="ico">✎</span><div>This sauda is a <strong>draft</strong>. Activate it to raise indents (open the record from Create flow to edit in a full build).</div></div>`;
+        default: return "";
+      }
+    }
+
+    function bind(elId, fn) { const el = document.getElementById(elId); if (el && !el.disabled) el.addEventListener("click", fn); }
+
+    /* ===================== Modal helpers ===================== */
+    const backdrop = document.getElementById("modalBackdrop");
+    const modal = document.getElementById("modal");
+    function closeModal() { backdrop.classList.remove("open"); modal.innerHTML = ""; }
+    backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+    function showModal(html) { modal.innerHTML = html; backdrop.classList.add("open"); }
+
+    function commit(updater, historyEntry, msg) {
+      updater();
+      sauda.history = sauda.history || [];
+      sauda.history.push({ ts: nowStamp(), by: "Demo User", ...historyEntry });
+      upsertSauda(sauda);
+      closeModal();
+      toast(msg, "success");
+      render();
+    }
+
+    /* ===================== 1. Extend ===================== */
+    function openExtend() {
+      showModal(`
+        <div class="m-head"><h3>📅 Extend Sauda</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <p class="note-line">Extend the validity period of <strong>${sauda.id}</strong>. Current end date: <strong>${fmtDate(sauda.effectiveTo)}</strong>.</p>
+          <div class="field" style="margin-bottom:14px">
+            <label>New Effective To <span class="req">*</span></label>
+            <input type="date" id="exNewTo" value="${sauda.effectiveTo}" min="${sauda.effectiveTo}" />
+          </div>
+          <div class="field">
+            <label>Reason / Note</label>
+            <textarea id="exNote" placeholder="e.g. Buyer requested additional lifting window."></textarea>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-light" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-warn" id="exConfirm">Confirm Extension</button>
+        </div>
+      `);
+      document.getElementById("exConfirm").addEventListener("click", () => {
+        const newTo = document.getElementById("exNewTo").value;
+        if (!newTo) return toast("Pick a new end date.", "warn");
+        if (daysBetween(sauda.effectiveTo, newTo) <= 0) return toast("New date must be after the current end date.", "warn");
+        const note = document.getElementById("exNote").value;
+        const oldTo = sauda.effectiveTo;
+        commit(
+          () => {
+            sauda.effectiveTo = newTo;
+            (sauda.lines || []).forEach(l => { if (l.effTo === oldTo) l.effTo = newTo; });
+            sauda.status = "Extended";
+          },
+          { action: "Extended", note: `Validity extended ${fmtDate(oldTo)} → ${fmtDate(newTo)}.${note ? " " + note : ""}` },
+          "Sauda extended."
+        );
+      });
+    }
+
+    /* ===================== 2. Cancel ===================== */
+    function openCancel() {
+      showModal(`
+        <div class="m-head"><h3>✕ Cancel Sauda</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <div class="alert alert-danger"><span class="ico">⚠</span><div>Cancelling <strong>${sauda.id}</strong> voids the agreement. Pending indents cannot be raised against it afterwards.</div></div>
+          <div class="field">
+            <label>Cancellation Reason <span class="req">*</span></label>
+            <select id="cnReason">
+              <option value="">— Select —</option>
+              <option>Price movement / market correction</option>
+              <option>Buyer backed out</option>
+              <option>Supply shortage</option>
+              <option>Duplicate / data entry error</option>
+              <option>Mutual agreement</option>
+            </select>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label>Note</label>
+            <textarea id="cnNote" placeholder="Optional details…"></textarea>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-light" onclick="closeModal()">Keep Sauda</button>
+          <button class="btn btn-danger" id="cnConfirm">Cancel Sauda</button>
+        </div>
+      `);
+      document.getElementById("cnConfirm").addEventListener("click", () => {
+        const reason = document.getElementById("cnReason").value;
+        if (!reason) return toast("Select a cancellation reason.", "warn");
+        const note = document.getElementById("cnNote").value;
+        commit(
+          () => { sauda.status = "Cancelled"; sauda.indent = { stage: 0 }; },
+          { action: "Cancelled", note: `Reason: ${reason}.${note ? " " + note : ""}` },
+          "Sauda cancelled."
+        );
+      });
+    }
+
+    /* ===================== 3. BuyBack ===================== */
+    function openBuyback() {
+      const maxQty = saudaQty(sauda);
+      showModal(`
+        <div class="m-head"><h3>↩ BuyBack Sauda</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <p class="note-line">The company buys back the open position of <strong>${sauda.id}</strong>. Total agreed quantity: <strong>${num(maxQty)}</strong>.</p>
+          <div class="grid cols-2">
+            <div class="field">
+              <label>Buyback Quantity <span class="req">*</span></label>
+              <input type="number" id="bbQty" min="1" max="${maxQty}" value="${maxQty}" />
+            </div>
+            <div class="field">
+              <label>Buyback Price / Unit <span class="req">*</span></label>
+              <input type="number" id="bbPrice" min="0" step="0.01" placeholder="e.g. current market rate" />
+            </div>
+          </div>
+          <div class="alert alert-warn" id="bbCalc" style="margin-top:14px"><span class="ico">∑</span><div>Enter quantity &amp; price to see the buyback settlement.</div></div>
+          <div class="field">
+            <label>Note</label>
+            <textarea id="bbNote" placeholder="Settlement basis / reference…"></textarea>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-light" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-gold" id="bbConfirm">Confirm BuyBack</button>
+        </div>
+      `);
+      const qtyEl = document.getElementById("bbQty");
+      const priceEl = document.getElementById("bbPrice");
+      const calc = document.getElementById("bbCalc");
+      const avgSell = maxQty ? (saudaSellValue(sauda) / maxQty) : 0;
+      function recalcBB() {
+        const q = Number(qtyEl.value) || 0, p = Number(priceEl.value) || 0;
+        if (!q || !p) { calc.querySelector("div").textContent = "Enter quantity & price to see the buyback settlement."; return; }
+        const settlement = q * p;
+        const diff = (avgSell - p) * q; // company gain if buyback price below agreed sell
+        calc.querySelector("div").innerHTML =
+          `Buyback settlement: <strong>${inr(settlement)}</strong> &nbsp;·&nbsp; ` +
+          `vs agreed sell (${inr(avgSell)}/unit): <strong style="color:${diff >= 0 ? 'var(--green-700)' : 'var(--danger)'}">${diff >= 0 ? "company saves " : "company pays extra "}${inr(Math.abs(diff))}</strong>`;
+      }
+      qtyEl.addEventListener("input", recalcBB);
+      priceEl.addEventListener("input", recalcBB);
+      document.getElementById("bbConfirm").addEventListener("click", () => {
+        const q = Number(qtyEl.value) || 0, p = Number(priceEl.value) || 0;
+        if (!q || q > maxQty) return toast(`Quantity must be between 1 and ${num(maxQty)}.`, "warn");
+        if (!p) return toast("Enter a buyback price.", "warn");
+        const note = document.getElementById("bbNote").value;
+        commit(
+          () => { sauda.status = "Buyback"; sauda.buyback = { qty: q, price: p, settlement: q * p }; sauda.indent = { stage: 0 }; },
+          { action: "Buyback", note: `Bought back ${num(q)} unit(s) @ ${inr(p)} (settlement ${inr(q * p)}).${note ? " " + note : ""}` },
+          "Sauda bought back."
+        );
+      });
+    }
+
+    /* ===================== 4. Convert ===================== */
+    function openConvert() {
+      const lineOpts = (sauda.lines || []).map((l, i) => `<option value="${i}">${productName(l.product)} (${num(l.qty)} ${l.uom})</option>`).join("");
+      const prodOpts = PRODUCTS.map(p => `<option value="${p.code}">${p.name}</option>`).join("");
+      const locOpts = LOCATIONS.map(l => `<option value="${l.id}" ${l.id === sauda.location ? "selected" : ""}>${l.name} (${l.type})</option>`).join("");
+      showModal(`
+        <div class="m-head"><h3>⟳ Convert Sauda</h3><button class="x" onclick="closeModal()">×</button></div>
+        <div class="m-body">
+          <p class="note-line">Convert <strong>${sauda.id}</strong> with one or more changes. A revised sauda will be generated and the current one marked <em>Converted</em>.</p>
+
+          <div class="field" style="margin-bottom:12px">
+            <label>Conversion Type(s) <span class="req">*</span></label>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+              <label style="font-weight:500"><input type="checkbox" class="cvType" value="Material to Material Change" data-panel="panelMat" /> Material → Material change</label>
+              <label style="font-weight:500"><input type="checkbox" class="cvType" value="Delivery Type Change" data-panel="panelDel" /> Delivery type change (Ex ↔ FOR)</label>
+              <label style="font-weight:500"><input type="checkbox" class="cvType" value="Location Change" data-panel="panelLoc" /> Location change (Plant / Depot)</label>
+            </div>
+          </div>
+
+          <div id="panelMat" class="cvPanel" style="display:none;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px">
+            <strong>Material → Material</strong>
+            <div class="grid cols-2" style="margin-top:8px">
+              <div class="field"><label>Line to change</label><select id="cvLine">${lineOpts}</select></div>
+              <div class="field"><label>New product</label><select id="cvNewProd">${prodOpts}</select></div>
+            </div>
+          </div>
+
+          <div id="panelDel" class="cvPanel" style="display:none;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px">
+            <strong>Delivery type</strong>
+            <div class="field" style="margin-top:8px">
+              <label>New delivery type (current: ${sauda.deliveryType})</label>
+              <select id="cvNewDeliv">
+                <option value="FOR" ${sauda.deliveryType === "FOR" ? "" : ""}>FOR (delivered to buyer)</option>
+                <option value="Ex">Ex (buyer lifts goods)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="panelLoc" class="cvPanel" style="display:none;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px">
+            <strong>Source location</strong>
+            <div class="field" style="margin-top:8px">
+              <label>New location (current: ${locationName(sauda.location)})</label>
+              <select id="cvNewLoc">${locOpts}</select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Note</label>
+            <textarea id="cvNote" placeholder="Reason for conversion…"></textarea>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn btn-light" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-info" id="cvConfirm">Convert Sauda</button>
+        </div>
+      `);
+
+      modal.querySelectorAll(".cvType").forEach(cb => {
+        cb.addEventListener("change", () => {
+          const panel = document.getElementById(cb.dataset.panel);
+          panel.style.display = cb.checked ? "block" : "none";
+        });
+      });
+
+      // default delivery select to the opposite of current for convenience
+      const nd = document.getElementById("cvNewDeliv");
+      if (nd) nd.value = sauda.deliveryType === "FOR" ? "Ex" : "FOR";
+
+      document.getElementById("cvConfirm").addEventListener("click", () => {
+        const types = Array.from(modal.querySelectorAll(".cvType:checked")).map(c => c.value);
+        if (!types.length) return toast("Select at least one conversion type.", "warn");
+        const note = document.getElementById("cvNote").value;
+
+        // Build the revised sauda as a clone with the requested changes
+        const newId = nextSaudaId();
+        const revised = JSON.parse(JSON.stringify(sauda));
+        revised.id = newId;
+        revised.status = "Active";
+        revised.indent = { stage: 0 };
+        revised.convertedFrom = sauda.id;
+        const changeNotes = [];
+
+        if (types.includes("Material to Material Change")) {
+          const li = Number(document.getElementById("cvLine").value);
+          const np = document.getElementById("cvNewProd").value;
+          const oldName = productName(revised.lines[li].product);
+          revised.lines[li].product = np;
+          const pm = productByCode(np);
+          if (pm) revised.lines[li].uom = pm.uom;
+          changeNotes.push(`material ${oldName} → ${productName(np)}`);
+        }
+        if (types.includes("Delivery Type Change")) {
+          const ndv = document.getElementById("cvNewDeliv").value;
+          changeNotes.push(`delivery ${revised.deliveryType} → ${ndv}`);
+          revised.deliveryType = ndv;
+        }
+        if (types.includes("Location Change")) {
+          const nl = document.getElementById("cvNewLoc").value;
+          changeNotes.push(`location ${locationName(revised.location)} → ${locationName(nl)}`);
+          revised.location = nl;
+        }
+        revised.history = [{ ts: nowStamp(), by: "Demo User", action: "Created (Conversion)", note: `Converted from ${sauda.id}: ${changeNotes.join("; ")}.` }];
+        upsertSauda(revised);
+
+        commit(
+          () => { sauda.status = "Converted"; sauda.conversion = { types, newId, note }; sauda.indent = { stage: 0 }; },
+          { action: "Converted", note: `${types.join(", ")} — ${changeNotes.join("; ")}. New sauda ${newId}.${note ? " " + note : ""}` },
+          `Converted → ${newId}.`
+        );
+      });
+    }
+
+    /* ===================== Indent flow ===================== */
+    function advanceIndent() {
+      const labels = ["", "Indent (Order) raised", "Order confirmed", "Invoice created", "Goods delivered"];
+      const stage = (sauda.indent && sauda.indent.stage) || 0;
+      if (stage >= 4) return toast("Flow already completed (delivered).", "info");
+      const next = stage + 1;
+      commit(
+        () => {
+          sauda.indent = { stage: next };
+          if (next === 4) sauda.status = "Closed";
+        },
+        { action: "Indent flow", note: labels[next] + (next === 4 ? " — sauda closed." : ".") },
+        labels[next]
+      );
+    }
+
+    window.closeModal = closeModal;
+    render();
+  </script>
+</body>
+</html>

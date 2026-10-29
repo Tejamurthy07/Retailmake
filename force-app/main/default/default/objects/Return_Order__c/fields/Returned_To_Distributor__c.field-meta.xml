@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Returned_To_Distributor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>For secondary returns, the distributor whose inventory the returned goods are added back to. Falls back to the secondary invoice&apos;s Sold From Distributor.</description>
+    <label>Returned To Distributor</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Secondary Returns</relationshipLabel>
+    <relationshipName>Secondary_Returns</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

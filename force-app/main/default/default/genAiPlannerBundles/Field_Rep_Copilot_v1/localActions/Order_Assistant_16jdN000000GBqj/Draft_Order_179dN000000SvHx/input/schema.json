@@ -1,0 +1,21 @@
+{
+  "required" : [ "accountId", "items" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "accountId" : {
+      "title" : "Account Id",
+      "description" : "The outlet Account the order is for.",
+      "lightning:type" : "lightning__recordIdType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "items" : {
+      "title" : "Items",
+      "description" : "The products and quantities the rep asked for, in plain text, e.g. \"20 Ultra Mini, 10 Grind+ Gold\".",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

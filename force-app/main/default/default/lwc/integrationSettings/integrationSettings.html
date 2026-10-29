@@ -1,0 +1,134 @@
+<template>
+    <div class="int">
+        <div class="int__head">
+            <h1 class="int__title">Integrations</h1>
+            <p class="int__sub">
+                Connect your messaging, payment, tax and ERP providers. Secrets are stored in Salesforce's
+                encrypted credential store and are never shown again once saved.
+            </p>
+        </div>
+
+        <template if:true={error}>
+            <div class="int__err" role="alert">{error}</div>
+        </template>
+
+        <div class="int__body">
+            <!-- Master list -->
+            <div class="int__list">
+                <template for:each={groups} for:item="g">
+                    <div key={g.key} class="grp">
+                        <p class="grp__label">{g.category}</p>
+                        <template for:each={g.items} for:item="c">
+                            <button key={c.key} class={c.cardClass} data-key={c.key} type="button" onclick={selectIntegration}>
+                                <lightning-icon icon-name={c.icon} size="small" class="card__icon"></lightning-icon>
+                                <span class="card__label">{c.label}</span>
+                                <span class={c.statusClass}>{c.status}</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Detail -->
+            <div class="int__detail">
+                <template if:false={hasSelection}>
+                    <div class="empty">
+                        <lightning-icon icon-name="utility:setup" size="large"></lightning-icon>
+                        <p>Select an integration on the left to configure it.</p>
+                    </div>
+                </template>
+
+                <template if:true={hasSelection}>
+                    <div class="dt__head">
+                        <div class="dt__headmain">
+                            <h2 class="dt__title">{selected.label}</h2>
+                            <p class="dt__desc">{selected.description}</p>
+                        </div>
+                        <lightning-input type="toggle" label="Enabled" checked={draftEnabled}
+                            message-toggle-active="Enabled" message-toggle-inactive="Disabled"
+                            onchange={handleEnabled}></lightning-input>
+                    </div>
+
+                    <div class="dt__meta">
+                        <span class={statusPillClass}>{selected.status}</span>
+                        <template if:true={selected.lastTested}>
+                            <span class="dt__metaitem">Last tested {lastTestedLabel}</span>
+                        </template>
+                        <template if:true={selected.docsUrl}>
+                            <a class="dt__doc" href={selected.docsUrl} target="_blank" rel="noopener">Provider docs ↗</a>
+                        </template>
+                    </div>
+
+                    <div class="dt__grid">
+                        <template if:true={hasProviders}>
+                            <lightning-combobox label="Provider" value={draftProvider} options={providerOptions}
+                                placeholder="Select provider" onchange={handleProvider}></lightning-combobox>
+                        </template>
+                        <lightning-combobox label="Mode" value={draftMode} options={modeOptions}
+                            onchange={handleMode}></lightning-combobox>
+                    </div>
+
+                    <template if:true={hasEndpoint}>
+                        <p class="dt__endpoint">
+                            <lightning-icon icon-name="utility:link" size="xx-small" class="dt__endpointicon"></lightning-icon>
+                            <span class="dt__endpointlabel">{draftMode} endpoint</span>
+                            <code>{activeEndpoint}</code>
+                        </p>
+                    </template>
+
+                    <!-- Settings -->
+                    <template if:true={hasSettingFields}>
+                        <p class="dt__section">Settings</p>
+                        <div class="dt__grid">
+                            <template for:each={settingFields} for:item="f">
+                                <div key={f.key} class="fld">
+                                    <template if:true={f.isSelect}>
+                                        <lightning-combobox label={f.label} value={f.value} options={f.options}
+                                            data-key={f.key} required={f.required} onchange={handleSetting}></lightning-combobox>
+                                    </template>
+                                    <template if:true={f.isNumber}>
+                                        <lightning-input type="number" label={f.label} value={f.value}
+                                            data-key={f.key} required={f.required} onchange={handleSetting}></lightning-input>
+                                    </template>
+                                    <template if:true={f.isText}>
+                                        <lightning-input type="text" label={f.label} value={f.value}
+                                            data-key={f.key} required={f.required} onchange={handleSetting}></lightning-input>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Credentials -->
+                    <template if:true={hasSecretFields}>
+                        <p class="dt__section">
+                            Credentials <span class={credentialPillClass}>{credentialLabel}</span>
+                        </p>
+                        <p class="dt__hint">
+                            Secrets are written to this integration's encrypted credential and are never displayed again.
+                            Leave blank to keep the current value.
+                        </p>
+                        <div class="dt__grid">
+                            <template for:each={secretFields} for:item="f">
+                                <div key={f.key} class="fld">
+                                    <lightning-input type="password" label={f.label} value={f.value}
+                                        placeholder={f.placeholder} data-key={f.key} autocomplete="off"
+                                        onchange={handleSecret}></lightning-input>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="dt__actions">
+                        <lightning-button label="Test Connection" onclick={test} disabled={testing}></lightning-button>
+                        <lightning-button variant="brand" label="Save" onclick={save} disabled={saving}
+                            class="slds-m-left_small"></lightning-button>
+                    </div>
+                    <template if:true={selected.lastTestResult}>
+                        <p class="dt__result">{selected.lastTestResult}</p>
+                    </template>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,1644 @@
+<template>
+    <div class="hub-container">
+        <!-- ─── Sidebar Navigation ──────────────────────────────────────── -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Product Hub</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a class={dashboardNavClass} data-section="dashboard" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:dashboard" size="x-small"></lightning-icon>
+                    <span>Dashboard</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <!-- Masters -->
+                <a class={categoriesNavClass} data-section="categories" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:category" size="x-small"></lightning-icon>
+                    <span>Categories</span>
+                </a>
+                <a class={uomMasterNavClass} data-section="uomMaster" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:data_transforms" size="x-small"></lightning-icon>
+                    <span>UOM Master</span>
+                </a>
+                <a class={uomConversionsNavClass} data-section="uomConversions" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:formula" size="x-small"></lightning-icon>
+                    <span>UOM Conversions</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <!-- Products & Pricing -->
+                <a class={productsNavClass} data-section="products" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                    <span>Products</span>
+                </a>
+                <a class={priceListsNavClass} data-section="priceLists" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:pricebook" size="x-small"></lightning-icon>
+                    <span>Price Lists</span>
+                </a>
+                <a class={pricebookConfigNavClass} data-section="pricebookConfig" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:settings" size="x-small"></lightning-icon>
+                    <span>Pricebook Config</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <!-- Operations -->
+                <a class={batchesNavClass} data-section="batches" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:record" size="x-small"></lightning-icon>
+                    <span>Batch Master</span>
+                </a>
+                <a class={mustSellNavClass} data-section="mustSell" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:task" size="x-small"></lightning-icon>
+                    <span>Priority Sell Config</span>
+                </a>
+                <a class={priceChangeLogsNavClass} data-section="priceChangeLogs" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:note" size="x-small"></lightning-icon>
+                    <span>Price Change Logs</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <!-- Category Mappings -->
+                <a class={customerCategoriesNavClass} data-section="customerCategories" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
+                    <span>Customer Categories</span>
+                </a>
+                <a class={employeeCategoriesNavClass} data-section="employeeCategories" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:people" size="x-small"></lightning-icon>
+                    <span>Employee Categories</span>
+                </a>
+                <a class={categoryProductsNavClass} data-section="categoryProducts" onclick={handleSectionChange}>
+                    <lightning-icon icon-name="standard:product_consumed" size="x-small"></lightning-icon>
+                    <span>Category Products</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- ─── Main Content Area ───────────────────────────────────────── -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1>{sectionTitle}</h1>
+            </div>
+
+            <template if:true={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- ─── Dashboard Section ───────────────────────────────────── -->
+            <template if:true={showDashboard}>
+                <div class="dashboard-grid">
+                    <div class="stat-card stat-blue" data-section="products" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalProducts}</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="stat-card stat-green" data-section="products" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activeProducts}</div>
+                        <div class="stat-label">Active Products</div>
+                    </div>
+                    <div class="stat-card stat-purple" data-section="categories" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalCategories}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                    <div class="stat-card stat-teal" data-section="priceLists" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activePriceLists}</div>
+                        <div class="stat-label">Active Price Lists</div>
+                    </div>
+                    <div class="stat-card stat-orange" data-section="batches" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.activeBatches}</div>
+                        <div class="stat-label">Active Batches</div>
+                    </div>
+                    <div class="stat-card stat-red" data-section="batches" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.nearExpiryBatches}</div>
+                        <div class="stat-label">Near Expiry Batches</div>
+                    </div>
+                    <div class="stat-card stat-dark-red" data-section="batches" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.expiredBatches}</div>
+                        <div class="stat-label">Expired Batches</div>
+                    </div>
+                    <div class="stat-card stat-indigo" data-section="mustSell" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.mustSellConfigs}</div>
+                        <div class="stat-label">Priority Sell Configs</div>
+                    </div>
+                    <div class="stat-card stat-cyan" data-section="uomMaster" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalUOMs}</div>
+                        <div class="stat-label">Active UOMs</div>
+                    </div>
+                    <div class="stat-card stat-pink" data-section="uomConversions" onclick={handleStatClick}>
+                        <div class="stat-value">{stats.totalConversions}</div>
+                        <div class="stat-label">Conversion Rules</div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ─── Products Section ────────────────────────────────────── -->
+            <template if:true={showProducts}>
+                <div class="section-toolbar section-toolbar_wrap">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search Products"
+                            placeholder="Search by name or SKU..."
+                            value={productSearchTerm} onchange={handleProductSearch}
+                            variant="label-hidden"
+                            class="toolbar-search"></lightning-input>
+                        <lightning-combobox label="Category" variant="label-hidden"
+                            placeholder="All Categories"
+                            value={productCategoryFilter}
+                            options={productCategoryFilterOptions}
+                            onchange={handleProductCategoryFilter}
+                            class="toolbar-filter"></lightning-combobox>
+                        <lightning-combobox label="Brand" variant="label-hidden"
+                            placeholder="All Brands"
+                            value={productBrandFilter}
+                            options={productBrandFilterOptions}
+                            onchange={handleProductBrandFilter}
+                            class="toolbar-filter"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only"
+                            checked={productActiveOnly}
+                            onchange={handleProductActiveFilter}></lightning-input>
+                        <template if:true={hasActiveProductFilters}>
+                            <lightning-button label="Clear Filters" icon-name="utility:clear"
+                                variant="neutral" onclick={handleClearProductFilters}></lightning-button>
+                        </template>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="Open Catalog" variant="neutral"
+                            icon-name="utility:new_window"
+                            onclick={handleOpenProductCatalog}
+                            class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="New Product" variant="brand" icon-name="utility:add"
+                            onclick={handleNewProduct}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasProducts}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Name</th>
+                                    <th>Brand</th>
+                                    <th>Category</th>
+                                    <th class="cell-number">MRP</th>
+                                    <th class="cell-number">Unit Price</th>
+                                    <th class="cell-number">GST %</th>
+                                    <th>UOM</th>
+                                    <th>Active</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={products} for:item="product">
+                                    <tr key={product.Id}>
+                                        <td class="cell-mono">{product.SKU_Code__c}</td>
+                                        <td>{product.Name}</td>
+                                        <td>{product.Brand__c}</td>
+                                        <td>{product.categoryName}</td>
+                                        <td class="cell-number">{product.MRP__c}</td>
+                                        <td class="cell-number">{product.Unit_Price__c}</td>
+                                        <td class="cell-number">{product.GST_Rate__c}</td>
+                                        <td>{product.baseUOMName}</td>
+                                        <td>
+                                            <template if:true={product.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={product.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={product.Id} onclick={handleEditProduct} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={product.Id} onclick={handleDeleteProduct} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <lightning-button label="Previous" disabled={isFirstProductPage}
+                            onclick={handleProductPrevPage}></lightning-button>
+                        <span class="page-info">{productPageInfo}</span>
+                        <lightning-button label="Next" disabled={isLastProductPage}
+                            onclick={handleProductNextPage}></lightning-button>
+                    </div>
+                </template>
+                <template if:false={hasProducts}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+                        <p>No products found. Create a new product to get started.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Categories Section ──────────────────────────────────── -->
+            <template if:true={showCategories}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search" variant="label-hidden"
+                            placeholder="Search name, code..."
+                            value={categorySearchTerm} onchange={handleCategorySearch}></lightning-input>
+                        <lightning-combobox label="Level" value={categoryLevelFilter}
+                            options={categoryLevelOptions} onchange={handleCategoryLevelFilter}
+                            variant="label-hidden" placeholder="All Levels"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only" checked={categoryActiveOnly}
+                            onchange={handleCategoryActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Category" variant="brand" icon-name="utility:add"
+                            onclick={handleNewCategory}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasCategories}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Level</th>
+                                    <th>Parent</th>
+                                    <th class="cell-number">Sort Order</th>
+                                    <th>Active</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={categories} for:item="cat">
+                                    <tr key={cat.Id}>
+                                        <td class="cell-mono">{cat.Category_Code__c}</td>
+                                        <td>{cat.Name}</td>
+                                        <td>
+                                            <span class="badge badge-blue">{cat.Level__c}</span>
+                                        </td>
+                                        <td>{cat.parentCategoryName}</td>
+                                        <td class="cell-number">{cat.Sort_Order__c}</td>
+                                        <td>
+                                            <template if:true={cat.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={cat.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={cat.Id} onclick={handleEditCategory} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={cat.Id} onclick={handleDeleteCategory} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasCategories}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:category" size="large"></lightning-icon>
+                        <p>No categories found. Create a new category to organize your products.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Price Lists Section ─────────────────────────────────── -->
+            <template if:true={showPriceLists}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search" variant="label-hidden"
+                            placeholder="Search product, SKU, customer..."
+                            value={priceListSearchTerm} onchange={handlePriceListSearch}></lightning-input>
+                        <lightning-combobox label="Channel" value={priceListChannelFilter}
+                            options={channelFilterOptions} onchange={handlePriceListChannelFilter}
+                            variant="label-hidden" placeholder="All Channels"></lightning-combobox>
+                        <lightning-combobox label="Priority" value={priceListPriorityFilter}
+                            options={priorityFilterOptions} onchange={handlePriceListPriorityFilter}
+                            variant="label-hidden" placeholder="All Priorities"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only" checked={priceListActiveOnly}
+                            onchange={handlePriceListActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Price Entry" variant="brand" icon-name="utility:add"
+                            onclick={handleNewPriceList}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasPriceLists}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Customer</th>
+                                    <th>Category</th>
+                                    <th>Territory</th>
+                                    <th>Channel</th>
+                                    <th>Pricebook Name</th>
+                                    <th class="cell-number">Unit Price</th>
+                                    <th class="cell-number">Min Qty</th>
+                                    <th>Effective From</th>
+                                    <th>Effective To</th>
+                                    <th>Active</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={priceLists} for:item="pl">
+                                    <tr key={pl.Id}>
+                                        <td><template if:true={pl.priorityLabel}><span class="badge badge-blue">{pl.priorityLabel}</span></template></td>
+                                        <td>{pl.productName}</td>
+                                        <td class="cell-mono">{pl.productSku}</td>
+                                        <td>{pl.customerName}</td>
+                                        <td>{pl.categoryName}</td>
+                                        <td>{pl.territoryName}</td>
+                                        <td>{pl.Channel__c}</td>
+                                        <td>{pl.Name}</td>
+                                        <td class="cell-number">{pl.Unit_Price__c}</td>
+                                        <td class="cell-number">{pl.Min_Qty__c}</td>
+                                        <td>{pl.Effective_From__c}</td>
+                                        <td>{pl.Effective_To__c}</td>
+                                        <td>
+                                            <template if:true={pl.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={pl.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={pl.Id} onclick={handleEditPriceList} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={pl.Id} onclick={handleDeletePriceList} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <lightning-button label="Previous" disabled={isFirstPriceListPage}
+                            onclick={handlePriceListPrevPage}></lightning-button>
+                        <span class="page-info">{priceListPageInfo}</span>
+                        <lightning-button label="Next" disabled={isLastPriceListPage}
+                            onclick={handlePriceListNextPage}></lightning-button>
+                    </div>
+                </template>
+                <template if:false={hasPriceLists}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:pricebook" size="large"></lightning-icon>
+                        <p>No price list entries found.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Batches Section ─────────────────────────────────────── -->
+            <template if:true={showBatches}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search" variant="label-hidden"
+                            placeholder="Search product, SKU, batch #..."
+                            value={batchSearchTerm} onchange={handleBatchSearch}></lightning-input>
+                        <lightning-combobox label="Status" value={batchStatusFilter}
+                            options={batchStatusFilterOptions} onchange={handleBatchStatusFilter}
+                            variant="label-hidden" placeholder="All Statuses"></lightning-combobox>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Batch" variant="brand" icon-name="utility:add"
+                            onclick={handleNewBatch}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasBatches}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Batch #</th>
+                                    <th>Product</th>
+                                    <th>Mfg Date</th>
+                                    <th>Expiry Date</th>
+                                    <th class="cell-number">Qty Manufactured</th>
+                                    <th class="cell-number">Shelf Life (days)</th>
+                                    <th>Status</th>
+                                    <th>Near Expiry</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={batches} for:item="batch">
+                                    <tr key={batch.Id}>
+                                        <td class="cell-mono">{batch.Batch_Number__c}</td>
+                                        <td>{batch.productName}</td>
+                                        <td>{batch.Manufacturing_Date__c}</td>
+                                        <td>{batch.Expiry_Date__c}</td>
+                                        <td class="cell-number">{batch.Quantity_Manufactured__c}</td>
+                                        <td class="cell-number">{batch.Shelf_Life_Days__c}</td>
+                                        <td>
+                                            <template if:true={batch.Status__c}>
+                                                <span class={batch.statusClass}>{batch.Status__c}</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <span class={batch.expiryBadgeClass}>{batch.expiryLabel}</span>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={batch.Id} onclick={handleEditBatch} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={batch.Id} onclick={handleDeleteBatch} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasBatches}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:record" size="large"></lightning-icon>
+                        <p>No batches found.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Priority Sell Config Section ────────────────────────────── -->
+            <template if:true={showMustSell}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search" variant="label-hidden"
+                            placeholder="Search product, SKU..."
+                            value={mustSellSearchTerm} onchange={handleMustSellSearch}></lightning-input>
+                        <lightning-combobox label="Channel" value={mustSellChannelFilter}
+                            options={channelFilterOptions} onchange={handleMustSellChannelFilter}
+                            variant="label-hidden" placeholder="All Channels"></lightning-combobox>
+                        <lightning-combobox label="Classification" value={mustSellClassificationFilter}
+                            options={classificationFilterOptions} onchange={handleMustSellClassificationFilter}
+                            variant="label-hidden" placeholder="All Classifications"></lightning-combobox>
+                        <lightning-input type="checkbox" label="Active Only" checked={mustSellActiveOnly}
+                            onchange={handleMustSellActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Priority Sell Config" variant="brand" icon-name="utility:add"
+                            onclick={handleNewMustSell}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasMustSellConfigs}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Classification</th>
+                                    <th>Channel</th>
+                                    <th>Customer Type</th>
+                                    <th>Territory</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th class="cell-number">Min Qty</th>
+                                    <th>Active</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={mustSellConfigs} for:item="ms">
+                                    <tr key={ms.Id}>
+                                        <td>{ms.productName}</td>
+                                        <td class="cell-mono">{ms.productSku}</td>
+                                        <td>
+                                            <span class="badge badge-purple">{ms.Classification__c}</span>
+                                        </td>
+                                        <td>{ms.Channel__c}</td>
+                                        <td>{ms.Customer_Type__c}</td>
+                                        <td>{ms.territoryName}</td>
+                                        <td>{ms.Start_Date__c}</td>
+                                        <td>{ms.End_Date__c}</td>
+                                        <td class="cell-number">{ms.Min_Qty__c}</td>
+                                        <td>
+                                            <template if:true={ms.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={ms.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={ms.Id} onclick={handleEditMustSell} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={ms.Id} onclick={handleDeleteMustSell} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasMustSellConfigs}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:task" size="large"></lightning-icon>
+                        <p>No priority sell configurations found.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Price Change Logs Section ───────────────────────────── -->
+            <template if:true={showPriceChangeLogs}>
+                <template if:true={hasPriceChangeLogs}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th class="cell-number">Old Price</th>
+                                    <th class="cell-number">New Price</th>
+                                    <th>Change Date</th>
+                                    <th>Customer</th>
+                                    <th>Category</th>
+                                    <th>Territory</th>
+                                    <th>Channel</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={priceChangeLogs} for:item="log">
+                                    <tr key={log.Id}>
+                                        <td><span class="badge badge-blue">{log.priorityLabel}</span></td>
+                                        <td>{log.productName}</td>
+                                        <td class="cell-mono">{log.productSku}</td>
+                                        <td class="cell-number">{log.Old_Price__c}</td>
+                                        <td class="cell-number">{log.New_Price__c}</td>
+                                        <td>{log.Change_Date__c}</td>
+                                        <td>{log.customerName}</td>
+                                        <td>{log.categoryName}</td>
+                                        <td>{log.territoryName}</td>
+                                        <td>{log.Channel__c}</td>
+                                        <td>{log.Change_Reason__c}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasPriceChangeLogs}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:note" size="large"></lightning-icon>
+                        <p>No price change logs found.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Pricebook Priority Configuration Section ─────────────── -->
+            <template if:true={showPricebookConfig}>
+                <div class="priority-config-info slds-p-bottom_medium">
+                    <p>This table shows the configured pricebook priority rules. Priority determines which price is applied when multiple price list entries match. Lower priority number = higher precedence.</p>
+                </div>
+                <template if:true={hasPricebookPriorities}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="cell-number">Priority Order</th>
+                                    <th>Name</th>
+                                    <th>Dimensions</th>
+                                    <th>Customer</th>
+                                    <th>Category</th>
+                                    <th>Territory</th>
+                                    <th>Channel</th>
+                                    <th>Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={pricebookPriorities} for:item="pp">
+                                    <tr key={pp.Id}>
+                                        <td class="cell-number"><strong>{pp.Priority_Order__c}</strong></td>
+                                        <td>{pp.MasterLabel}</td>
+                                        <td><span class="badge badge-blue">{pp.dimensionLabel}</span></td>
+                                        <td>
+                                            <template if:true={pp.Has_Customer__c}>
+                                                <span class="badge badge-green">Yes</span>
+                                            </template>
+                                            <template if:false={pp.Has_Customer__c}>
+                                                <span class="badge badge-gray">No</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={pp.Has_Category__c}>
+                                                <span class="badge badge-green">Yes</span>
+                                            </template>
+                                            <template if:false={pp.Has_Category__c}>
+                                                <span class="badge badge-gray">No</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={pp.Has_Territory__c}>
+                                                <span class="badge badge-green">Yes</span>
+                                            </template>
+                                            <template if:false={pp.Has_Territory__c}>
+                                                <span class="badge badge-gray">No</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={pp.Has_Channel__c}>
+                                                <span class="badge badge-green">Yes</span>
+                                            </template>
+                                            <template if:false={pp.Has_Channel__c}>
+                                                <span class="badge badge-gray">No</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={pp.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={pp.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasPricebookPriorities}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:settings" size="large"></lightning-icon>
+                        <p>No pricebook priority configurations found.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── UOM Master Section ────────────────────────────────────── -->
+            <template if:true={showUOMMaster}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left"></div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New UOM" variant="brand" icon-name="utility:add"
+                            onclick={handleNewUOM}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasUOMs}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>Base Unit</th>
+                                    <th>Active</th>
+                                    <th>Description</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={uomList} for:item="uom">
+                                    <tr key={uom.Id}>
+                                        <td><strong>{uom.Name}</strong></td>
+                                        <td class="cell-mono">{uom.UOM_Code__c}</td>
+                                        <td><span class="badge badge-blue">{uom.UOM_Type__c}</span></td>
+                                        <td>
+                                            <template if:true={uom.Is_Base_Unit__c}>
+                                                <span class="badge badge-purple">Base</span>
+                                            </template>
+                                            <template if:false={uom.Is_Base_Unit__c}>
+                                                <span class="badge badge-gray">No</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={uom.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={uom.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td>{uom.Description__c}</td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={uom.Id} onclick={handleEditUOM} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={uom.Id} onclick={handleDeleteUOM} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasUOMs}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:data_transforms" size="large"></lightning-icon>
+                        <p>No UOM records found. Create a new unit of measure to get started.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── UOM Conversions Section ───────────────────────────────── -->
+            <template if:true={showUOMConversions}>
+                <div class="section-toolbar">
+                    <div class="toolbar-left">
+                        <lightning-input type="search" label="Search" variant="label-hidden"
+                            placeholder="Search product, UOM..."
+                            value={uomConvSearchTerm} onchange={handleUOMConvSearch}></lightning-input>
+                        <lightning-input type="checkbox" label="Active Only" checked={uomConvActiveOnly}
+                            onchange={handleUOMConvActiveFilter}></lightning-input>
+                    </div>
+                    <div class="toolbar-right">
+                        <lightning-button label="New Conversion Rule" variant="brand" icon-name="utility:add"
+                            onclick={handleNewUOMConv}></lightning-button>
+                    </div>
+                </div>
+                <template if:true={hasUOMConversions}>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>From UOM</th>
+                                    <th>To UOM</th>
+                                    <th class="cell-number">Factor</th>
+                                    <th class="cell-number">Inverse Factor</th>
+                                    <th>Product</th>
+                                    <th>Active</th>
+                                    <th class="cell-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={uomConversions} for:item="conv">
+                                    <tr key={conv.Id}>
+                                        <td>{conv.Name}</td>
+                                        <td>{conv.fromUOMName}</td>
+                                        <td>{conv.toUOMName}</td>
+                                        <td class="cell-number">{conv.Conversion_Factor__c}</td>
+                                        <td class="cell-number">{conv.Inverse_Conversion_Factor__c}</td>
+                                        <td>
+                                            <template if:true={conv.Product__c}>
+                                                <span class="badge badge-purple">{conv.productName}</span>
+                                            </template>
+                                            <template if:false={conv.Product__c}>
+                                                <span class="badge badge-blue">Global</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={conv.Is_Active__c}>
+                                                <span class="badge badge-green">Active</span>
+                                            </template>
+                                            <template if:false={conv.Is_Active__c}>
+                                                <span class="badge badge-gray">Inactive</span>
+                                            </template>
+                                        </td>
+                                        <td class="cell-actions">
+                                            <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                                data-id={conv.Id} onclick={handleEditUOMConv} variant="border-filled"
+                                                size="small"></lightning-button-icon>
+                                            <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                                data-id={conv.Id} onclick={handleDeleteUOMConv} variant="border-filled"
+                                                size="small" class="slds-m-left_xx-small"></lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasUOMConversions}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:formula" size="large"></lightning-icon>
+                        <p>No conversion rules found. Create a new rule to define UOM relationships.</p>
+                    </div>
+                </template>
+            </template>
+
+            <!-- ─── Customer Categories Section ────────────────────────────── -->
+            <template if:true={showCustomerCategories}>
+                <c-category-mapping-manager section="accountCategories"></c-category-mapping-manager>
+            </template>
+
+            <!-- ─── Employee Categories Section ────────────────────────────── -->
+            <template if:true={showEmployeeCategories}>
+                <c-category-mapping-manager section="employeeCategories"></c-category-mapping-manager>
+            </template>
+
+            <!-- ─── Category Products Section ──────────────────────────────── -->
+            <template if:true={showCategoryProducts}>
+                <c-category-mapping-manager section="categoryProducts"></c-category-mapping-manager>
+            </template>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         MODALS
+         ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- ─── Product Modal ───────────────────────────────────────────────── -->
+    <template if:true={showProductModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseProductModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{productModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="Product Name" value={editProduct.Name}
+                                data-field="Name" onchange={handleProductFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="SKU Code" value={editProduct.SKU_Code__c}
+                                data-field="SKU_Code__c" onchange={handleProductFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="Brand" value={editProduct.Brand__c}
+                                data-field="Brand__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="Product Category"
+                                value={editProduct.Product_Category__c}
+                                options={productCategoryOptions}
+                                data-field="Product_Category__c"
+                                onchange={handleProductFieldChange}
+                                placeholder="-- Select a category --"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="HSN/SAC Code" value={editProduct.HSN_SAC_Code__c}
+                                data-field="HSN_SAC_Code__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="MRP" value={editProduct.MRP__c}
+                                data-field="MRP__c" onchange={handleProductFieldChange} step="0.01"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Unit Price" value={editProduct.Unit_Price__c}
+                                data-field="Unit_Price__c" onchange={handleProductFieldChange} step="0.01"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="GST Rate (%)" value={editProduct.GST_Rate__c}
+                                data-field="GST_Rate__c" onchange={handleProductFieldChange} step="0.01"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Base UOM (Master)</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedUOM}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:data_transforms" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedUOMName}</span>
+                                            <button class="pill-remove" onclick={handleClearUOMSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedUOM}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Search UOMs..."
+                                            value={uomLookupSearchTerm}
+                                            onchange={handleUOMLookupSearch}></lightning-input>
+                                        <template if:true={showUOMLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={uomLookupResults} for:item="uom">
+                                                    <li key={uom.Id} class="lookup-option" role="option"
+                                                        data-id={uom.Id} data-name={uom.Name}
+                                                        onclick={handleSelectUOM}>
+                                                        <span class="lookup-option-name">{uom.Name}</span>
+                                                        <span class="lookup-option-meta">{uom.UOM_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Case Size" value={editProduct.Case_Size__c}
+                                data-field="Case_Size__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Min Order Qty" value={editProduct.Min_Order_Qty__c}
+                                data-field="Min_Order_Qty__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Weight" value={editProduct.Weight__c}
+                                data-field="Weight__c" onchange={handleProductFieldChange} step="0.01"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-combobox label="Weight Unit" value={editProduct.Weight_Unit__c}
+                                options={weightUnitOptions} data-field="Weight_Unit__c"
+                                onchange={handleProductFieldChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Shelf Life (days)" value={editProduct.Shelf_Life_Days__c}
+                                data-field="Shelf_Life_Days__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input label="Barcode (EAN)" value={editProduct.Barcode_EAN__c}
+                                data-field="Barcode_EAN__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input label="Barcode (UPC)" value={editProduct.Barcode_UPC__c}
+                                data-field="Barcode_UPC__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input label="Image URL" value={editProduct.Product_Image_URL__c}
+                                data-field="Product_Image_URL__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editProduct.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Returnable" checked={editProduct.Is_Returnable__c}
+                                data-field="Is_Returnable__c" onchange={handleProductFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                            <lightning-dual-listbox label="Channels"
+                                source-label="Available" selected-label="Selected"
+                                options={productChannelOptions}
+                                value={editProductChannels}
+                                onchange={handleProductChannelsChange}></lightning-dual-listbox>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseProductModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveProduct}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Category Modal ──────────────────────────────────────────────── -->
+    <template if:true={showCategoryModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseCategoryModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{categoryModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="Category Name" value={editCategory.Name}
+                                data-field="Name" onchange={handleCategoryFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="Category Code" value={editCategory.Category_Code__c}
+                                data-field="Category_Code__c" onchange={handleCategoryFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="Level" value={editCategory.Level__c}
+                                options={categoryLevelOptions} data-field="Level__c"
+                                onchange={handleCategoryFieldChange} required></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="Parent Category" value={editCategory.Parent_Category__c}
+                                options={parentCategoryOptions} data-field="Parent_Category__c"
+                                onchange={handleCategoryFieldChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="number" label="Sort Order" value={editCategory.Sort_Order__c}
+                                data-field="Sort_Order__c" onchange={handleCategoryFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editCategory.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleCategoryFieldChange}></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseCategoryModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveCategory}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Price List Modal ────────────────────────────────────────────── -->
+    <template if:true={showPriceListModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleClosePriceListModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{priceListModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <!-- Pricebook Name (first field) -->
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                            <lightning-input label="Pricebook Name" value={editPriceList.Name}
+                                data-field="Name"
+                                onchange={handlePriceListFieldChange}
+                                placeholder="Enter pricebook/price list name"
+                                required></lightning-input>
+                        </div>
+                        <!-- Product Lookup -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element slds-is-required">
+                                <label class="slds-form-element__label">
+                                    <abbr class="slds-required" title="required">*</abbr>Product
+                                </label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedProduct}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedProductName}</span>
+                                            <button class="pill-remove" data-target="priceList"
+                                                onclick={handleClearProductSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedProduct}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Type to search products..."
+                                            value={productLookupSearchTerm}
+                                            data-target="priceList"
+                                            onchange={handleProductLookupSearch}></lightning-input>
+                                        <template if:true={showProductLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={productLookupResults} for:item="prod">
+                                                    <li key={prod.Id} class="lookup-option" role="option"
+                                                        data-id={prod.Id} data-name={prod.Name}
+                                                        data-target="priceList"
+                                                        onclick={handleSelectLookupProduct}>
+                                                        <span class="lookup-option-name">{prod.Name}</span>
+                                                        <span class="lookup-option-meta">{prod.SKU_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Customer Lookup -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Customer (for customer-wise pricing)</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedCustomer}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedCustomerName}</span>
+                                            <button class="pill-remove" onclick={handleClearCustomerSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedCustomer}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Type to search customers..."
+                                            value={customerLookupSearchTerm}
+                                            onchange={handleCustomerLookupSearch}></lightning-input>
+                                        <template if:true={showCustomerLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={customerLookupResults} for:item="cust">
+                                                    <li key={cust.Id} class="lookup-option" role="option"
+                                                        data-id={cust.Id} data-name={cust.Name}
+                                                        onclick={handleSelectLookupCustomer}>
+                                                        <span class="lookup-option-name">{cust.Name}</span>
+                                                        <span class="lookup-option-meta">{cust.AccountNumber}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Category Lookup -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Category</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={isPriceListDimensionDisabled}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Not applicable — customer-specific pricing"
+                                            disabled></lightning-input>
+                                    </template>
+                                    <template if:false={isPriceListDimensionDisabled}>
+                                        <template if:true={hasSelectedCategory}>
+                                            <div class="product-lookup-pill">
+                                                <lightning-icon icon-name="standard:category" size="x-small"></lightning-icon>
+                                                <span class="pill-label">{selectedCategoryName}</span>
+                                                <button class="pill-remove" onclick={handleClearCategorySelection} type="button">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small"
+                                                        alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <template if:false={hasSelectedCategory}>
+                                            <lightning-input label="" variant="label-hidden"
+                                                placeholder="Type to search categories..."
+                                                value={categoryLookupSearchTerm}
+                                                onchange={handleCategoryLookupSearch}></lightning-input>
+                                            <template if:true={showCategoryLookup}>
+                                                <ul class="product-lookup-dropdown" role="listbox">
+                                                    <template for:each={categoryLookupResults} for:item="cat">
+                                                        <li key={cat.Id} class="lookup-option" role="option"
+                                                            data-id={cat.Id} data-name={cat.Name}
+                                                            onclick={handleSelectLookupCategory}>
+                                                            <span class="lookup-option-name">{cat.Name}</span>
+                                                            <span class="lookup-option-meta">{cat.Level__c}</span>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Territory Lookup -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Territory</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={isPriceListDimensionDisabled}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Not applicable — customer-specific pricing"
+                                            disabled></lightning-input>
+                                    </template>
+                                    <template if:false={isPriceListDimensionDisabled}>
+                                        <template if:true={hasSelectedTerritory}>
+                                            <div class="product-lookup-pill">
+                                                <lightning-icon icon-name="standard:location" size="x-small"></lightning-icon>
+                                                <span class="pill-label">{selectedTerritoryName}</span>
+                                                <button class="pill-remove" data-target="priceList"
+                                                    onclick={handleClearTerritorySelection} type="button">
+                                                    <lightning-icon icon-name="utility:close" size="xx-small"
+                                                        alternative-text="Remove"></lightning-icon>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <template if:false={hasSelectedTerritory}>
+                                            <lightning-input label="" variant="label-hidden"
+                                                placeholder="Type to search territories..."
+                                                value={territoryLookupSearchTerm}
+                                                data-target="priceList"
+                                                onchange={handleTerritoryLookupSearch}></lightning-input>
+                                            <template if:true={showTerritoryLookup}>
+                                                <ul class="product-lookup-dropdown" role="listbox">
+                                                    <template for:each={territoryLookupResults} for:item="terr">
+                                                        <li key={terr.Id} class="lookup-option" role="option"
+                                                            data-id={terr.Id} data-name={terr.Name}
+                                                            data-target="priceList"
+                                                            onclick={handleSelectLookupTerritory}>
+                                                            <span class="lookup-option-name">{terr.Name}</span>
+                                                            <span class="lookup-option-meta">{terr.Territory_Code__c}</span>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="Channel" value={editPriceList.Channel__c}
+                                options={channelOptions} data-field="Channel__c"
+                                onchange={handlePriceListFieldChange}
+                                disabled={isPriceListDimensionDisabled}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="number" label="Unit Price" value={editPriceList.Unit_Price__c}
+                                data-field="Unit_Price__c" onchange={handlePriceListFieldChange}
+                                step="0.01" required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="number" label="Min Qty" value={editPriceList.Min_Qty__c}
+                                data-field="Min_Qty__c" onchange={handlePriceListFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editPriceList.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handlePriceListFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="Effective From" value={editPriceList.Effective_From__c}
+                                data-field="Effective_From__c" onchange={handlePriceListFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="Effective To" value={editPriceList.Effective_To__c}
+                                data-field="Effective_To__c" onchange={handlePriceListFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                            <div class="priority-info-box">
+                                <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                <span> Priority is auto-calculated based on dimensions: Customer (1st) &gt; Category+Territory+Channel (2nd) &gt; Territory+Channel (3rd) &gt; Category+Territory (4th) &gt; Territory (5th) &gt; Channel (6th) &gt; Category (7th) &gt; Base (8th)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleClosePriceListModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSavePriceList}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Batch Modal ─────────────────────────────────────────────────── -->
+    <template if:true={showBatchModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseBatchModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{batchModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="Batch Number" value={editBatch.Batch_Number__c}
+                                data-field="Batch_Number__c" onchange={handleBatchFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element slds-is-required">
+                                <label class="slds-form-element__label">
+                                    <abbr class="slds-required" title="required">*</abbr>Product
+                                </label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedProduct}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedProductName}</span>
+                                            <button class="pill-remove" data-target="batch"
+                                                onclick={handleClearProductSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedProduct}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Type to search products..."
+                                            value={productLookupSearchTerm}
+                                            data-target="batch"
+                                            onchange={handleProductLookupSearch}></lightning-input>
+                                        <template if:true={showProductLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={productLookupResults} for:item="prod">
+                                                    <li key={prod.Id} class="lookup-option" role="option"
+                                                        data-id={prod.Id} data-name={prod.Name}
+                                                        data-target="batch"
+                                                        onclick={handleSelectLookupProduct}>
+                                                        <span class="lookup-option-name">{prod.Name}</span>
+                                                        <span class="lookup-option-meta">{prod.SKU_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="Manufacturing Date" value={editBatch.Manufacturing_Date__c}
+                                data-field="Manufacturing_Date__c" onchange={handleBatchFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="Expiry Date" value={editBatch.Expiry_Date__c}
+                                data-field="Expiry_Date__c" onchange={handleBatchFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Qty Manufactured" value={editBatch.Quantity_Manufactured__c}
+                                data-field="Quantity_Manufactured__c" onchange={handleBatchFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-input type="number" label="Shelf Life (days)" value={editBatch.Shelf_Life_Days__c}
+                                data-field="Shelf_Life_Days__c" onchange={handleBatchFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-combobox label="Status" value={editBatch.Status__c}
+                                options={batchStatusOptions} data-field="Status__c"
+                                onchange={handleBatchFieldChange}></lightning-combobox>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseBatchModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveBatch}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── Priority Sell Config Modal ──────────────────────────────────────── -->
+    <template if:true={showMustSellModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseMustSellModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{mustSellModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element slds-is-required">
+                                <label class="slds-form-element__label">
+                                    <abbr class="slds-required" title="required">*</abbr>Product
+                                </label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedProduct}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedProductName}</span>
+                                            <button class="pill-remove" data-target="mustSell"
+                                                onclick={handleClearProductSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedProduct}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Type to search products..."
+                                            value={productLookupSearchTerm}
+                                            data-target="mustSell"
+                                            onchange={handleProductLookupSearch}></lightning-input>
+                                        <template if:true={showProductLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={productLookupResults} for:item="prod">
+                                                    <li key={prod.Id} class="lookup-option" role="option"
+                                                        data-id={prod.Id} data-name={prod.Name}
+                                                        data-target="mustSell"
+                                                        onclick={handleSelectLookupProduct}>
+                                                        <span class="lookup-option-name">{prod.Name}</span>
+                                                        <span class="lookup-option-meta">{prod.SKU_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="Classification" value={editMustSell.Classification__c}
+                                options={classificationOptions} data-field="Classification__c"
+                                onchange={handleMustSellFieldChange} required></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_x-small">
+                            <p class="slds-text-body_small slds-text-color_weak">Configure by one dimension only: Territory, Channel, or Outlet Type</p>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Territory</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedTerritory}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:territory" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedTerritoryName}</span>
+                                            <button class="pill-remove"
+                                                onclick={handleClearTerritorySelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedTerritory}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Search territories..."
+                                            value={territoryLookupSearchTerm}
+                                            disabled={isTerritoryDisabled}
+                                            onchange={handleTerritoryLookupSearch}></lightning-input>
+                                        <template if:true={showTerritoryLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={territoryLookupResults} for:item="terr">
+                                                    <li key={terr.Id} class="lookup-option" role="option"
+                                                        data-id={terr.Id} data-name={terr.Name}
+                                                        onclick={handleSelectLookupTerritory}>
+                                                        <span class="lookup-option-name">{terr.Name}</span>
+                                                        <span class="lookup-option-meta">{terr.Territory_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-combobox label="Channel" value={editMustSell.Channel__c}
+                                options={channelOptions} data-field="Channel__c"
+                                disabled={isChannelDisabled}
+                                onchange={handleMustSellFieldChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3 slds-p-bottom_small">
+                            <lightning-combobox label="Outlet Type" value={editMustSell.Customer_Type__c}
+                                options={outletTypeOptions} data-field="Customer_Type__c"
+                                disabled={isCustomerTypeDisabled}
+                                onchange={handleMustSellFieldChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="Start Date" value={editMustSell.Start_Date__c}
+                                data-field="Start_Date__c" onchange={handleMustSellFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="date" label="End Date" value={editMustSell.End_Date__c}
+                                data-field="End_Date__c" onchange={handleMustSellFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="number" label="Min Qty" value={editMustSell.Min_Qty__c}
+                                data-field="Min_Qty__c" onchange={handleMustSellFieldChange}
+                                min="1" step="1" required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editMustSell.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleMustSellFieldChange}></lightning-input>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseMustSellModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveMustSell}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── UOM Modal ─────────────────────────────────────────────────────── -->
+    <template if:true={showUOMModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseUOMModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{uomModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="UOM Name" value={editUOM.Name}
+                                data-field="Name" onchange={handleUOMFieldChange} required></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input label="UOM Code" value={editUOM.UOM_Code__c}
+                                data-field="UOM_Code__c" onchange={handleUOMFieldChange} required
+                                max-length="10" placeholder="e.g. PCS, BOX, KG"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="UOM Type" value={editUOM.UOM_Type__c}
+                                options={uomTypeOptions} data-field="UOM_Type__c"
+                                onchange={handleUOMFieldChange} required></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Base Unit" checked={editUOM.Is_Base_Unit__c}
+                                data-field="Is_Base_Unit__c" onchange={handleUOMFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editUOM.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleUOMFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                            <lightning-textarea label="Description" value={editUOM.Description__c}
+                                data-field="Description__c" onchange={handleUOMFieldChange}></lightning-textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseUOMModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveUOM}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ─── UOM Conversion Modal ──────────────────────────────────────────── -->
+    <template if:true={showUOMConvModal}>
+        <section class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={handleCloseUOMConvModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title">{uomConvModalTitle}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="From UOM" value={editUOMConv.From_UOM__c}
+                                options={uomLookupOptions} data-field="From_UOM__c"
+                                onchange={handleUOMConvFieldChange} required
+                                placeholder="Select source UOM"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-combobox label="To UOM" value={editUOMConv.To_UOM__c}
+                                options={uomLookupOptions} data-field="To_UOM__c"
+                                onchange={handleUOMConvFieldChange} required
+                                placeholder="Select target UOM"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="number" label="Conversion Factor" value={editUOMConv.Conversion_Factor__c}
+                                data-field="Conversion_Factor__c" onchange={handleUOMConvFieldChange}
+                                step="0.000001" min="0.000001" required
+                                message-when-range-underflow="Factor must be positive"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label">Product (optional - leave blank for global)</label>
+                                <div class="product-lookup-container">
+                                    <template if:true={hasSelectedProduct}>
+                                        <div class="product-lookup-pill">
+                                            <lightning-icon icon-name="standard:product" size="x-small"></lightning-icon>
+                                            <span class="pill-label">{selectedProductName}</span>
+                                            <button class="pill-remove" data-target="uomConv"
+                                                onclick={handleClearProductSelection} type="button">
+                                                <lightning-icon icon-name="utility:close" size="xx-small"
+                                                    alternative-text="Remove"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <template if:false={hasSelectedProduct}>
+                                        <lightning-input label="" variant="label-hidden"
+                                            placeholder="Type to search products..."
+                                            value={productLookupSearchTerm}
+                                            data-target="uomConv"
+                                            onchange={handleProductLookupSearch}></lightning-input>
+                                        <template if:true={showProductLookup}>
+                                            <ul class="product-lookup-dropdown" role="listbox">
+                                                <template for:each={productLookupResults} for:item="prod">
+                                                    <li key={prod.Id} class="lookup-option" role="option"
+                                                        data-id={prod.Id} data-name={prod.Name}
+                                                        data-target="uomConv"
+                                                        onclick={handleSelectLookupProduct}>
+                                                        <span class="lookup-option-name">{prod.Name}</span>
+                                                        <span class="lookup-option-meta">{prod.SKU_Code__c}</span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                            <lightning-input type="checkbox" label="Active" checked={editUOMConv.Is_Active__c}
+                                data-field="Is_Active__c" onchange={handleUOMConvFieldChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-bottom_small">
+                            <div class="priority-info-box">
+                                <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                <span>Inverse factor is auto-calculated. Product-specific conversions take priority over global ones.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseUOMConvModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={handleSaveUOMConv}
+                        disabled={isSaving} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

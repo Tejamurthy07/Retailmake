@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>PerfectStoreScoreController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Access to the Perfect Store Score dashboard tab and its controller.</description>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey_Answer__c.Answer_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey_Answer__c.Max_Answer_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey_Response__c.Max_Possible_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey_Response__c.Score_Percentage__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Survey_Response__c.Total_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Perfect Store Score Access</label>
+    <tabSettings>
+        <tab>Perfect_Store_Score</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>
